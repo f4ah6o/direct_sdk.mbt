@@ -17,8 +17,8 @@ pub struct SelectStampContent {
 pub struct SelectStampReply {
   question : String
   options : Array[String]
-  response : Int           // Selected index (0-based)
-  in_reply_to : String     // Original message ID
+  response : Int // Selected index (0-based)
+  in_reply_to : String // Original message ID
 }
 
 // Result type for parsing select stamp content
@@ -26,21 +26,19 @@ pub struct SelectStampReply {
 ///|
 pub enum SelectParseResult {
   SelectParseSuccess(SelectStampReply)
-  SelectParseNotSelect     // Not a select message
-  SelectParseNoResponse    // Select sent, not a reply
+  SelectParseNotSelect // Not a select message
+  SelectParseNoResponse // Select sent, not a reply
   SelectParseError(String) // Parse error
 }
 
 // Create a new select stamp content with default values
 
 ///|
-pub fn new_select_content(question : String, options : Array[String]) -> SelectStampContent {
-  {
-    question,
-    options,
-    listing: true,
-    closing_type: 1,
-  }
+pub fn new_select_content(
+  question : String,
+  options : Array[String],
+) -> SelectStampContent {
+  { question, options, listing: true, closing_type: 1 }
 }
 
 // Create select stamp content with custom listing
@@ -51,12 +49,7 @@ pub fn select_content_with_listing(
   options : Array[String],
   listing : Bool,
 ) -> SelectStampContent {
-  {
-    question,
-    options,
-    listing,
-    closing_type: 1,
-  }
+  { question, options, listing, closing_type: 1 }
 }
 
 // Send a select action stamp to a room
@@ -122,24 +115,23 @@ pub fn parse_select_content(msg : @types.ReceivedMessage) -> SelectParseResult {
 // Parse select reply content from a MsgTypeSelectReply message
 
 ///|
-fn parse_select_reply_content(msg : @types.ReceivedMessage) -> SelectParseResult {
+fn parse_select_reply_content(
+  msg : @types.ReceivedMessage,
+) -> SelectParseResult {
   let content_map = match msg.content {
     @types.JsonObject(obj) => extract_content_from_raw(msg, obj)
     _ => return SelectParseError("Invalid content type")
   }
-
   match content_map {
     Ok(obj) => {
       let question = match obj.get("question") {
         Some(@types.JsonString(s)) => s
         _ => ""
       }
-
       let options = match obj.get("options") {
         Some(@types.JsonArray(arr)) => parse_string_array(arr)
         _ => []
       }
-
       match obj.get("response") {
         Some(@types.JsonNumber(n)) => {
           let response_idx = n.to_int()
@@ -176,17 +168,17 @@ fn extract_content_from_raw(
 
   // Try to extract from raw data
   match msg.raw {
-    Some(@types.JsonObject(raw_obj)) => {
+    Some(@types.JsonObject(raw_obj)) =>
       match raw_obj.get("content") {
         Some(@types.JsonObject(content_obj)) =>
-          if content_obj.contains_key("question") && content_obj.contains_key("options") {
+          if content_obj.contains_key("question") &&
+            content_obj.contains_key("options") {
             Ok(content_obj)
           } else {
             Err("Content not found in raw data")
           }
         _ => Err("Invalid raw content structure")
       }
-    }
     _ => Err("No raw data available")
   }
 }
@@ -238,8 +230,14 @@ pub fn get_selected_option(reply : SelectStampReply) -> String? {
 pub fn format_select_reply(reply : SelectStampReply) -> String {
   match get_selected_option(reply) {
     Some(option) =>
-      "選択されたオプション: " ++ option ++ " (インデックス: " ++ reply.response.to_string() ++ ")"
+      "選択されたオプション: " +
+      ~+(option) +
+      ~+(" (インデックス: ") +
+      ~+(reply.response.to_string()) +
+      ~+(")")
     None =>
-      "無効な選択 (インデックス: " ++ reply.response.to_string() ++ ")"
+      "無効な選択 (インデックス: " +
+      ~+(reply.response.to_string()) +
+      ~+(")")
   }
 }
