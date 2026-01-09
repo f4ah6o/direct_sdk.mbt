@@ -3,32 +3,36 @@ let usage_text : String =
   #|daab - Direct bot helper CLI
   #|
   #|Usage:
-  #|  daab login [--token <token>] [--env <path>]
+  #|  daab login [--env <path>]
   #|  daab init <project-name>
   #|  daab run [--env <path>]
   #|  daab --help
   #|
   #|Commands:
-  #|  login   Save access token into .env
+  #|  login   Login and save access token into .env
   #|  init    Create a new bot project
   #|  run     Run the bot in the current directory
   #|  help    Show this help
   #|
   #|Environment:
-  #|  HUBOT_DIRECT_TOKEN  Access token used by login/run when --token is not set
+  #|  HUBOT_DIRECT_TOKEN       Access token used by run
+  #|  HUBOT_DIRECT_ENDPOINT    Override WebSocket endpoint
+  #|  HUBOT_DIRECT_PROXY_URL   Proxy URL for WebSocket
+  #|  HTTPS_PROXY              Proxy URL (fallback)
+  #|  HTTP_PROXY               Proxy URL (fallback)
   #|
 
 ///|
 let login_help_text : String =
   #|Usage:
-  #|  daab login [--token <token>] [--env <path>]
+  #|  daab login [--env <path>]
   #|
   #|Options:
-  #|  --token <token>   Access token to save into .env
-  #|  --env <path>      Path to the env file (default: .env)
+  #|  --env <path>   Path to the env file (default: .env)
   #|
   #|Notes:
-  #|  If --token is omitted, daab uses HUBOT_DIRECT_TOKEN from the environment.
+  #|  Login prompts for email and password.
+  #|  Endpoint/proxy settings are read from environment variables.
   #|
 
 ///|

@@ -1,5 +1,5 @@
 ///|
-fn dispatch(args : Array[String]) -> Result[Unit, String] {
+async fn dispatch(args : Array[String]) -> Result[Unit, String] {
   if args.length() <= 1 {
     print_usage()
     return Ok(())
@@ -20,13 +20,15 @@ fn dispatch(args : Array[String]) -> Result[Unit, String] {
 
 ///|
 fn main {
-  let args = @sys.get_cli_args()
-  match dispatch(args) {
-    Ok(_) => ()
-    Err(msg) => {
-      println("Error: " + msg)
-      println("Run 'daab --help' for usage.")
-      print_usage()
+  @async.run_async_main(fn() {
+    let args = @sys.get_cli_args()
+    match dispatch(args) {
+      Ok(_) => ()
+      Err(msg) => {
+        println("Error: " + msg)
+        println("Run 'daab --help' for usage.")
+        print_usage()
+      }
     }
-  }
+  })
 }

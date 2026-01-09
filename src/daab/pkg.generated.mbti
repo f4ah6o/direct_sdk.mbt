@@ -1,18 +1,36 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "f4ah6o/direct_sdk/cmd/daab"
+package "f4ah6o/direct_sdk/daab"
+
+import(
+  "f4ah6o/direct_sdk/types"
+)
 
 // Values
 pub const DEFAULT_ENV_PATH : String = ".env"
 
+pub const ENV_ENDPOINT_KEY : String = "HUBOT_DIRECT_ENDPOINT"
+
+pub const ENV_HTTPS_PROXY_KEY : String = "HTTPS_PROXY"
+
+pub const ENV_HTTP_PROXY_KEY : String = "HTTP_PROXY"
+
+pub const ENV_PROXY_KEY : String = "HUBOT_DIRECT_PROXY_URL"
+
 pub const ENV_TOKEN_KEY : String = "HUBOT_DIRECT_TOKEN"
 
 pub fn create_dir(String) -> Result[Unit, String]
+
+pub fn extract_token(@types.JsonValue) -> String
 
 pub fn first_non_flag(ArrayView[String]) -> String?
 
 pub fn flag_value(ArrayView[String], String) -> String?
 
 pub fn has_flag(ArrayView[String], String) -> Bool
+
+pub fn has_token(String) -> Result[Bool, String]
+
+pub fn load_env_file(String) -> Result[Unit, String]
 
 pub fn print_init_help() -> Unit
 
@@ -30,7 +48,7 @@ pub fn resolve_token(String) -> Result[String?, String]
 
 pub fn run_init(ArrayView[String]) -> Result[Unit, String]
 
-pub fn run_login(ArrayView[String]) -> Result[Unit, String]
+pub async fn run_login(ArrayView[String]) -> Result[Unit, String]
 
 pub fn run_run(ArrayView[String]) -> Result[Unit, String]
 
