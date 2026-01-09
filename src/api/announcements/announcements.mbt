@@ -2,6 +2,7 @@
 // Reference: direct-go-sdk/direct-go/announcements.go
 
 // Announcement message
+
 ///|
 pub struct Announcement {
   id : @types.ID

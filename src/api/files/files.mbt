@@ -2,6 +2,7 @@
 // Reference: direct-go-sdk/direct-go/files.go
 
 // Upload authentication credentials for file upload
+
 ///|
 pub struct UploadAuth {
   file_id : @types.ID

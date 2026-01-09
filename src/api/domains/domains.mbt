@@ -2,6 +2,7 @@
 // Reference: direct-go-sdk/direct-go/domains.go
 
 // Detailed domain information
+
 ///|
 pub struct DomainInfo {
   id : @types.ID

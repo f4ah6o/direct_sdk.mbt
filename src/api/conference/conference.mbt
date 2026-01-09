@@ -2,6 +2,7 @@
 // Reference: direct-go-sdk/direct-go/conference.go
 
 // Video/audio conference information
+
 ///|
 pub struct Conference {
   id : @types.ID

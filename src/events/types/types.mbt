@@ -2,6 +2,7 @@
 // Reference: direct-go-sdk/direct-go/events.go
 
 // Server-to-client notification events
+
 ///|
 pub enum ServerEvent {
   // Connection events

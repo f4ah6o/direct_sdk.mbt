@@ -3,6 +3,7 @@
 
 // Get all talks (conversations/rooms)
 // cfg(target="native")
+
 ///|
 pub async fn get_talks(
   client : @rpc_client.Client,

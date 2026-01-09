@@ -3,6 +3,7 @@
 
 // Get current user information
 // cfg(target="native")
+
 ///|
 pub async fn get_me(
   client : @rpc_client.Client,

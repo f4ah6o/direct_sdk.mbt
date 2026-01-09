@@ -2,6 +2,7 @@
 // Reference: direct-go-sdk/direct-go/departments.go
 
 // Department tree structure for a domain
+
 ///|
 pub struct DepartmentTree {
   domain_id : @types.ID

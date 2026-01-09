@@ -2,6 +2,7 @@
 // Reference: direct-go-sdk/direct-go/errors.go
 
 // DirectError represents all possible errors in the SDK
+
 ///|
 pub enum DirectError {
   NotConnected(String) // Client is not connected

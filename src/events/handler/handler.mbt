@@ -2,6 +2,7 @@
 // Reference: direct-go-sdk/direct-go/client.go
 
 // Event dispatcher for managing event handlers
+
 ///|
 pub struct EventDispatcher {
   mut handlers : Map[String, Array[@events_types.JsonEventHandler]]

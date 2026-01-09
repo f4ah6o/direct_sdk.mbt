@@ -2,6 +2,7 @@
 // Reference: direct-go-sdk/direct-go/config.go
 
 // Configuration for the Direct client
+
 ///|
 pub struct Config {
   mut token : String // Authentication token (required)

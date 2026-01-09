@@ -2,6 +2,7 @@
 // Reference: direct-go-sdk/direct-go/messages.go
 
 // Message types (internal enum values 0-21, wire values 500-508 for action stamps)
+
 ///|
 pub(all) enum MessageType {
   MsgTypeSystem // 0

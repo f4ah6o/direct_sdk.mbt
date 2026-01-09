@@ -2,6 +2,7 @@
 // Reference: direct-go-sdk/direct-go/message_operations.go
 
 // Message order for retrieving messages
+
 ///|
 pub enum MessageOrder {
   Asc // Ascending order (oldest first)
