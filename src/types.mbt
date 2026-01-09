@@ -186,17 +186,37 @@ pub type TalkStatus = {
   latest_msg_id : Option[ID],
 }
 
-// Domain/Organization
+// Domain/Organization (simplified)
 pub type Domain = {
   id   : ID,
   name : String,
 }
 
-// Domain invitation
+// Domain invitation (simplified)
 pub type DomainInvite = {
   id                       : ID,
   name                     : String,
   account_control_request_id : Option[ID],
+}
+
+// Detailed domain information
+pub type DomainInfo = {
+  id         : ID,
+  name       : String,
+  updated_at : Int64,
+  contract   : JsonValue,
+  setting    : JsonValue,
+  role       : JsonValue,
+  closed     : Bool,
+}
+
+// Conference information
+pub type ConferenceInfo = {
+  id        : ID,
+  talk_id   : ID,
+  domain_id : ID,
+  status    : String,
+  created   : Int64,
 }
 
 // Room (simpler version of Talk)

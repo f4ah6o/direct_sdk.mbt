@@ -14,6 +14,7 @@ pub type Client = {
   mut done_channel      : Option[DoneChannel],
   mut talk_domains      : Map[String, String],  // talk_id -> domain_id
   mut metrics           : config/Metrics,
+  mut dispatcher        : events/handler/EventDispatcher,  // Event dispatcher
 }
 
 // Request promise for async RPC calls
@@ -52,6 +53,7 @@ pub fn new_client(config : Config) -> Client {
     done_channel:      None,
     talk_domains:      Map::new(),
     metrics:           config/noop_metrics(),
+    dispatcher:        events/handler/new_dispatcher(),
   }
 }
 
@@ -260,11 +262,32 @@ pub fn on(client : Client, event : String, handler : EventHandler) -> Unit {
 // Register a message handler
 pub fn on_message(client : Client, handler : (types/ReceivedMessage) -> Unit) -> Unit {
   // TODO: Add to message handlers list
-  ()
+  events/handler/on_message(client.dispatcher, handler)
+}
+
+// Register a talk handler
+pub fn on_talk(client : Client, handler : (types/Talk) -> Unit) -> Unit {
+  events/handler/on_talk(client.dispatcher, handler)
+}
+
+// Register a user handler
+pub fn on_user(client : Client, handler : (types/UserInfo) -> Unit) -> Unit {
+  events/handler/on_user(client.dispatcher, handler)
+}
+
+// Register a domain handler
+pub fn on_domain(client : Client, handler : (types/DomainInfo) -> Unit) -> Unit {
+  events/handler/on_domain(client.dispatcher, handler)
+}
+
+// Register a conference handler
+pub fn on_conference(client : Client, handler : (types/ConferenceInfo) -> Unit) -> Unit {
+  events/handler/on_conference(client.dispatcher, handler)
 }
 
 // Emit an event to all registered handlers
 pub fn emit(client : Client, event : String, data : JsonValue) -> Unit {
+  // Emit to legacy handlers
   match client.event_handlers.get(event) {
     | Some(handlers) => {
       for h in handlers {
@@ -273,6 +296,9 @@ pub fn emit(client : Client, event : String, data : JsonValue) -> Unit {
     }
     | None => ()
   }
+
+  // Also emit to dispatcher
+  events/handler/emit(client.dispatcher, event, data)
 }
 
 // === Background Loops ===
