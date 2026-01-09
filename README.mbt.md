@@ -101,13 +101,16 @@ rpc/client/on(client, "session_created", fn(data) {
 ## Configuration
 
 ```moonbit
-let client = rpc/client/new_client(
-  config/default_config()
-    |> config/with_token("your-token")
-    |> config/with_endpoint("wss://custom.example.com/api")
-    |> config/with_proxy(Some("http://proxy:8080"))
-    |> config/with_timeout(60000)
-)
+///|
+let client = rpc /
+  client /
+  new_client(
+    (config / default_config())
+    |> config / with_token("your-token")
+    |> config / with_endpoint("wss://custom.example.com/api")
+    |> config / with_proxy(Some("http://proxy:8080"))
+    |> config / with_timeout(60000),
+  )
 ```
 
 ## Examples
