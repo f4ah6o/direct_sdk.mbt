@@ -1,9 +1,0 @@
-{
-  "is-main": true,
-  "import": [
-    {
-      "path": "f4ah6o/direct_sdk",
-      "alias": "lib"
-    }
-  ]
-}

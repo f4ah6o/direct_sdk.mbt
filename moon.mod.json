@@ -1,9 +1,12 @@
 {
   "name": "f4ah6o/direct_sdk",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "readme": "README.mbt.md",
-  "repository": "",
+  "repository": "https://github.com/f4ah6o/direct-moonbit-sdk",
   "license": "Apache-2.0",
-  "keywords": [],
-  "description": ""
+  "keywords": ["direct", "websocket", "rpc", "msgpack", "chat", "api"],
+  "description": "MoonBit SDK for Direct4B WebSocket API with MessagePack RPC",
+  "dependencies": {
+    "moonbitlang/async": "*"
+  }
 }
