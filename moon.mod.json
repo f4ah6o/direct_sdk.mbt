@@ -18,5 +18,6 @@
     "api"
   ],
   "description": "MoonBit SDK for Direct4B WebSocket API with MessagePack RPC",
-  "source": "src"
+  "source": "src",
+  "preferred-target": "native"
 }
