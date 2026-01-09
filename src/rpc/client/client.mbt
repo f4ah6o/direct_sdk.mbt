@@ -2,6 +2,7 @@
 // Reference: direct-go-sdk/direct-go/client.go
 
 // Main client type with WebSocket and MessagePack RPC protocol
+
 ///|
 pub struct Client {
   config : @config.Config
@@ -97,6 +98,10 @@ pub async fn connect(client : Client) -> Result[Unit, @errors.DirectError] {
   let ws_config = @rpc_websocket.default_websocket_config(
     client.config.endpoint,
   )
+  let ws_config = match client.config.proxy_url {
+    Some(url) => @rpc_websocket.with_proxy(ws_config, url)
+    None => ws_config
+  }
 
   // Connect to WebSocket
   let ws = match @rpc_websocket.connect(ws_config) {
@@ -201,11 +206,69 @@ pub async fn call(
       }
     None => return Err(@errors.not_connected("WebSocket not connected"))
   }
+  let result = @async.with_timeout_opt(client.config.timeout, fn() {
+    wait_for_response(client, msg_id)
+  })
+  match result {
+    Some(value) => value
+    None => Err(@errors.timeout("Response timeout"))
+  }
+}
 
-  // Wait for response with timeout
-  // TODO: Implement async wait with timeout using TaskGroup
-  // For now, return an error
-  Err(@errors.timeout("Response timeout not yet implemented"))
+///|
+async fn wait_for_response(
+  client : Client,
+  msg_id : Int64,
+) -> Result[@types.JsonValue, @errors.DirectError] {
+  while true {
+    let ws = match client.ws {
+      Some(value) => value
+      None => return Err(@errors.not_connected("WebSocket not connected"))
+    }
+    let data = match @rpc_websocket.receive(ws) {
+      Ok(value) => value
+      Err(err) => return Err(@rpc_websocket.ws_error_to_direct(err))
+    }
+    match @rpc_msgpack.decode_message(data) {
+      Ok(@rpc_msgpack.Response(resp)) =>
+        if resp.msg_id == msg_id {
+          match resp.error {
+            Some(err) => return Err(rpc_error_from_json(err))
+            None => return Ok(resp.result)
+          }
+        }
+      Ok(@rpc_msgpack.Request(req)) => handle_notification(client, req)
+      Err(err) => return Err(err)
+    }
+  } else {
+    Err(@errors.timeout("Response loop ended"))
+  }
+}
+
+///|
+fn rpc_error_from_json(value : @types.JsonValue) -> @errors.DirectError {
+  match value {
+    @types.JsonString(msg) => @errors.rpc_error(0, msg)
+    @types.JsonObject(obj) => {
+      let code = match obj.get("code") {
+        Some(@types.JsonNumber(n)) => {
+          let int_val = n.to_int()
+          if Float::from_int(int_val) == n {
+            int_val
+          } else {
+            0
+          }
+        }
+        _ => 0
+      }
+      let msg = match obj.get("message") {
+        Some(@types.JsonString(text)) => text
+        _ => value.to_string()
+      }
+      @errors.rpc_error(code, msg)
+    }
+    _ => @errors.rpc_error(0, value.to_string())
+  }
 }
 
 // Synchronous-style RPC call with timeout
@@ -412,14 +475,10 @@ async fn ping_loop(client : Client) -> Unit {
 // Handle incoming message
 
 ///|
-fn handle_message(client : Client, data : Array[Byte]) -> Unit {
-  match @rpc_msgpack.decode_response(data) {
-    Ok(resp) =>
-      if resp.msg_type == @constants.RPC_RESPONSE {
-        handle_response(client, resp)
-      } else if resp.msg_type == @constants.RPC_REQUEST {
-        handle_notification(client, resp)
-      }
+fn handle_message(client : Client, data : Bytes) -> Unit {
+  match @rpc_msgpack.decode_message(data) {
+    Ok(@rpc_msgpack.Response(resp)) => handle_response(client, resp)
+    Ok(@rpc_msgpack.Request(req)) => handle_notification(client, req)
     Err(e) =>
       emit(
         client,
@@ -452,13 +511,10 @@ fn handle_response(client : Client, resp : @rpc_msgpack.RpcResponse) -> Unit {
 // Handle server notification
 
 ///|
-fn handle_notification(
-  client : Client,
-  resp : @rpc_msgpack.RpcResponse,
-) -> Unit {
+fn handle_notification(client : Client, req : @rpc_msgpack.RpcRequest) -> Unit {
   let _ = client
-  let _ = resp
-  // TODO: RpcResponse does not expose method information yet.
+  let _ = req
+  // TODO: Dispatch notifications by method.
 }
 
 // === Helper Functions ===

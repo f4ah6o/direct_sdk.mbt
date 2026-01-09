@@ -9,15 +9,22 @@ import(
 // Values
 pub fn create_request(Int64, String, Array[@types.JsonValue]) -> RpcRequest
 
-pub fn decode_response(Array[Byte]) -> Result[RpcResponse, @errors.DirectError]
+pub fn decode_message(Bytes) -> Result[RpcMessage, @errors.DirectError]
 
-pub fn encode_notification(String, Array[@types.JsonValue]) -> Result[Array[Byte], @errors.DirectError]
+pub fn decode_response(Bytes) -> Result[RpcResponse, @errors.DirectError]
 
-pub fn encode_request(RpcRequest) -> Result[Array[Byte], @errors.DirectError]
+pub fn encode_notification(String, Array[@types.JsonValue]) -> Result[Bytes, @errors.DirectError]
+
+pub fn encode_request(RpcRequest) -> Result[Bytes, @errors.DirectError]
 
 // Errors
 
 // Types and methods
+pub enum RpcMessage {
+  Request(RpcRequest)
+  Response(RpcResponse)
+}
+
 pub struct RpcRequest {
   msg_type : Int
   msg_id : Int64
