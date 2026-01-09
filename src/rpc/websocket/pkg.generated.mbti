@@ -10,7 +10,7 @@ pub async fn close(WebSocketConnection) -> Result[Unit, WebSocketError]
 
 pub fn close_code_to_int(CloseCode) -> Int
 
-pub async fn close_native(WebSocketConnection) -> Result[Unit, WebSocketError]
+pub fn close_native(WebSocketConnection) -> Result[Unit, WebSocketError]
 
 pub async fn connect(WebSocketConfig) -> Result[WebSocketConnection, WebSocketError]
 
@@ -32,9 +32,9 @@ pub async fn receive(WebSocketConnection) -> Result[Bytes, WebSocketError]
 
 pub async fn receive_native(WebSocketConnection) -> Result[Bytes, WebSocketError]
 
-pub async fn send_binary(WebSocketConnection, Array[Byte]) -> Result[Unit, WebSocketError]
+pub async fn send_binary(WebSocketConnection, Bytes) -> Result[Unit, WebSocketError]
 
-pub async fn send_binary_native(WebSocketConnection, Array[Byte]) -> Result[Unit, WebSocketError]
+pub async fn send_binary_native(WebSocketConnection, Bytes) -> Result[Unit, WebSocketError]
 
 pub async fn send_close(WebSocketConnection) -> Result[Unit, WebSocketError]
 
@@ -79,7 +79,7 @@ pub struct WebSocketConfig {
 }
 
 pub struct WebSocketConnection {
-  conn : Unit?
+  mut conn : @moonbitlang/async/websocket.Conn?
   endpoint : String
   mut connected : Bool
 }
@@ -93,7 +93,7 @@ pub(all) enum WebSocketError {
 }
 
 // Type aliases
-pub type InternalConn = Unit
+pub using @moonbitlang/async/websocket {type Conn as InternalConn}
 
 // Traits
 

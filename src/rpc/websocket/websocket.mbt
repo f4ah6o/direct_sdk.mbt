@@ -7,6 +7,7 @@
 // cfg(target="native") will be used for native-specific code
 
 // WebSocket close codes (RFC 6455)
+
 ///|
 pub(all) enum CloseCode {
   Normal // 1000
@@ -36,6 +37,51 @@ pub fn close_code_to_int(code : CloseCode) -> Int {
     MissingExtension => 1010
     InternalError => 1011
     Other(n) => n
+  }
+}
+
+///|
+fn close_code_from_async(code : @async_ws.CloseCode) -> CloseCode {
+  match code {
+    @async_ws.Normal => Normal
+    @async_ws.GoingAway => GoingAway
+    @async_ws.ProtocolError => ProtocolError
+    @async_ws.UnsupportedData => UnsupportedData
+    @async_ws.Abnormal => Abnormal
+    @async_ws.InvalidFramePayload => InvalidFramePayload
+    @async_ws.PolicyViolation => PolicyViolation
+    @async_ws.MessageTooBig => MessageTooBig
+    @async_ws.MissingExtension => MissingExtension
+    @async_ws.InternalError => InternalError
+    @async_ws.Other(code) => Other(code.to_int())
+  }
+}
+
+///|
+fn close_code_to_async(code : CloseCode) -> @async_ws.CloseCode {
+  match code {
+    Normal => @async_ws.Normal
+    GoingAway => @async_ws.GoingAway
+    ProtocolError => @async_ws.ProtocolError
+    UnsupportedData => @async_ws.UnsupportedData
+    Abnormal => @async_ws.Abnormal
+    InvalidFramePayload => @async_ws.InvalidFramePayload
+    PolicyViolation => @async_ws.PolicyViolation
+    MessageTooBig => @async_ws.MessageTooBig
+    MissingExtension => @async_ws.MissingExtension
+    InternalError => @async_ws.InternalError
+    Other(code) => @async_ws.Other(code.to_uint16())
+  }
+}
+
+///|
+fn map_async_error(err : Error) -> WebSocketError {
+  match err {
+    @async_ws.ConnectionClosed(code, reason) =>
+      ConnectionClosed(close_code_from_async(code), reason)
+    @async_ws.InvalidHandshake(msg) => InvalidHandshake(msg)
+    @async_ws.WebSocketError::ProtocolError(_) => ProtocolError
+    _ => ConnectionFailed(err.to_string())
   }
 }
 
@@ -134,20 +180,20 @@ pub fn with_timeout(cfg : WebSocketConfig, timeout_ms : Int) -> WebSocketConfig 
 }
 
 // WebSocket connection wrapper
-// This wraps the underlying @websocket.Conn from moonbitlang/async
+// This wraps the underlying @async_ws.Conn from moonbitlang/async
 
 ///|
 pub struct WebSocketConnection {
-  conn : InternalConn?
+  mut conn : InternalConn?
   endpoint : String
   mut connected : Bool
 }
 
-// Internal connection type (opaque wrapper around @websocket.Conn)
+// Internal connection type (opaque wrapper around @async_ws.Conn)
 // This is defined as opaque to hide the platform-specific details
 
 ///|
-pub type InternalConn = Unit
+pub type InternalConn = @async_ws.Conn
 
 // Create a new WebSocket connection wrapper (not connected)
 
@@ -174,39 +220,46 @@ pub fn get_endpoint(conn : WebSocketConnection) -> String {
 // These functions use moonbitlang/async/websocket
 
 // Connect to WebSocket endpoint (async)
-// Uses @websocket.connect(url, headers?, proxy?)
+// Uses @async_ws.connect(url, headers?, proxy?)
 // cfg(target="native")
 
 ///|
 pub async fn connect_native(
   config : WebSocketConfig,
 ) -> Result[WebSocketConnection, WebSocketError] {
-  // TODO: Implement using moonbitlang/async/websocket
-  // The implementation would be:
-  //
-  // let ws = match config.headers {
-  //   | Some(h) => match config.proxy_url {
-  //     | Some(p) => @websocket.connect(config.endpoint, h, p)
-  //     | None => @websocket.connect(config.endpoint, h)
-  //   }
-  //   | None => match config.proxy_url {
-  //     | Some(p) => @websocket.connect(config.endpoint, proxy=p)
-  //     | None => @websocket.connect(config.endpoint)
-  //   }
-  // }
-  //
-  // return Ok({
-  //   conn: Some(ws),
-  //   endpoint: config.endpoint,
-  //   connected: true,
-  // })
-
-  // For now, return an error as a placeholder
-  Err(
-    ConnectionFailed(
-      "Native WebSocket implementation pending - requires cfg(target=\"native\") build",
-    ),
-  )
+  let headers : Map[String, String] = match config.headers {
+    Some(h) => h
+    None => {}
+  }
+  let proxy_client = match config.proxy_url {
+    Some(url) => {
+      let client = try @http.Client::new(url) catch {
+        err => return Err(ConnectionFailed("proxy: " + err.to_string()))
+      } noraise {
+        c => c
+      }
+      Some(client)
+    }
+    None => None
+  }
+  let result = @async.with_timeout_opt(config.timeout, fn() {
+    try {
+      let ws = @async_ws.Conn::connect(
+        config.endpoint,
+        headers~,
+        proxy?=proxy_client,
+      )
+      Ok(ws)
+    } catch {
+      err => Err(err)
+    }
+  })
+  match result {
+    Some(Ok(ws)) =>
+      Ok({ conn: Some(ws), endpoint: config.endpoint, connected: true })
+    Some(Err(err)) => Err(map_async_error(err))
+    None => Err(Timeout("handshake timed out"))
+  }
 }
 
 // Send binary data (async)
@@ -215,12 +268,15 @@ pub async fn connect_native(
 ///|
 pub async fn send_binary_native(
   conn : WebSocketConnection,
-  data : Array[Byte],
+  data : Bytes,
 ) -> Result[Unit, WebSocketError] {
   match conn.conn {
-    Some(_) =>
-      // TODO: Implement using @websocket.Conn.send_binary(data)
-      Ok(())
+    Some(ws) =>
+      try ws.send_binary(data[:]) catch {
+        err => Err(map_async_error(err))
+      } noraise {
+        _ => Ok(())
+      }
     None => Err(ConnectionClosed(Abnormal, Some("Not connected")))
   }
 }
@@ -234,9 +290,12 @@ pub async fn send_text_native(
   text : String,
 ) -> Result[Unit, WebSocketError] {
   match conn.conn {
-    Some(_) =>
-      // TODO: Implement using @websocket.Conn.send_text(text)
-      Ok(())
+    Some(ws) =>
+      try ws.send_text(text[:]) catch {
+        err => Err(map_async_error(err))
+      } noraise {
+        _ => Ok(())
+      }
     None => Err(ConnectionClosed(Abnormal, Some("Not connected")))
   }
 }
@@ -250,18 +309,22 @@ pub async fn receive_native(
   conn : WebSocketConnection,
 ) -> Result[Bytes, WebSocketError] {
   match conn.conn {
-    Some(_) =>
-      // TODO: Implement using @websocket.Conn.recv()
-      // let msg = ws.recv()
-      // let content = msg.read_all()
-      // Ok(content.to_bytes())
-      Err(Timeout("Receive not yet implemented"))
+    Some(ws) =>
+      try {
+        let msg = ws.recv()
+        let content = msg.read_all()
+        Ok(content.binary())
+      } catch {
+        err => Err(map_async_error(err))
+      } noraise {
+        value => value
+      }
     None => Err(ConnectionClosed(Abnormal, Some("Not connected")))
   }
 }
 
 // Send ping (async)
-// Note: @websocket.Conn.ping() requires another task to be receiving messages
+// Note: @async_ws.Conn.ping() requires another task to be receiving messages
 // cfg(target="native")
 
 ///|
@@ -269,9 +332,12 @@ pub async fn ping_native(
   conn : WebSocketConnection,
 ) -> Result[Unit, WebSocketError] {
   match conn.conn {
-    Some(_) =>
-      // TODO: Implement using @websocket.Conn.ping()
-      Ok(())
+    Some(ws) =>
+      try ws.ping() catch {
+        err => Err(map_async_error(err))
+      } noraise {
+        _ => Ok(())
+      }
     None => Err(ConnectionClosed(Abnormal, Some("Not connected")))
   }
 }
@@ -284,9 +350,12 @@ pub async fn send_close_native(
   conn : WebSocketConnection,
 ) -> Result[Unit, WebSocketError] {
   match conn.conn {
-    Some(_) =>
-      // TODO: Implement using @websocket.Conn.send_close()
-      Ok(())
+    Some(ws) =>
+      try ws.send_close(code=close_code_to_async(Normal)) catch {
+        err => Err(map_async_error(err))
+      } noraise {
+        _ => Ok(())
+      }
     None => Err(ConnectionClosed(Abnormal, Some("Not connected")))
   }
 }
@@ -295,13 +364,12 @@ pub async fn send_close_native(
 // cfg(target="native")
 
 ///|
-pub async fn close_native(
-  conn : WebSocketConnection,
-) -> Result[Unit, WebSocketError] {
+pub fn close_native(conn : WebSocketConnection) -> Result[Unit, WebSocketError] {
   match conn.conn {
-    Some(_) => {
-      // TODO: Implement using @websocket.Conn.close()
+    Some(ws) => {
+      ws.close()
       conn.connected = false
+      conn.conn = None
       Ok(())
     }
     None => Ok(())
@@ -326,7 +394,7 @@ pub async fn connect(
 ///|
 pub async fn send_binary(
   conn : WebSocketConnection,
-  data : Array[Byte],
+  data : Bytes,
 ) -> Result[Unit, WebSocketError] {
   send_binary_native(conn, data)
 }
