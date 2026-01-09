@@ -2,7 +2,8 @@
   "name": "f4ah6o/direct_sdk",
   "version": "0.2.0",
   "deps": {
-    "moonbitlang/quickcheck": "0.9.8"
+    "moonbitlang/quickcheck": "0.9.8",
+    "moonbitlang/x": "0.4.38"
   },
   "readme": "README.mbt.md",
   "repository": "https://github.com/f4ah6o/direct-moonbit-sdk",

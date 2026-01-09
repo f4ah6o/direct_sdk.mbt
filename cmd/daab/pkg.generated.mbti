@@ -1,0 +1,48 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "f4ah6o/direct_sdk/cmd/daab"
+
+// Values
+pub const DEFAULT_ENV_PATH : String = ".env"
+
+pub const ENV_TOKEN_KEY : String = "HUBOT_DIRECT_TOKEN"
+
+pub fn create_dir(String) -> Result[Unit, String]
+
+pub fn first_non_flag(ArrayView[String]) -> String?
+
+pub fn flag_value(ArrayView[String], String) -> String?
+
+pub fn has_flag(ArrayView[String], String) -> Bool
+
+pub fn print_init_help() -> Unit
+
+pub fn print_login_help() -> Unit
+
+pub fn print_run_help() -> Unit
+
+pub fn print_usage() -> Unit
+
+pub fn read_env_value(String, String) -> Result[String?, String]
+
+pub fn read_file_or_empty(String) -> Result[String, String]
+
+pub fn resolve_token(String) -> Result[String?, String]
+
+pub fn run_init(ArrayView[String]) -> Result[Unit, String]
+
+pub fn run_login(ArrayView[String]) -> Result[Unit, String]
+
+pub fn run_run(ArrayView[String]) -> Result[Unit, String]
+
+pub fn set_env_value(String, String, String) -> Result[Unit, String]
+
+pub fn write_file(String, String) -> Result[Unit, String]
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits
+

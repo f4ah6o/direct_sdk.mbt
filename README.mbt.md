@@ -118,6 +118,23 @@ let client = rpc /
 - `examples/basic_usage.mbt` - 基本的な使用方法
 - `examples/bot_example.mbt` - ボット実装パターン
 
+## CLI (daab)
+
+```bash
+# Save access token to .env
+daab login --token <token>
+
+# Initialize a new bot project
+daab init my-bot
+
+# Run the bot (prints the command to run)
+cd my-bot
+daab run
+
+# Show available commands
+daab --help
+```
+
 ## Development
 
 ```bash
