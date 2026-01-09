@@ -1,0 +1,247 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "f4ah6o/direct_sdk/types"
+
+// Values
+pub fn id_to_json(ID) -> JsonValue
+
+pub fn id_to_string(ID) -> String
+
+pub fn int_to_room_type(Int) -> RoomType?
+
+pub fn json_to_id(JsonValue) -> ID?
+
+pub fn msg_type_to_wire(MessageType) -> Int
+
+pub fn room_type_to_int(RoomType) -> Int
+
+pub fn string_to_id(String) -> ID
+
+pub fn wire_to_msg_type(Int) -> MessageType?
+
+// Errors
+
+// Types and methods
+pub(all) struct ConferenceInfo {
+  id : ID
+  talk_id : ID
+  domain_id : ID
+  status : String
+  created : Int64
+}
+
+pub(all) struct Domain {
+  id : ID
+  name : String
+}
+
+pub(all) struct DomainInfo {
+  id : ID
+  name : String
+  updated_at : Int64
+  contract : JsonValue
+  setting : JsonValue
+  role : JsonValue
+  closed : Bool
+}
+
+pub(all) struct DomainInvite {
+  id : ID
+  name : String
+  account_control_request_id : ID?
+}
+
+pub(all) struct FileMessage {
+  file_id : ID
+  name : String
+  mime_type : String
+  text : String?
+}
+
+pub(all) struct GroupTalkSettings {
+  name : String
+  icon_url : String?
+  allow_display_past_messages : Bool
+  description : String?
+}
+
+pub(all) struct HealthStatus {
+  connected : Bool
+  authenticated : Bool
+  endpoint : String
+  error : String?
+}
+
+pub(all) enum ID {
+  IDString(String)
+  IDInt(Int64)
+}
+pub impl Eq for ID
+pub impl Show for ID
+
+pub(all) enum JsonValue {
+  JsonNull
+  JsonBool(Bool)
+  JsonNumber(Float)
+  JsonString(String)
+  JsonArray(Array[JsonValue])
+  JsonObject(Map[String, JsonValue])
+}
+pub impl Show for JsonValue
+
+pub(all) struct LocationMessage {
+  address : String
+  latitude : Float
+  longitude : Float
+}
+
+pub(all) enum MessageType {
+  MsgTypeSystem
+  MsgTypeText
+  MsgTypeStamp
+  MsgTypeLocation
+  MsgTypeFile
+  MsgTypeTextMultipleFile
+  MsgTypeUnused
+  MsgTypeDeleted
+  MsgTypeNoteShared
+  MsgTypeNoteDeleted
+  MsgTypeNoteCreated
+  MsgTypeNoteUpdated
+  MsgTypeOriginalStamp
+  MsgTypeYesNo
+  MsgTypeYesNoReply
+  MsgTypeSelect
+  MsgTypeSelectReply
+  MsgTypeTask
+  MsgTypeTaskDone
+  MsgTypeYesNoClosed
+  MsgTypeSelectClosed
+  MsgTypeTaskClosed
+}
+pub impl Eq for MessageType
+pub impl Show for MessageType
+
+pub(all) struct NoteMessage {
+  title : String
+  content : String
+}
+
+pub(all) struct PresenceInfo {
+  user_id : ID
+  status : String
+}
+
+pub(all) struct ProfileInfo {
+  user_id : ID
+  domain_id : ID
+  display_name : String
+  phonetic_name : String
+  profiles : Map[String, JsonValue]
+}
+
+pub(all) struct ReceivedMessage {
+  id : String
+  talk_id : String
+  room_id : String
+  user_id : String
+  domain_id : String
+  text : String
+  msg_type : MessageType
+  content : JsonValue
+  created : Int64
+  raw : JsonValue?
+}
+
+pub(all) struct Room {
+  id : ID
+  name : String
+  room_type : RoomType
+  user_ids : Array[ID]
+  domain_id : ID?
+}
+
+pub(all) enum RoomType {
+  RoomTypePair
+  RoomTypeGroup
+}
+pub impl Eq for RoomType
+pub impl Show for RoomType
+
+pub(all) struct SelectMessage {
+  question : String
+  options : Array[String]
+  listing : Bool
+  closing_type : Int
+}
+
+pub(all) struct SessionResponse {
+  user_id : ID
+  device_id : ID
+  password_expiration : ID?
+}
+
+pub(all) struct StampMessage {
+  stamp_set : String
+  stamp_index : String
+  text : String?
+}
+
+pub(all) struct Talk {
+  id : ID
+  domain_id : ID
+  talk_type : Int
+  name : String
+  user_ids : Array[ID]
+  allow_display_past_messages : Bool
+}
+
+pub(all) struct TalkStatus {
+  talk_id : ID
+  unread_count : Int
+  latest_msg_id : ID?
+}
+
+pub(all) struct TaskMessage {
+  title : String
+  closing_type : Int
+  closing_users : Int
+  target_user_ids : Array[ID]
+}
+
+pub(all) struct TextMessage {
+  text : String
+}
+
+pub(all) struct UserIdentifier {
+  user_id : ID
+  email : String
+  sub_email : String
+  group_alias : String
+  signin_id : String
+}
+
+pub(all) struct UserInfo {
+  id : ID
+  name : String
+  display_name : String
+  phonetic_name : String
+  email : String
+  icon_url : String
+  domain_id : ID
+  departments : Array[ID]
+  profiles : Map[String, JsonValue]
+  can_talk : Bool
+  allowed_to_create_talk : Bool
+}
+
+pub(all) struct YesNoMessage {
+  question : String
+  listing : Bool
+  close_yes : Bool
+  close_no : Bool
+}
+
+// Type aliases
+
+// Traits
+

@@ -1,0 +1,100 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "f4ah6o/direct_sdk/rpc/client"
+
+import(
+  "f4ah6o/direct_sdk/config"
+  "f4ah6o/direct_sdk/errors"
+  "f4ah6o/direct_sdk/events/handler"
+  "f4ah6o/direct_sdk/rpc/websocket"
+  "f4ah6o/direct_sdk/types"
+)
+
+// Values
+pub fn cache_talk_domain(Client, String, String) -> Unit
+
+pub async fn call(Client, String, Array[@types.JsonValue]) -> Result[@types.JsonValue, @errors.DirectError]
+
+pub fn call_sync(Client, String, Array[@types.JsonValue], Int) -> Result[@types.JsonValue, @errors.DirectError]
+
+pub async fn close(Client) -> Result[Unit, @errors.DirectError]
+
+pub async fn connect(Client) -> Result[Unit, @errors.DirectError]
+
+pub fn emit(Client, String, @types.JsonValue) -> Unit
+
+pub fn get_config(Client) -> @config.Config
+
+pub fn get_domain_for_talk(Client, String) -> String?
+
+pub fn get_talk_domains(Client) -> Map[String, String]
+
+pub fn health(Client) -> @config.HealthStatus
+
+pub fn is_authenticated(Client) -> Bool
+
+pub fn is_connected(Client) -> Bool
+
+pub fn new_client(@config.Config) -> Client
+
+pub fn new_client_with_token(String) -> Client
+
+pub fn next_msg_id(Client) -> Int64
+
+pub fn on(Client, String, (@types.JsonValue) -> Unit) -> Unit
+
+pub fn on_conference(Client, (@types.ConferenceInfo) -> Unit) -> Unit
+
+pub fn on_domain(Client, (@types.DomainInfo) -> Unit) -> Unit
+
+pub fn on_message(Client, (@types.ReceivedMessage) -> Unit) -> Unit
+
+pub fn on_talk(Client, (@types.Talk) -> Unit) -> Unit
+
+pub fn on_user(Client, (@types.UserInfo) -> Unit) -> Unit
+
+pub async fn send_text(Client, String, String) -> Result[Unit, @errors.DirectError]
+
+pub fn set_metrics(Client, @config.Metrics) -> Unit
+
+// Errors
+
+// Types and methods
+pub struct Client {
+  config : @config.Config
+  mut ws : @websocket.WebSocketConnection?
+  mut msg_id : Int64
+  mut connected : Bool
+  mut authenticated : Bool
+  mut pending_requests : Map[Int64, RequestPromise]
+  event_handlers : Map[String, Array[(@types.JsonValue) -> Unit]]
+  message_channel : Unit?
+  done_channel : Unit?
+  mut talk_domains : Map[String, String]
+  mut metrics : @config.Metrics
+  dispatcher : @handler.EventDispatcher
+}
+
+pub struct RequestPromise {
+  result_ch : Unit
+  error_ch : Unit
+}
+
+pub struct ResponseHandler {
+  method : String
+  on_success : (@types.JsonValue) -> Unit
+  on_error : (@types.JsonValue) -> Unit
+}
+
+// Type aliases
+pub type DoneChannel = Unit
+
+pub type ErrorChannel = Unit
+
+pub type EventHandler = (@types.JsonValue) -> Unit
+
+pub type MessageChannel = Unit
+
+pub type ResultChannel = Unit
+
+// Traits
+

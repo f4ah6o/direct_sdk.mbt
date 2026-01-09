@@ -1,0 +1,56 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "f4ah6o/direct_sdk/api/files"
+
+import(
+  "f4ah6o/direct_sdk/errors"
+  "f4ah6o/direct_sdk/rpc/client"
+  "f4ah6o/direct_sdk/types"
+)
+
+// Values
+pub async fn create_file_preview(@client.Client, @types.ID) -> Result[FilePreview, @errors.DirectError]
+
+pub async fn create_upload_auth(@client.Client, String, String, Int64, String) -> Result[UploadAuth, @errors.DirectError]
+
+pub async fn delete_attachment(@client.Client, @types.ID) -> Result[Unit, @errors.DirectError]
+
+pub async fn get_attachments(@client.Client, @types.ID, Int) -> Result[Array[Attachment], @errors.DirectError]
+
+pub async fn get_file_preview(@client.Client, @types.ID) -> Result[FilePreview, @errors.DirectError]
+
+pub async fn search_attachments(@client.Client, String, @types.ID) -> Result[Array[Attachment], @errors.DirectError]
+
+// Errors
+
+// Types and methods
+pub struct Attachment {
+  id : @types.ID
+  message_id : @types.ID
+  talk_id : @types.ID
+  file_id : @types.ID
+  name : String
+  content_type : String
+  content_size : Int64
+  url : String
+  created_at : Int64
+}
+
+pub struct FilePreview {
+  file_id : @types.ID
+  status : String
+  file_preview_file_id : @types.ID
+  url : String
+  key : String
+}
+
+pub struct UploadAuth {
+  file_id : @types.ID
+  post_url : String
+  post_form : Map[String, String]
+  put_url : String
+}
+
+// Type aliases
+
+// Traits
+

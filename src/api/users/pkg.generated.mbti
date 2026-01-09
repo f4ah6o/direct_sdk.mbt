@@ -1,0 +1,40 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "f4ah6o/direct_sdk/api/users"
+
+import(
+  "f4ah6o/direct_sdk/errors"
+  "f4ah6o/direct_sdk/rpc/client"
+  "f4ah6o/direct_sdk/types"
+)
+
+// Values
+pub async fn add_friend(@client.Client, @types.ID) -> Result[Unit, @errors.DirectError]
+
+pub async fn delete_friend(@client.Client, @types.ID) -> Result[Unit, @errors.DirectError]
+
+pub async fn get_acquaintances(@client.Client) -> Result[Array[@types.UserInfo], @errors.DirectError]
+
+pub async fn get_friends(@client.Client) -> Result[Array[@types.UserInfo], @errors.DirectError]
+
+pub async fn get_me(@client.Client) -> Result[@types.UserInfo, @errors.DirectError]
+
+pub async fn get_presences(@client.Client, Array[@types.ID]) -> Result[Array[@types.PresenceInfo], @errors.DirectError]
+
+pub async fn get_profile(@client.Client, @types.ID, @types.ID) -> Result[@types.ProfileInfo, @errors.DirectError]
+
+pub async fn get_user_identifiers(@client.Client, Array[@types.ID]) -> Result[Array[@types.UserIdentifier], @errors.DirectError]
+
+pub async fn get_users(@client.Client, @types.ID, Array[@types.ID]) -> Result[Array[@types.UserInfo], @errors.DirectError]
+
+pub async fn update_profile(@client.Client, @types.ID, Map[String, @types.JsonValue]) -> Result[Unit, @errors.DirectError]
+
+pub async fn update_user(@client.Client, @types.ID, Map[String, @types.JsonValue]) -> Result[Unit, @errors.DirectError]
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits
+

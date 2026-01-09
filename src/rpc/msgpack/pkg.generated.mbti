@@ -1,0 +1,38 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "f4ah6o/direct_sdk/rpc/msgpack"
+
+import(
+  "f4ah6o/direct_sdk/errors"
+  "f4ah6o/direct_sdk/types"
+)
+
+// Values
+pub fn create_request(Int64, String, Array[@types.JsonValue]) -> RpcRequest
+
+pub fn decode_response(Array[Byte]) -> Result[RpcResponse, @errors.DirectError]
+
+pub fn encode_notification(String, Array[@types.JsonValue]) -> Result[Array[Byte], @errors.DirectError]
+
+pub fn encode_request(RpcRequest) -> Result[Array[Byte], @errors.DirectError]
+
+// Errors
+
+// Types and methods
+pub struct RpcRequest {
+  msg_type : Int
+  msg_id : Int64
+  method : String
+  params : Array[@types.JsonValue]
+}
+
+pub struct RpcResponse {
+  msg_type : Int
+  msg_id : Int64
+  error : @types.JsonValue?
+  result : @types.JsonValue
+}
+
+// Type aliases
+
+// Traits
+

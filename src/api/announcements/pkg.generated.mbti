@@ -1,0 +1,47 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "f4ah6o/direct_sdk/api/announcements"
+
+import(
+  "f4ah6o/direct_sdk/errors"
+  "f4ah6o/direct_sdk/rpc/client"
+  "f4ah6o/direct_sdk/types"
+)
+
+// Values
+pub async fn create_announcement(@client.Client, @types.ID, String, String, Array[@types.ID]) -> Result[Announcement, @errors.DirectError]
+
+pub async fn get_announcement_status(@client.Client, @types.ID) -> Result[AnnouncementStatus, @errors.DirectError]
+
+pub async fn get_announcement_statuses(@client.Client) -> Result[Array[AnnouncementStatus], @errors.DirectError]
+
+pub async fn get_announcements(@client.Client, @types.ID) -> Result[Array[Announcement], @errors.DirectError]
+
+pub async fn update_announcement_status(@client.Client, @types.ID, @types.ID) -> Result[Unit, @errors.DirectError]
+
+// Errors
+
+// Types and methods
+pub struct Announcement {
+  id : @types.ID
+  domain_id : @types.ID
+  title : String
+  text : String
+  created_by : @types.ID
+  created_at : Int64
+  updated_at : Int64
+  target_user_ids : Array[@types.ID]
+  read_user_ids : Array[@types.ID]
+  unread_user_count : Int
+}
+
+pub struct AnnouncementStatus {
+  domain_id : @types.ID
+  unread_count : Int
+  max_announcement_id : @types.ID
+  max_read_announcement_id : @types.ID
+}
+
+// Type aliases
+
+// Traits
+

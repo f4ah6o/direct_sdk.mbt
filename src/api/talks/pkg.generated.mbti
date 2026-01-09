@@ -1,0 +1,36 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "f4ah6o/direct_sdk/api/talks"
+
+import(
+  "f4ah6o/direct_sdk/errors"
+  "f4ah6o/direct_sdk/rpc/client"
+  "f4ah6o/direct_sdk/types"
+)
+
+// Values
+pub async fn add_favorite_talk(@client.Client, @types.ID) -> Result[Unit, @errors.DirectError]
+
+pub async fn add_talkers(@client.Client, @types.ID, Array[@types.ID]) -> Result[Unit, @errors.DirectError]
+
+pub async fn create_group_talk(@client.Client, @types.ID, String, Array[@types.ID], @types.GroupTalkSettings?) -> Result[@types.Talk, @errors.DirectError]
+
+pub async fn create_pair_talk(@client.Client, @types.ID, @types.ID) -> Result[@types.Talk, @errors.DirectError]
+
+pub async fn delete_favorite_talk(@client.Client, @types.ID) -> Result[Unit, @errors.DirectError]
+
+pub async fn delete_talker(@client.Client, @types.ID, @types.ID) -> Result[Unit, @errors.DirectError]
+
+pub async fn get_talk_statuses(@client.Client) -> Result[Array[@types.TalkStatus], @errors.DirectError]
+
+pub async fn get_talks(@client.Client) -> Result[Array[@types.Talk], @errors.DirectError]
+
+pub async fn update_group_talk(@client.Client, @types.ID, Map[String, @types.JsonValue]) -> Result[@types.Talk, @errors.DirectError]
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits
+
