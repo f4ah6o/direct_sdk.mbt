@@ -63,7 +63,7 @@ pub async fn send_select(
   content : SelectStampContent,
 ) -> Result[String, @errors.DirectError] {
   // Build content object
-  let mut content_map = Map::new()
+  let content_map = Map::new()
   content_map["question"] = @types.JsonString(content.question)
   content_map["options"] = @types.JsonArray(
     content.options.map(fn(o) { @types.JsonString(o) }),
@@ -80,21 +80,19 @@ pub async fn send_select(
     content_json,
   ]
 
-  match await @rpc_client.call(client, @constants.METHOD_CREATE_MESSAGE, params) {
-    Ok(result) => {
+  match @rpc_client.call(client, @constants.METHOD_CREATE_MESSAGE, params) {
+    Ok(result) =>
       // Extract message ID from result
       match result {
-        @types.JsonObject(obj) => {
+        @types.JsonObject(obj) =>
           match obj.get("id") {
             Some(@types.JsonString(id)) => Ok(id)
             Some(@types.JsonNumber(n)) => Ok(n.to_string())
             _ => Ok("unknown")
           }
-        }
         @types.JsonString(id) => Ok(id)
         _ => Ok("unknown")
       }
-    }
     Err(e) => Err(e)
   }
 }
@@ -106,9 +104,9 @@ pub async fn send_select(
 pub fn parse_select_content(msg : @types.ReceivedMessage) -> SelectParseResult {
   // Check if this is a select stamp message (502 or 503)
   match msg.msg_type {
-    | @types.MsgTypeSelect => SelectParseNotSelect
-    | @types.MsgTypeSelectReply => parse_select_reply_content(msg)
-    | _ => SelectParseNotSelect
+    @types.MsgTypeSelect => SelectParseNotSelect
+    @types.MsgTypeSelectReply => parse_select_reply_content(msg)
+    _ => SelectParseNotSelect
   }
 }
 
@@ -162,7 +160,7 @@ fn extract_content_from_raw(
   current_obj : Map[String, @types.JsonValue],
 ) -> Result[Map[String, @types.JsonValue], String] {
   // Check if we have the required fields in current object
-  if current_obj.contains_key("question") && current_obj.contains_key("options") {
+  if current_obj.contains("question") && current_obj.contains("options") {
     return Ok(current_obj)
   }
 
@@ -171,8 +169,8 @@ fn extract_content_from_raw(
     Some(@types.JsonObject(raw_obj)) =>
       match raw_obj.get("content") {
         Some(@types.JsonObject(content_obj)) =>
-          if content_obj.contains_key("question") &&
-            content_obj.contains_key("options") {
+          if content_obj.contains("question") &&
+            content_obj.contains("options") {
             Ok(content_obj)
           } else {
             Err("Content not found in raw data")
@@ -187,7 +185,7 @@ fn extract_content_from_raw(
 
 ///|
 fn parse_string_array(arr : Array[@types.JsonValue]) -> Array[String] {
-  let mut result = []
+  let result = []
   for item in arr {
     match item {
       @types.JsonString(s) => result.push(s)
@@ -210,7 +208,7 @@ pub async fn send_select_simple(
   options : Array[String],
 ) -> Result[String, @errors.DirectError] {
   let content = new_select_content(question, options)
-  await send_select(client, room_id, content)
+  send_select(client, room_id, content)
 }
 
 // Get the selected option text from a SelectStampReply
@@ -230,14 +228,8 @@ pub fn get_selected_option(reply : SelectStampReply) -> String? {
 pub fn format_select_reply(reply : SelectStampReply) -> String {
   match get_selected_option(reply) {
     Some(option) =>
-      "選択されたオプション: " +
-      ~+(option) +
-      ~+(" (インデックス: ") +
-      ~+(reply.response.to_string()) +
-      ~+(")")
+      "選択されたオプション: " + option + " (インデックス: " + reply.response.to_string() + ")"
     None =>
-      "無効な選択 (インデックス: " +
-      ~+(reply.response.to_string()) +
-      ~+(")")
+      "無効な選択 (インデックス: " + reply.response.to_string() + ")"
   }
 }
