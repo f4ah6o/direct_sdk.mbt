@@ -1,0 +1,53 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "f4ah6o/direct_sdk/errors"
+
+// Values
+pub fn already_connected(String) -> DirectError
+
+pub fn auth_error(String) -> DirectError
+
+pub fn connection_error(String) -> DirectError
+
+pub fn decode_error(String) -> DirectError
+
+pub fn direct_error_to_string(DirectError) -> String
+
+pub fn internal_error(String) -> DirectError
+
+pub fn invalid_response(String) -> DirectError
+
+pub fn not_connected(String) -> DirectError
+
+pub fn room_not_found(String) -> DirectError
+
+pub fn rpc_error(Int, String) -> DirectError
+
+pub fn timeout(String) -> DirectError
+
+pub fn user_not_found(String) -> DirectError
+
+pub fn wrap_connection_error(String) -> DirectError
+
+pub fn wrap_decode_error(String) -> DirectError
+
+// Errors
+
+// Types and methods
+pub enum DirectError {
+  NotConnected(String)
+  Timeout(String)
+  InvalidResponse(String)
+  AlreadyConnected(String)
+  RoomNotFound(String)
+  UserNotFound(String)
+  RPCError(Int, String)
+  ConnectionError(String)
+  DecodeError(String)
+  AuthError(String)
+  InternalError(String)
+}
+
+// Type aliases
+
+// Traits
+

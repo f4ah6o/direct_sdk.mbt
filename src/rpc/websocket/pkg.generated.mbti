@@ -1,0 +1,99 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "f4ah6o/direct_sdk/rpc/websocket"
+
+import(
+  "f4ah6o/direct_sdk/errors"
+)
+
+// Values
+pub async fn close(WebSocketConnection) -> Result[Unit, WebSocketError]
+
+pub fn close_code_to_int(CloseCode) -> Int
+
+pub async fn close_native(WebSocketConnection) -> Result[Unit, WebSocketError]
+
+pub async fn connect(WebSocketConfig) -> Result[WebSocketConnection, WebSocketError]
+
+pub async fn connect_native(WebSocketConfig) -> Result[WebSocketConnection, WebSocketError]
+
+pub fn default_websocket_config(String) -> WebSocketConfig
+
+pub fn get_endpoint(WebSocketConnection) -> String
+
+pub fn is_connected(WebSocketConnection) -> Bool
+
+pub fn new_connection(String) -> WebSocketConnection
+
+pub async fn ping(WebSocketConnection) -> Result[Unit, WebSocketError]
+
+pub async fn ping_native(WebSocketConnection) -> Result[Unit, WebSocketError]
+
+pub async fn receive(WebSocketConnection) -> Result[Bytes, WebSocketError]
+
+pub async fn receive_native(WebSocketConnection) -> Result[Bytes, WebSocketError]
+
+pub async fn send_binary(WebSocketConnection, Array[Byte]) -> Result[Unit, WebSocketError]
+
+pub async fn send_binary_native(WebSocketConnection, Array[Byte]) -> Result[Unit, WebSocketError]
+
+pub async fn send_close(WebSocketConnection) -> Result[Unit, WebSocketError]
+
+pub async fn send_close_native(WebSocketConnection) -> Result[Unit, WebSocketError]
+
+pub async fn send_text(WebSocketConnection, String) -> Result[Unit, WebSocketError]
+
+pub async fn send_text_native(WebSocketConnection, String) -> Result[Unit, WebSocketError]
+
+pub fn with_headers(WebSocketConfig, Map[String, String]) -> WebSocketConfig
+
+pub fn with_proxy(WebSocketConfig, String) -> WebSocketConfig
+
+pub fn with_timeout(WebSocketConfig, Int) -> WebSocketConfig
+
+pub fn ws_error_to_direct(WebSocketError) -> @errors.DirectError
+
+pub fn ws_error_to_string(WebSocketError) -> String
+
+// Errors
+
+// Types and methods
+pub(all) enum CloseCode {
+  Normal
+  GoingAway
+  ProtocolError
+  UnsupportedData
+  Abnormal
+  InvalidFramePayload
+  PolicyViolation
+  MessageTooBig
+  MissingExtension
+  InternalError
+  Other(Int)
+}
+
+pub struct WebSocketConfig {
+  endpoint : String
+  mut proxy_url : String?
+  mut headers : Map[String, String]?
+  mut timeout : Int
+}
+
+pub struct WebSocketConnection {
+  conn : Unit?
+  endpoint : String
+  mut connected : Bool
+}
+
+pub(all) enum WebSocketError {
+  ConnectionClosed(CloseCode, String?)
+  InvalidHandshake(String)
+  ProtocolError
+  ConnectionFailed(String)
+  Timeout(String)
+}
+
+// Type aliases
+pub type InternalConn = Unit
+
+// Traits
+

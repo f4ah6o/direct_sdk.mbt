@@ -1,0 +1,48 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "f4ah6o/direct_sdk/api/domains"
+
+import(
+  "f4ah6o/direct_sdk/errors"
+  "f4ah6o/direct_sdk/rpc/client"
+  "f4ah6o/direct_sdk/types"
+)
+
+// Values
+pub async fn accept_domain_invite(@client.Client, @types.ID) -> Result[DomainInfo, @errors.DirectError]
+
+pub async fn delete_domain_invite(@client.Client, @types.ID) -> Result[Unit, @errors.DirectError]
+
+pub async fn get_domain_invites(@client.Client) -> Result[Array[DomainInviteInfo], @errors.DirectError]
+
+pub async fn get_domain_users(@client.Client, @types.ID) -> Result[Array[@types.UserInfo], @errors.DirectError]
+
+pub async fn get_domains(@client.Client) -> Result[Array[DomainInfo], @errors.DirectError]
+
+pub async fn leave_domain(@client.Client, @types.ID) -> Result[Unit, @errors.DirectError]
+
+pub async fn search_domain_users(@client.Client, @types.ID, String) -> Result[Array[@types.UserInfo], @errors.DirectError]
+
+// Errors
+
+// Types and methods
+pub struct DomainInfo {
+  id : @types.ID
+  name : String
+  updated_at : Int64
+  contract : @types.JsonValue
+  setting : @types.JsonValue
+  role : @types.JsonValue
+  closed : Bool
+}
+
+pub struct DomainInviteInfo {
+  id : @types.ID
+  name : String
+  account_control_request_id : @types.ID
+  updated_at : Int64
+}
+
+// Type aliases
+
+// Traits
+

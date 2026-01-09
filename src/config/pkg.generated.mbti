@@ -1,0 +1,74 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "f4ah6o/direct_sdk/config"
+
+import(
+  "f4ah6o/direct_sdk/errors"
+)
+
+// Values
+pub fn apply_defaults(Config) -> Config
+
+pub fn create_config(String) -> Result[Config, String]
+
+pub fn default_config() -> Config
+
+pub fn healthy_health_status(String) -> HealthStatus
+
+pub fn new_config(String) -> Config
+
+pub fn noop_metrics() -> Metrics
+
+pub fn to_options(Config) -> Options
+
+pub fn unhealthy_health_status(String, String) -> HealthStatus
+
+pub fn validate(Config) -> Result[Config, String]
+
+pub fn with_debug(Config, Bool) -> Config
+
+pub fn with_endpoint(Config, String) -> Config
+
+pub fn with_name(Config, String) -> Config
+
+pub fn with_proxy(Config, String) -> Config
+
+pub fn with_timeout(Config, Int) -> Config
+
+pub fn with_token(Config, String) -> Config
+
+// Errors
+
+// Types and methods
+pub struct Config {
+  mut token : String
+  mut endpoint : String
+  mut proxy_url : String?
+  mut timeout : Int
+  mut name : String
+  mut debug : Bool
+}
+
+pub struct HealthStatus {
+  connected : Bool
+  authenticated : Bool
+  endpoint : String
+  error : String?
+}
+
+pub struct Metrics {
+  record_request : (String, Int64) -> Unit
+  record_error : (String, @errors.DirectError) -> Unit
+  record_connection_state : (String) -> Unit
+}
+
+pub struct Options {
+  endpoint : String
+  access_token : String
+  proxy_url : String
+  name : String
+}
+
+// Type aliases
+
+// Traits
+

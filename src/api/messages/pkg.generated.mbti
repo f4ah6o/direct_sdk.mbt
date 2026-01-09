@@ -1,0 +1,98 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "f4ah6o/direct_sdk/api/messages"
+
+import(
+  "f4ah6o/direct_sdk/errors"
+  "f4ah6o/direct_sdk/rpc/client"
+  "f4ah6o/direct_sdk/types"
+)
+
+// Values
+pub async fn add_favorite_message(@client.Client, @types.ID) -> Result[Unit, @errors.DirectError]
+
+pub fn default_get_messages_options() -> GetMessagesOptions
+
+pub async fn delete_favorite_message(@client.Client, @types.ID) -> Result[Unit, @errors.DirectError]
+
+pub async fn delete_message(@client.Client, @types.ID, @types.ID) -> Result[Unit, @errors.DirectError]
+
+pub async fn delete_scheduled_message(@client.Client, @types.ID) -> Result[Unit, @errors.DirectError]
+
+pub async fn get_available_message_reactions(@client.Client) -> Result[Array[MessageReaction], @errors.DirectError]
+
+pub async fn get_favorite_messages(@client.Client) -> Result[Array[@types.ReceivedMessage], @errors.DirectError]
+
+pub async fn get_message_reaction_users(@client.Client, @types.ID) -> Result[Array[MessageReactionUser], @errors.DirectError]
+
+pub async fn get_messages(@client.Client, @types.ID, @types.ID, GetMessagesOptions?) -> Result[Array[@types.ReceivedMessage], @errors.DirectError]
+
+pub async fn get_scheduled_messages(@client.Client) -> Result[Array[ScheduledMessage], @errors.DirectError]
+
+pub fn int_to_message_order(Int) -> MessageOrder
+
+pub fn message_order_to_int(MessageOrder) -> Int
+
+pub async fn reschedule_message(@client.Client, @types.ID, Int64) -> Result[Unit, @errors.DirectError]
+
+pub async fn reset_message_reaction(@client.Client, @types.ID, @types.ID) -> Result[Unit, @errors.DirectError]
+
+pub async fn schedule_message(@client.Client, @types.ID, @types.MessageType, @types.JsonValue, Int64) -> Result[ScheduledMessage, @errors.DirectError]
+
+pub async fn search_messages(@client.Client, @types.ID, @types.ID?, String, @types.ID?, Int) -> Result[SearchMessagesResult, @errors.DirectError]
+
+pub async fn set_message_reaction(@client.Client, @types.ID, @types.ID) -> Result[Unit, @errors.DirectError]
+
+// Errors
+
+// Types and methods
+pub struct GetMessagesOptions {
+  since_id : @types.ID?
+  max_id : @types.ID?
+  order : MessageOrder
+}
+
+pub enum MessageOrder {
+  Asc
+  Desc
+}
+
+pub struct MessageReaction {
+  id : @types.ID
+  name : String
+  image_url : String
+}
+
+pub struct MessageReactionUser {
+  user_id : @types.ID
+  reaction_id : @types.ID
+  created_at : Int64
+}
+
+pub struct MessageSearchContent {
+  message : @types.ReceivedMessage
+  talk_id : @types.ID
+  domain_id : @types.ID
+  match_score : Float
+}
+
+pub struct ScheduledMessage {
+  id : @types.ID
+  talk_id : @types.ID
+  domain_id : @types.ID
+  msg_type : @types.MessageType
+  content : @types.JsonValue
+  scheduled_at : Int64
+  created_at : Int64
+}
+
+pub struct SearchMessagesResult {
+  total : Int
+  marker : @types.ID?
+  next_marker : @types.ID?
+  contents : Array[MessageSearchContent]
+}
+
+// Type aliases
+
+// Traits
+

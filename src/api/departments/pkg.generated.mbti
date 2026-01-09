@@ -1,0 +1,47 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "f4ah6o/direct_sdk/api/departments"
+
+import(
+  "f4ah6o/direct_sdk/errors"
+  "f4ah6o/direct_sdk/rpc/client"
+  "f4ah6o/direct_sdk/types"
+)
+
+// Values
+pub async fn get_department_tree(@client.Client, @types.ID) -> Result[DepartmentTree, @errors.DirectError]
+
+pub async fn get_department_user_count(@client.Client, @types.ID) -> Result[DepartmentUserCounts, @errors.DirectError]
+
+pub async fn get_department_users(@client.Client, @types.ID, @types.ID) -> Result[Array[@types.UserInfo], @errors.DirectError]
+
+// Errors
+
+// Types and methods
+pub struct Department {
+  id : @types.ID
+  name : String
+  parent_id : @types.ID
+  children_ids : Array[@types.ID]
+  user_count : Int
+}
+
+pub struct DepartmentTree {
+  domain_id : @types.ID
+  departments : Array[Department]
+}
+
+pub struct DepartmentUserCount {
+  department_id : @types.ID
+  all : Int
+  partial : Int
+}
+
+pub struct DepartmentUserCounts {
+  domain_id : @types.ID
+  departments : Array[DepartmentUserCount]
+}
+
+// Type aliases
+
+// Traits
+

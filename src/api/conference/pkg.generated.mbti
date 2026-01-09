@@ -1,0 +1,48 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "f4ah6o/direct_sdk/api/conference"
+
+import(
+  "f4ah6o/direct_sdk/errors"
+  "f4ah6o/direct_sdk/rpc/client"
+  "f4ah6o/direct_sdk/types"
+)
+
+// Values
+pub async fn get_conference_participants(@client.Client, @types.ID) -> Result[Array[@types.ID], @errors.DirectError]
+
+pub async fn get_conferences(@client.Client) -> Result[Array[Conference], @errors.DirectError]
+
+pub async fn join_conference(@client.Client, @types.ID) -> Result[ConferenceJoinInfo, @errors.DirectError]
+
+pub async fn leave_conference(@client.Client, @types.ID) -> Result[Unit, @errors.DirectError]
+
+pub async fn reject_conference(@client.Client, @types.ID) -> Result[Unit, @errors.DirectError]
+
+// Errors
+
+// Types and methods
+pub struct Conference {
+  id : @types.ID
+  user_id : @types.ID
+  domain_id : @types.ID
+  talk_id : @types.ID
+  message_id : @types.ID
+  created_at : Int64
+  expired_at : Int64
+  participants : Array[@types.ID]
+  skyway_version : Int
+}
+
+pub struct ConferenceJoinInfo {
+  conference_id : @types.ID
+  room_name : String
+  credential : String
+  mode : String
+  timestamp : Int64
+  skyway_version : Int
+}
+
+// Type aliases
+
+// Traits
+

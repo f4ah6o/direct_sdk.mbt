@@ -1,0 +1,59 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "f4ah6o/direct_sdk/events/handler"
+
+import(
+  "f4ah6o/direct_sdk/types"
+)
+
+// Values
+pub fn emit(EventDispatcher, String, @types.JsonValue) -> Unit
+
+pub fn emit_message(EventDispatcher, @types.ReceivedMessage) -> Unit
+
+pub fn emit_talk(EventDispatcher, @types.Talk) -> Unit
+
+pub fn emit_user(EventDispatcher, @types.UserInfo) -> Unit
+
+pub fn handler_count(EventDispatcher, String) -> Int
+
+pub fn new_dispatcher() -> EventDispatcher
+
+pub fn on(EventDispatcher, String, (@types.JsonValue) -> Unit) -> Unit
+
+pub fn on_conference(EventDispatcher, (@types.ConferenceInfo) -> Unit) -> Unit
+
+pub fn on_domain(EventDispatcher, (@types.DomainInfo) -> Unit) -> Unit
+
+pub fn on_message(EventDispatcher, (@types.ReceivedMessage) -> Unit) -> Unit
+
+pub fn on_talk(EventDispatcher, (@types.Talk) -> Unit) -> Unit
+
+pub fn on_user(EventDispatcher, (@types.UserInfo) -> Unit) -> Unit
+
+pub fn remove_all_handlers(EventDispatcher) -> Unit
+
+pub fn remove_handler(EventDispatcher, String) -> Unit
+
+pub fn remove_message_handlers(EventDispatcher) -> Unit
+
+pub fn total_handler_count(EventDispatcher) -> Int
+
+// Errors
+
+// Types and methods
+pub struct EventDispatcher {
+  mut handlers : Map[String, Array[(@types.JsonValue) -> Unit]]
+  mut message_handlers : Array[(@types.ReceivedMessage) -> Unit]
+  mut talk_handlers : Array[(@types.Talk) -> Unit]
+  mut user_handlers : Array[(@types.UserInfo) -> Unit]
+  mut domain_handlers : Array[(@types.DomainInfo) -> Unit]
+  mut conference_handlers : Array[(@types.ConferenceInfo) -> Unit]
+}
+
+// Type aliases
+pub type ConferenceEventHandler = (@types.ConferenceInfo) -> Unit
+
+pub type DomainEventHandler = (@types.DomainInfo) -> Unit
+
+// Traits
+

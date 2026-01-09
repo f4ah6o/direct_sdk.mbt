@@ -25,22 +25,22 @@ MoonBit用のDirect4B WebSocket API SDKです。`direct-go-sdk`を移植した�
 
 ```moonbit
 // クライアント作成
-let client = rpc/client/new_client_with_token("your-access-token")
+let client = @rpc_client.new_client_with_token("your-access-token")
 
 // 接続
-match await rpc/client/connect(client) {
+match await @rpc_client.connect(client) {
   | Ok(_) => println("Connected!")
-  | Err(e) => println("Failed: \${errors/direct_error_to_string(e)}")
+  | Err(e) => println("Failed: \${@errors.direct_error_to_string(e)}")
 }
 
 // ユーザー情報取得
-match await api/users/get_me(client) {
+match await @api_users.get_me(client) {
   | Ok(user) => println("Hello, \${user.display_name}!")
   | Err(e) => ()
 }
 
 // トーク一覧取得
-match await api/talks/get_talks(client) {
+match await @api_talks.get_talks(client) {
   | Ok(talks) => {
     for talk in talks {
       println("Talk: \${talk.name}")
@@ -50,15 +50,15 @@ match await api/talks/get_talks(client) {
 }
 
 // メッセージ送信
-let content = types/JsonObject(Map::from_array([
-  ("text", types/JsonString("Hello, World!"))
+let content = @types.JsonObject(Map::from_array([
+  ("text", @types.JsonString("Hello, World!"))
 ]))
 let params = [
-  types/id_to_json(types/IDString("talk-id")),
-  types/JsonNumber(types/msg_type_to_wire(types/MsgTypeText).to_float()),
+  @types.id_to_json(@types.IDString("talk-id")),
+  @types.JsonNumber(@types.msg_type_to_wire(@types.MsgTypeText).to_float()),
   content,
 ]
-match await rpc/client/call(client, "create_message", params) {
+match await @rpc_client.call(client, "create_message", params) {
   | Ok(_) => println("Message sent!")
   | Err(e) => ()
 }
@@ -68,17 +68,17 @@ match await rpc/client/call(client, "create_message", params) {
 
 ```moonbit
 // メッセージ受信ハンドラー
-rpc/client/on_message(client, fn(msg) {
+@rpc_client.on_message(client, fn(msg) {
   println("Received: \${msg.text}")
 })
 
 // トークイベントハンドラー
-rpc/client/on_talk(client, fn(talk) {
+@rpc_client.on_talk(client, fn(talk) {
   println("New talk: \${talk.name}")
 })
 
 // 汎用イベントハンドラー
-rpc/client/on(client, "session_created", fn(data) {
+@rpc_client.on(client, "session_created", fn(data) {
   println("Session created!")
 })
 ```
@@ -108,7 +108,7 @@ let client = rpc /
     (config / default_config())
     |> config / with_token("your-token")
     |> config / with_endpoint("wss://custom.example.com/api")
-    |> config / with_proxy(Some("http://proxy:8080"))
+    |> config / with_proxy("http://proxy:8080")
     |> config / with_timeout(60000),
   )
 ```

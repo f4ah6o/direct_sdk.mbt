@@ -1,0 +1,190 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "f4ah6o/direct_sdk/events/types"
+
+// Values
+
+// Errors
+
+// Types and methods
+pub struct AnnouncementDeletedData {
+  announcement_id : @f4ah6o/direct_sdk/types.ID
+  domain_id : @f4ah6o/direct_sdk/types.ID
+}
+
+pub struct AnnouncementInfo {
+  id : @f4ah6o/direct_sdk/types.ID
+  domain_id : @f4ah6o/direct_sdk/types.ID
+  talk_id : @f4ah6o/direct_sdk/types.ID
+  title : String
+  content : String
+  created : Int64
+  updated : Int64
+}
+
+pub struct AttachmentDeletedData {
+  attachment_id : @f4ah6o/direct_sdk/types.ID
+  talk_id : @f4ah6o/direct_sdk/types.ID
+}
+
+pub struct AttachmentInfo {
+  id : @f4ah6o/direct_sdk/types.ID
+  file_id : @f4ah6o/direct_sdk/types.ID
+  talk_id : @f4ah6o/direct_sdk/types.ID
+  msg_id : @f4ah6o/direct_sdk/types.ID
+  domain_id : @f4ah6o/direct_sdk/types.ID
+  name : String
+  size : Int64
+  mime_type : String
+}
+
+pub struct ConferenceClosedData {
+  conference_id : @f4ah6o/direct_sdk/types.ID
+  talk_id : @f4ah6o/direct_sdk/types.ID
+}
+
+pub struct ConferenceInfo {
+  id : @f4ah6o/direct_sdk/types.ID
+  talk_id : @f4ah6o/direct_sdk/types.ID
+  domain_id : @f4ah6o/direct_sdk/types.ID
+  status : String
+  created : Int64
+}
+
+pub struct ConferenceParticipantData {
+  conference_id : @f4ah6o/direct_sdk/types.ID
+  talk_id : @f4ah6o/direct_sdk/types.ID
+  user_id : @f4ah6o/direct_sdk/types.ID
+}
+
+pub struct DomainInviteDeletedData {
+  invite_id : @f4ah6o/direct_sdk/types.ID
+}
+
+pub struct DomainInviteInfo {
+  id : @f4ah6o/direct_sdk/types.ID
+  name : String
+  account_control_request_id : @f4ah6o/direct_sdk/types.ID
+  updated_at : Int64
+}
+
+pub struct DomainJoinedData {
+  domain_id : @f4ah6o/direct_sdk/types.ID
+  name : String
+}
+
+pub struct DomainLeftData {
+  domain_id : @f4ah6o/direct_sdk/types.ID
+}
+
+pub struct FavoriteTalkData {
+  talk_id : @f4ah6o/direct_sdk/types.ID
+  domain_id : @f4ah6o/direct_sdk/types.ID
+}
+
+pub struct MessageDeletedData {
+  message_id : @f4ah6o/direct_sdk/types.ID
+  talk_id : @f4ah6o/direct_sdk/types.ID
+  domain_id : @f4ah6o/direct_sdk/types.ID
+}
+
+pub struct NoteDeletedData {
+  note_id : @f4ah6o/direct_sdk/types.ID
+  talk_id : @f4ah6o/direct_sdk/types.ID
+}
+
+pub struct NoteInfo {
+  id : @f4ah6o/direct_sdk/types.ID
+  talk_id : @f4ah6o/direct_sdk/types.ID
+  domain_id : @f4ah6o/direct_sdk/types.ID
+  user_id : @f4ah6o/direct_sdk/types.ID
+  title : String
+  content : String
+  created : Int64
+  updated : Int64
+}
+
+pub struct ReadStatusData {
+  talk_id : @f4ah6o/direct_sdk/types.ID
+  user_id : @f4ah6o/direct_sdk/types.ID
+  msg_id : @f4ah6o/direct_sdk/types.ID
+  read_at : Int64
+}
+
+pub enum ServerEvent {
+  SessionCreated(SessionData)
+  SessionError(String)
+  DataRecovered
+  NotificationError(String)
+  ConnectionError(String)
+  DecodeError(String)
+  AccessTokenChanged(String)
+  NotifyCreateMessage(@f4ah6o/direct_sdk/types.ReceivedMessage)
+  NotifyDeleteMessage(MessageDeletedData)
+  NotifyCreateGroupTalk(@f4ah6o/direct_sdk/types.Talk)
+  NotifyCreatePairTalk(@f4ah6o/direct_sdk/types.Talk)
+  NotifyAddTalkers(UsersAddedData)
+  NotifyDeleteTalker(UserRemovedData)
+  NotifyUpdateTalk(@f4ah6o/direct_sdk/types.Talk)
+  NotifyAddFriend(@f4ah6o/direct_sdk/types.UserInfo)
+  NotifyDeleteFriend(UserDeletedData)
+  NotifyAddAcquaintance(@f4ah6o/direct_sdk/types.UserInfo)
+  NotifyAddAcquaintances(Array[@f4ah6o/direct_sdk/types.UserInfo])
+  NotifyUpdateUser(@f4ah6o/direct_sdk/types.UserInfo)
+  NotifyJoinDomain(DomainJoinedData)
+  NotifyLeaveDomain(DomainLeftData)
+  NotifyAddDomainInvite(DomainInviteInfo)
+  NotifyDeleteDomainInvite(DomainInviteDeletedData)
+  NotifyCreateAttachment(AttachmentInfo)
+  NotifyDeleteAttachment(AttachmentDeletedData)
+  NotifyCreateNote(NoteInfo)
+  NotifyUpdateNote(NoteInfo)
+  NotifyDeleteNote(NoteDeletedData)
+  NotifyAddFavoriteTalk(FavoriteTalkData)
+  NotifyDeleteFavoriteTalk(FavoriteTalkData)
+  NotifyCreateAnnouncement(AnnouncementInfo)
+  NotifyDeleteAnnouncement(AnnouncementDeletedData)
+  NotifyUpdateReadStatus(ReadStatusData)
+  NotifyUpdateTalkStatus(TalkStatusData)
+  NotifyCreateConference(ConferenceInfo)
+  NotifyCloseConference(ConferenceClosedData)
+  NotifyConferenceJoin(ConferenceParticipantData)
+  NotifyConferenceReject(ConferenceParticipantData)
+}
+
+pub struct SessionData {
+  user_id : @f4ah6o/direct_sdk/types.ID
+  access_token : String
+  endpoint : String
+}
+
+pub struct TalkStatusData {
+  talk_id : @f4ah6o/direct_sdk/types.ID
+  unread_count : Int
+  latest_msg_id : @f4ah6o/direct_sdk/types.ID
+}
+
+pub struct UserDeletedData {
+  user_id : @f4ah6o/direct_sdk/types.ID
+}
+
+pub struct UserRemovedData {
+  talk_id : @f4ah6o/direct_sdk/types.ID
+  user_id : @f4ah6o/direct_sdk/types.ID
+}
+
+pub struct UsersAddedData {
+  talk_id : @f4ah6o/direct_sdk/types.ID
+  user_ids : Array[@f4ah6o/direct_sdk/types.ID]
+}
+
+// Type aliases
+pub type JsonEventHandler = (@f4ah6o/direct_sdk/types.JsonValue) -> Unit
+
+pub type MessageEventHandler = (@f4ah6o/direct_sdk/types.ReceivedMessage) -> Unit
+
+pub type TalkEventHandler = (@f4ah6o/direct_sdk/types.Talk) -> Unit
+
+pub type UserEventHandler = (@f4ah6o/direct_sdk/types.UserInfo) -> Unit
+
+// Traits
+
