@@ -121,8 +121,8 @@ let client = rpc /
 ## CLI (daab)
 
 ```bash
-# Save access token to .env
-daab login --token <token>
+# Login to obtain access token
+daab login
 
 # Initialize a new bot project
 daab init my-bot
@@ -134,6 +134,12 @@ daab run
 # Show available commands
 daab --help
 ```
+
+Environment variables used by `daab login`:
+
+- `HUBOT_DIRECT_ENDPOINT` (optional)
+- `HUBOT_DIRECT_PROXY_URL` (optional)
+- `HTTPS_PROXY` / `HTTP_PROXY` (fallback)
 
 ## Development
 
