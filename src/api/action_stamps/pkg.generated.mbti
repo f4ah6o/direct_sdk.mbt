@@ -1,0 +1,52 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "f4ah6o/direct_sdk/api/action_stamps"
+
+import(
+  "f4ah6o/direct_sdk/errors"
+  "f4ah6o/direct_sdk/rpc/client"
+  "f4ah6o/direct_sdk/types"
+)
+
+// Values
+pub fn format_select_reply(SelectStampReply) -> String
+
+pub fn get_selected_option(SelectStampReply) -> String?
+
+pub fn new_select_content(String, Array[String]) -> SelectStampContent
+
+pub fn parse_select_content(@types.ReceivedMessage) -> SelectParseResult
+
+pub fn select_content_with_listing(String, Array[String], Bool) -> SelectStampContent
+
+pub async fn send_select(@client.Client, String, SelectStampContent) -> Result[String, @errors.DirectError]
+
+pub async fn send_select_simple(@client.Client, String, String, Array[String]) -> Result[String, @errors.DirectError]
+
+// Errors
+
+// Types and methods
+pub enum SelectParseResult {
+  SelectParseSuccess(SelectStampReply)
+  SelectParseNotSelect
+  SelectParseNoResponse
+  SelectParseError(String)
+}
+
+pub struct SelectStampContent {
+  question : String
+  options : Array[String]
+  listing : Bool
+  closing_type : Int
+}
+
+pub struct SelectStampReply {
+  question : String
+  options : Array[String]
+  response : Int
+  in_reply_to : String
+}
+
+// Type aliases
+
+// Traits
+

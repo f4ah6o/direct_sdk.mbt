@@ -69,17 +69,19 @@ pub async fn send_select(
     content.options.map(fn(o) { @types.JsonString(o) }),
   )
   content_map["listing"] = @types.JsonBool(content.listing)
-  content_map["closing_type"] = @types.JsonNumber(Float::from_int(content.closing_type))
-
+  content_map["closing_type"] = @types.JsonNumber(
+    Float::from_int(content.closing_type),
+  )
   let content_json = @types.JsonObject(content_map)
 
   // Build params for create_message RPC call
   let params = [
     @types.JsonString(room_id),
-    @types.JsonNumber(Float::from_int(@types.msg_type_to_wire(@types.MsgTypeSelect))),
+    @types.JsonNumber(
+      Float::from_int(@types.msg_type_to_wire(@types.MsgTypeSelect)),
+    ),
     content_json,
   ]
-
   match @rpc_client.call(client, @constants.METHOD_CREATE_MESSAGE, params) {
     Ok(result) =>
       // Extract message ID from result
@@ -169,8 +171,7 @@ fn extract_content_from_raw(
     Some(@types.JsonObject(raw_obj)) =>
       match raw_obj.get("content") {
         Some(@types.JsonObject(content_obj)) =>
-          if content_obj.contains("question") &&
-            content_obj.contains("options") {
+          if content_obj.contains("question") && content_obj.contains("options") {
             Ok(content_obj)
           } else {
             Err("Content not found in raw data")
@@ -228,7 +229,11 @@ pub fn get_selected_option(reply : SelectStampReply) -> String? {
 pub fn format_select_reply(reply : SelectStampReply) -> String {
   match get_selected_option(reply) {
     Some(option) =>
-      "選択されたオプション: " + option + " (インデックス: " + reply.response.to_string() + ")"
+      "選択されたオプション: " +
+      option +
+      " (インデックス: " +
+      reply.response.to_string() +
+      ")"
     None =>
       "無効な選択 (インデックス: " + reply.response.to_string() + ")"
   }
