@@ -7,6 +7,8 @@ import(
   "f4ah6o/direct_sdk/events/handler"
   "f4ah6o/direct_sdk/rpc/websocket"
   "f4ah6o/direct_sdk/types"
+  "moonbitlang/async"
+  "moonbitlang/async/aqueue"
 )
 
 // Values
@@ -18,7 +20,7 @@ pub fn call_sync(Client, String, Array[@types.JsonValue], Int) -> Result[@types.
 
 pub async fn close(Client) -> Result[Unit, @errors.DirectError]
 
-pub async fn connect(Client) -> Result[Unit, @errors.DirectError]
+pub async fn[T] connect(Client, @async.TaskGroup[T]) -> Result[Unit, @errors.DirectError]
 
 pub fn emit(Client, String, @types.JsonValue) -> Unit
 
@@ -75,8 +77,7 @@ pub struct Client {
 }
 
 pub struct RequestPromise {
-  result_ch : Unit
-  error_ch : Unit
+  result_ch : @aqueue.Queue[Result[@types.JsonValue, @errors.DirectError]]
 }
 
 pub struct ResponseHandler {
@@ -88,13 +89,13 @@ pub struct ResponseHandler {
 // Type aliases
 pub type DoneChannel = Unit
 
-pub type ErrorChannel = Unit
+pub type ErrorChannel = @aqueue.Queue[@errors.DirectError]
 
 pub type EventHandler = (@types.JsonValue) -> Unit
 
 pub type MessageChannel = Unit
 
-pub type ResultChannel = Unit
+pub type ResultChannel = @aqueue.Queue[Result[@types.JsonValue, @errors.DirectError]]
 
 // Traits
 

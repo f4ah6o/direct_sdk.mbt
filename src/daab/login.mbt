@@ -76,8 +76,62 @@ pub async fn run_login(args : ArrayView[String]) -> Result[Unit, String] {
     cfg
   }
   let client = @rpc_client.new_client(cfg)
-  match @rpc_client.connect(client) {
-    Ok(_) => ()
+  let result = @async.with_task_group(fn(tasks) {
+    match @rpc_client.connect(client, tasks) {
+      Ok(_) => {
+        println("Authenticating...")
+        let params = [
+          @types.JsonString(email),
+          @types.JsonString(password),
+          @types.JsonString(login_device_name),
+          @types.JsonString(login_device_info),
+          @types.JsonString(""),
+        ]
+        let call_result = @rpc_client.call(
+          client,
+          @constants.METHOD_CREATE_ACCESS_TOKEN,
+          params,
+        )
+        ignore(@rpc_client.close(client))
+        Ok(call_result)
+      }
+      Err(err) => Err(err)
+    }
+  })
+  match result {
+    Ok(call_result) =>
+      match call_result {
+        Ok(value) => {
+          let token = extract_token(value)
+          if token == "" {
+            return Err(
+              "failed to extract token from response: " +
+              value.to_string() +
+              "\n\n" +
+              "The server returned an unexpected response format.\n" +
+              "Please contact support if the problem persists.",
+            )
+          }
+          match set_env_value(env_path, ENV_TOKEN_KEY, token) {
+            Ok(_) => {
+              println("Logged in successfully!")
+              println("Token saved to: " + env_path)
+              Ok(())
+            }
+            Err(msg) => Err("failed to save token: " + msg)
+          }
+        }
+        Err(err) => {
+          let msg = "login failed\n\n" +
+            "Troubleshooting:\n" +
+            "  - Verify your email and password are correct\n" +
+            "  - Make sure the account is a bot account\n" +
+            "  - Check if the account is active\n" +
+            "  Error: " +
+            @errors.direct_error_to_string(err)
+          Err(msg)
+        }
+      }
     Err(err) => {
       let msg = "failed to connect\n\n" +
         "Troubleshooting:\n" +
@@ -86,52 +140,6 @@ pub async fn run_login(args : ArrayView[String]) -> Result[Unit, String] {
         endpoint +
         "\n" +
         "  - Check if a proxy is required\n" +
-        "  Error: " +
-        @errors.direct_error_to_string(err)
-      return Err(msg)
-    }
-  }
-  println("Authenticating...")
-  let params = [
-    @types.JsonString(email),
-    @types.JsonString(password),
-    @types.JsonString(login_device_name),
-    @types.JsonString(login_device_info),
-    @types.JsonString(""),
-  ]
-  let result = @rpc_client.call(
-    client,
-    @constants.METHOD_CREATE_ACCESS_TOKEN,
-    params,
-  )
-  ignore(@rpc_client.close(client))
-  match result {
-    Ok(value) => {
-      let token = extract_token(value)
-      if token == "" {
-        return Err(
-          "failed to extract token from response: " +
-          value.to_string() +
-          "\n\n" +
-          "The server returned an unexpected response format.\n" +
-          "Please contact support if the problem persists.",
-        )
-      }
-      match set_env_value(env_path, ENV_TOKEN_KEY, token) {
-        Ok(_) => {
-          println("Logged in successfully!")
-          println("Token saved to: " + env_path)
-          Ok(())
-        }
-        Err(msg) => Err("failed to save token: " + msg)
-      }
-    }
-    Err(err) => {
-      let msg = "login failed\n\n" +
-        "Troubleshooting:\n" +
-        "  - Verify your email and password are correct\n" +
-        "  - Make sure the account is a bot account\n" +
-        "  - Check if the account is active\n" +
         "  Error: " +
         @errors.direct_error_to_string(err)
       Err(msg)

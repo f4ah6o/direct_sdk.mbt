@@ -27,41 +27,46 @@ MoonBit用のDirect4B WebSocket API SDKです。`direct-go-sdk`を移植した�
 // クライアント作成
 let client = @rpc_client.new_client_with_token("your-access-token")
 
-// 接続
-match await @rpc_client.connect(client) {
-  | Ok(_) => println("Connected!")
-  | Err(e) => println("Failed: \${@errors.direct_error_to_string(e)}")
-}
-
-// ユーザー情報取得
-match await @api_users.get_me(client) {
-  | Ok(user) => println("Hello, \${user.display_name}!")
-  | Err(e) => ()
-}
-
-// トーク一覧取得
-match await @api_talks.get_talks(client) {
-  | Ok(talks) => {
-    for talk in talks {
-      println("Talk: \${talk.name}")
-    }
+@async.with_task_group(fn(tasks) {
+  // 接続
+  match @rpc_client.connect(client, tasks) {
+    | Ok(_) => println("Connected!")
+    | Err(e) => {
+        println("Failed: \${@errors.direct_error_to_string(e)}")
+        return
+      }
   }
-  | Err(e) => ()
-}
 
-// メッセージ送信
-let content = @types.JsonObject(Map::from_array([
-  ("text", @types.JsonString("Hello, World!"))
-]))
-let params = [
-  @types.id_to_json(@types.IDString("talk-id")),
-  @types.JsonNumber(@types.msg_type_to_wire(@types.MsgTypeText).to_float()),
-  content,
-]
-match await @rpc_client.call(client, "create_message", params) {
-  | Ok(_) => println("Message sent!")
-  | Err(e) => ()
-}
+  // ユーザー情報取得
+  match @api_users.get_me(client) {
+    | Ok(user) => println("Hello, \${user.display_name}!")
+    | Err(e) => ()
+  }
+
+  // トーク一覧取得
+  match @api_talks.get_talks(client) {
+    | Ok(talks) => {
+      for talk in talks {
+        println("Talk: \${talk.name}")
+      }
+    }
+    | Err(e) => ()
+  }
+
+  // メッセージ送信
+  let content = @types.JsonObject(Map::from_array([
+    ("text", @types.JsonString("Hello, World!"))
+  ]))
+  let params = [
+    @types.id_to_json(@types.IDString("talk-id")),
+    @types.JsonNumber(@types.msg_type_to_wire(@types.MsgTypeText).to_float()),
+    content,
+  ]
+  match @rpc_client.call(client, "create_message", params) {
+    | Ok(_) => println("Message sent!")
+    | Err(e) => ()
+  }
+})
 ```
 
 ## Event Handling

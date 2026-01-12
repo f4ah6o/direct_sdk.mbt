@@ -69,6 +69,7 @@ fn moon_mod_template_with_x(module_name : String) -> String {
     $|    "moonbitlang/x": "\{default_moon_x_version}"
     $|  },
     $|  "readme": "README.md",
+    $|  "preferred-target": "native",
     $|  "description": "daab bot project"
     $|}
   )
@@ -102,11 +103,11 @@ fn shared_bot_utils_template() -> String {
     #|  room_id : String,
     #|  text : String,
     #|) -> Result[Unit, String] {
-    #|  match await @rpc_client.send_text(client, room_id, text) {
+    #|  match @rpc_client.send_text(client, room_id, text) {
     #|    Ok(_) => Ok(())
     #|    Err(e) => {
-    #|      let error_msg = "Failed to send: " ++ @errors.direct_error_to_string(e)
-    #|      println("[ERROR] " ++ error_msg)
+    #|      let error_msg = "Failed to send: " + @errors.direct_error_to_string(e)
+    #|      println("[ERROR] " + error_msg)
     #|      Err(error_msg)
     #|    }
     #|  }
@@ -117,10 +118,9 @@ fn shared_bot_utils_template() -> String {
     #|///|
     #|pub fn log_message(msg : @types.ReceivedMessage, prefix : String) -> Unit {
     #|  let timestamp = msg.created.to_string()
-    #|  println(
-    #|    "[" ++ prefix ++ "] " ++ timestamp ++ " | Room: " ++ msg.talk_id
-    #|      ++ " | User: " ++ msg.user_id ++ " | " ++ msg.text,
-    #|  )
+    #|  let message =
+    #|    "[\{prefix}] \{timestamp} | Room: \{msg.talk_id} | User: \{msg.user_id} | \{msg.text}"
+    #|  println(message)
     #|}
     #|
     #|// Log message with type information
@@ -129,11 +129,9 @@ fn shared_bot_utils_template() -> String {
     #|pub fn log_message_with_type(msg : @types.ReceivedMessage, prefix : String) -> Unit {
     #|  let type_name = msg_type_to_name(msg.msg_type)
     #|  let timestamp = msg.created.to_string()
-    #|  println(
-    #|    "[" ++ prefix ++ "] " ++ timestamp ++ " | Type: " ++ type_name
-    #|      ++ " | Room: " ++ msg.talk_id ++ " | User: " ++ msg.user_id ++ " | "
-    #|      ++ msg.text,
-    #|  )
+    #|  let message =
+    #|    "[\{prefix}] \{timestamp} | Type: \{type_name} | Room: \{msg.talk_id} | User: \{msg.user_id} | \{msg.text}"
+    #|  println(message)
     #|}
     #|
     #|// Convert MessageType to readable name
@@ -141,28 +139,28 @@ fn shared_bot_utils_template() -> String {
     #|///|
     #|pub fn msg_type_to_name(t : @types.MessageType) -> String {
     #|  match t {
-    #|    | @types.MsgTypeSystem => "System"
-    #|    | @types.MsgTypeText => "Text"
-    #|    | @types.MsgTypeStamp => "Stamp"
-    #|    | @types.MsgTypeLocation => "Location"
-    #|    | @types.MsgTypeFile => "File"
-    #|    | @types.MsgTypeTextMultipleFile => "MultiFile"
-    #|    | @types.MsgTypeDeleted => "Deleted"
-    #|    | @types.MsgTypeNoteShared => "NoteShared"
-    #|    | @types.MsgTypeNoteDeleted => "NoteDeleted"
-    #|    | @types.MsgTypeNoteCreated => "NoteCreated"
-    #|    | @types.MsgTypeNoteUpdated => "NoteUpdated"
-    #|    | @types.MsgTypeOriginalStamp => "OriginalStamp"
-    #|    | @types.MsgTypeYesNo => "YesNo"
-    #|    | @types.MsgTypeYesNoReply => "YesNoReply"
-    #|    | @types.MsgTypeSelect => "Select"
-    #|    | @types.MsgTypeSelectReply => "SelectReply"
-    #|    | @types.MsgTypeTask => "Task"
-    #|    | @types.MsgTypeTaskDone => "TaskDone"
-    #|    | @types.MsgTypeYesNoClosed => "YesNoClosed"
-    #|    | @types.MsgTypeSelectClosed => "SelectClosed"
-    #|    | @types.MsgTypeTaskClosed => "TaskClosed"
-    #|    | _ => "Unknown"
+    #|    @types.MsgTypeSystem => "System"
+    #|    @types.MsgTypeText => "Text"
+    #|    @types.MsgTypeStamp => "Stamp"
+    #|    @types.MsgTypeLocation => "Location"
+    #|    @types.MsgTypeFile => "File"
+    #|    @types.MsgTypeTextMultipleFile => "MultiFile"
+    #|    @types.MsgTypeDeleted => "Deleted"
+    #|    @types.MsgTypeNoteShared => "NoteShared"
+    #|    @types.MsgTypeNoteDeleted => "NoteDeleted"
+    #|    @types.MsgTypeNoteCreated => "NoteCreated"
+    #|    @types.MsgTypeNoteUpdated => "NoteUpdated"
+    #|    @types.MsgTypeOriginalStamp => "OriginalStamp"
+    #|    @types.MsgTypeYesNo => "YesNo"
+    #|    @types.MsgTypeYesNoReply => "YesNoReply"
+    #|    @types.MsgTypeSelect => "Select"
+    #|    @types.MsgTypeSelectReply => "SelectReply"
+    #|    @types.MsgTypeTask => "Task"
+    #|    @types.MsgTypeTaskDone => "TaskDone"
+    #|    @types.MsgTypeYesNoClosed => "YesNoClosed"
+    #|    @types.MsgTypeSelectClosed => "SelectClosed"
+    #|    @types.MsgTypeTaskClosed => "TaskClosed"
+    #|    _ => "Unknown"
     #|  }
     #|}
     #|
@@ -217,7 +215,7 @@ fn shared_bot_utils_template() -> String {
     #|
     #|///|
     #|pub fn join_lines(lines : Array[String]) -> String {
-    #|  String::join("\n", lines)
+    #|  lines.join("\n")
     #|}
     #|
     #|// Split text by whitespace
@@ -225,47 +223,6 @@ fn shared_bot_utils_template() -> String {
     #|///|
     #|pub fn split_words(text : String) -> Array[String] {
     #|  text.split(" ").to_array().map((part) => part.to_string())
-    #|}
-    #|
-    #|// Check if text starts with prefix
-    #|
-    #|///|
-    #|pub fn starts_with(text : String, prefix : String) -> Bool {
-    #|  text.length() >= prefix.length()
-    #|    && text.substring(0, prefix.length()) == prefix
-    #|}
-    #|
-    #|// Check if text ends with suffix
-    #|
-    #|///|
-    #|pub fn ends_with(text : String, suffix : String) -> Bool {
-    #|  let text_len = text.length()
-    #|  let suffix_len = suffix.length()
-    #|  text_len >= suffix_len
-    #|    && text.substring(text_len - suffix_len, text_len) == suffix
-    #|}
-    #|
-    #|// Trim whitespace from text
-    #|
-    #|///|
-    #|pub fn trim(text : String) -> String {
-    #|  // Simple trim implementation
-    #|  let mut start = 0
-    #|  let mut end = text.length()
-    #|
-    #|  while start < end && text.char_at(start) == ' ' {
-    #|    start = start + 1
-    #|  }
-    #|
-    #|  while end > start && text.char_at(end - 1) == ' ' {
-    #|    end = end - 1
-    #|  }
-    #|
-    #|  if start == 0 && end == text.length() {
-    #|    text
-    #|  } else {
-    #|    text.substring(start, end)
-    #|  }
     #|}
     #|
     #|// Convert ID to String (handles both String and Int64 IDs)
@@ -280,8 +237,8 @@ fn shared_bot_utils_template() -> String {
     #|///|
     #|pub fn is_select_reply(msg : @types.ReceivedMessage) -> Bool {
     #|  match msg.msg_type {
-    #|    | @types.MsgTypeSelectReply => true
-    #|    | _ => false
+    #|    @types.MsgTypeSelectReply => true
+    #|    _ => false
     #|  }
     #|}
     #|
@@ -290,8 +247,8 @@ fn shared_bot_utils_template() -> String {
     #|///|
     #|pub fn is_text_message(msg : @types.ReceivedMessage) -> Bool {
     #|  match msg.msg_type {
-    #|    | @types.MsgTypeText => true
-    #|    | _ => false
+    #|    @types.MsgTypeText => true
+    #|    _ => false
     #|  }
     #|}
   )
@@ -313,40 +270,6 @@ fn shared_command_parser_template() -> String {
     #|  SuffixMatch(String)                // Suffix with preceding text like "hello!"
     #|}
     #|
-    #|// Parse command and return match result
-    #|
-    #|///|
-    #|pub fn parse_command(text : String, pattern : CommandPattern) -> CommandMatch {
-    #|  match pattern {
-    #|    | ExactPattern(cmd) => {
-    #|      let trimmed = trim(text)
-    #|      if trimmed == cmd {
-    #|        ExactMatch
-    #|      } else {
-    #|        NoMatch
-    #|      }
-    #|    }
-    #|    | PrefixPattern(prefix) => {
-    #|      let trimmed = trim(text)
-    #|      if starts_with(trimmed, prefix) {
-    #|        let remaining = trimmed.substring(prefix.length(), trimmed.length())
-    #|        PrefixMatch(trim(remaining))
-    #|      } else {
-    #|        NoMatch
-    #|      }
-    #|    }
-    #|    | SuffixPattern(suffix) => {
-    #|      let trimmed = trim(text)
-    #|      if ends_with(trimmed, suffix) {
-    #|        let preceding = trimmed.substring(0, trimmed.length() - suffix.length())
-    #|        SuffixMatch(trim(preceding))
-    #|      } else {
-    #|        NoMatch
-    #|      }
-    #|    }
-    #|  }
-    #|}
-    #|
     #|// Command pattern definitions
     #|
     #|///|
@@ -354,6 +277,49 @@ fn shared_command_parser_template() -> String {
     #|  ExactPattern(String)  // Exact match: "ping"
     #|  PrefixPattern(String) // Starts with: "echo "
     #|  SuffixPattern(String) // Ends with: "!"
+    #|}
+    #|
+    #|// Parse command and return match result
+    #|
+    #|///|
+    #|pub fn parse_command(text : String, pattern : CommandPattern) -> CommandMatch {
+    #|  match pattern {
+    #|    ExactPattern(cmd) => {
+    #|      let trimmed = trim(text)
+    #|      if trimmed == cmd {
+    #|        ExactMatch
+    #|      } else {
+    #|        NoMatch
+    #|      }
+    #|    }
+    #|    PrefixPattern(prefix) => {
+    #|      let trimmed = trim(text)
+    #|      if starts_with(trimmed, prefix) {
+    #|        let remaining =
+    #|          trim(
+    #|            String::unsafe_substring(
+    #|              trimmed,
+    #|              start=prefix.length(),
+    #|              end=trimmed.length(),
+    #|            ),
+    #|          )
+    #|        PrefixMatch(remaining)
+    #|      } else {
+    #|        NoMatch
+    #|      }
+    #|    }
+    #|    SuffixPattern(suffix) => {
+    #|      let trimmed = trim(text)
+    #|      if ends_with(trimmed, suffix) {
+    #|        let end_idx = trimmed.length() - suffix.length()
+    #|        let preceding =
+    #|          trim(String::unsafe_substring(trimmed, start=0, end=end_idx))
+    #|        SuffixMatch(preceding)
+    #|      } else {
+    #|        NoMatch
+    #|      }
+    #|    }
+    #|  }
     #|}
     #|
     #|// Match "ping" command
@@ -379,7 +345,14 @@ fn shared_command_parser_template() -> String {
     #|  let trimmed = trim(text)
     #|  let prefix = "echo "
     #|  if starts_with(trimmed, prefix) {
-    #|    let echoed = trim(trimmed.substring(prefix.length(), trimmed.length()))
+    #|    let echoed =
+    #|      trim(
+    #|        String::unsafe_substring(
+    #|          trimmed,
+    #|          start=prefix.length(),
+    #|          end=trimmed.length(),
+    #|        ),
+    #|      )
     #|    if echoed.length() > 0 {
     #|      Some(echoed)
     #|    } else {
@@ -397,7 +370,14 @@ fn shared_command_parser_template() -> String {
     #|  let trimmed = trim(text)
     #|  let prefix = "shout "
     #|  if starts_with(trimmed, prefix) {
-    #|    let shouted = trim(trimmed.substring(prefix.length(), trimmed.length()))
+    #|    let shouted =
+    #|      trim(
+    #|        String::unsafe_substring(
+    #|          trimmed,
+    #|          start=prefix.length(),
+    #|          end=trimmed.length(),
+    #|        ),
+    #|      )
     #|    if shouted.length() > 0 {
     #|      Some(shouted)
     #|    } else {
@@ -421,17 +401,20 @@ fn shared_command_parser_template() -> String {
     #|///|
     #|pub fn split_command(text : String) -> (String, String) {
     #|  let trimmed = trim(text)
-    #|  let parts = trimmed.split(" ").to_array().map((part) => part.to_string())
-    #|  if parts.length() > 0 {
-    #|    let cmd = parts[0]
-    #|    let args = if parts.length() > 1 {
-    #|      String::join(" ", parts.slice(1, parts.length()))
-    #|    } else {
-    #|      ""
-    #|    }
-    #|    (cmd, trim(args))
-    #|  } else {
+    #|  if trimmed == "" {
     #|    ("", "")
+    #|  } else {
+    #|    let parts =
+    #|      trimmed.split(" ").to_array().map((part) => part.to_string())
+    #|        .filter((part) => part != "")
+    #|    if parts.length() == 0 {
+    #|      ("", "")
+    #|    } else if parts.length() == 1 {
+    #|      (parts[0], "")
+    #|    } else {
+    #|      let args = parts[1:parts.length()].to_array().join(" ")
+    #|      (parts[0], trim(args))
+    #|    }
     #|  }
     #|}
     #|
@@ -440,9 +423,8 @@ fn shared_command_parser_template() -> String {
     #|///|
     #|pub fn first_word(text : String) -> String {
     #|  let trimmed = trim(text)
-    #|  let space_idx = trimmed.index_of(" ")
-    #|  match space_idx {
-    #|    Some(idx) => trimmed.substring(0, idx)
+    #|  match trimmed.find(" ") {
+    #|    Some(idx) => String::unsafe_substring(trimmed, start=0, end=idx)
     #|    None => trimmed
     #|  }
     #|}
@@ -452,9 +434,15 @@ fn shared_command_parser_template() -> String {
     #|///|
     #|pub fn remaining_text(text : String) -> String {
     #|  let trimmed = trim(text)
-    #|  let space_idx = trimmed.index_of(" ")
-    #|  match space_idx {
-    #|    Some(idx) => trim(trimmed.substring(idx + 1, trimmed.length()))
+    #|  match trimmed.find(" ") {
+    #|    Some(idx) =>
+    #|      trim(
+    #|        String::unsafe_substring(
+    #|          trimmed,
+    #|          start=idx + 1,
+    #|          end=trimmed.length(),
+    #|        ),
+    #|      )
     #|    None => ""
     #|  }
     #|}
@@ -475,40 +463,17 @@ fn shared_command_parser_template() -> String {
     #|
     #|///|
     #|pub fn trim(text : String) -> String {
-    #|  let mut start = 0
-    #|  let mut end = text.length()
-    #|
-    #|  while start < end {
-    #|    let ch = text.char_at(start)
-    #|    if ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' {
-    #|      start = start + 1
-    #|    } else {
-    #|      break
-    #|    }
-    #|  }
-    #|
-    #|  while end > start {
-    #|    let ch = text.char_at(end - 1)
-    #|    if ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' {
-    #|      end = end - 1
-    #|    } else {
-    #|      break
-    #|    }
-    #|  }
-    #|
-    #|  if start == 0 && end == text.length() {
-    #|    text
-    #|  } else {
-    #|    text.substring(start, end)
-    #|  }
+    #|  text.trim().to_string()
     #|}
     #|
     #|// Check if text starts with prefix
     #|
     #|///|
     #|pub fn starts_with(text : String, prefix : String) -> Bool {
-    #|  text.length() >= prefix.length()
-    #|    && text.substring(0, prefix.length()) == prefix
+    #|  match text.find(prefix) {
+    #|    Some(0) => true
+    #|    _ => false
+    #|  }
     #|}
     #|
     #|// Check if text ends with suffix
@@ -517,8 +482,16 @@ fn shared_command_parser_template() -> String {
     #|pub fn ends_with(text : String, suffix : String) -> Bool {
     #|  let text_len = text.length()
     #|  let suffix_len = suffix.length()
-    #|  text_len >= suffix_len
-    #|    && text.substring(text_len - suffix_len, text_len) == suffix
+    #|  if suffix_len == 0 {
+    #|    true
+    #|  } else if text_len < suffix_len {
+    #|    false
+    #|  } else {
+    #|    match text.rev_find(suffix) {
+    #|      Some(idx) => idx + suffix_len == text_len
+    #|      None => false
+    #|    }
+    #|  }
     #|}
     #|
     #|// Tokenize text by spaces
@@ -526,30 +499,11 @@ fn shared_command_parser_template() -> String {
     #|///|
     #|pub fn tokenize(text : String) -> Array[String] {
     #|  let trimmed = trim(text)
-    #|  if trimmed.length() == 0 {
+    #|  if trimmed == "" {
     #|    return []
     #|  }
-    #|
-    #|  let mut tokens = []
-    #|  let mut current = ""
-    #|
-    #|  for i in range(0, trimmed.length()) {
-    #|    let ch = trimmed.char_at(i)
-    #|    if ch == ' ' {
-    #|      if current.length() > 0 {
-    #|        tokens.push(current)
-    #|        current = ""
-    #|      }
-    #|    } else {
-    #|      current = current + ch.to_string()
-    #|    }
-    #|  }
-    #|
-    #|  if current.length() > 0 {
-    #|    tokens.push(current)
-    #|  }
-    #|
-    #|  tokens
+    #|  trimmed.split(" ").to_array().map((part) => part.to_string())
+    #|    .filter((part) => part != "")
     #|}
     #|
     #|// Find command by prefix in text
@@ -558,7 +512,7 @@ fn shared_command_parser_template() -> String {
     #|pub fn find_command(text : String, commands : Array[String]) -> Option[String] {
     #|  let trimmed = trim(text)
     #|  for cmd in commands {
-    #|    if starts_with(trimmed, cmd ++ " ") {
+    #|    if starts_with(trimmed, cmd + " ") {
     #|      return Some(cmd)
     #|    }
     #|  }
@@ -604,9 +558,9 @@ fn ping_main_template() -> String {
     #|
     #|///|
     #|pub struct Bot {
-    #|  mut client : @rpc_client.Client
-    #|  mut config : BotConfig
-    #|  mut tasks  : @async.TaskGroup[Unit]
+    #|  client : @rpc_client.Client
+    #|  config : BotConfig
+    #|  tasks  : @async.TaskGroup[Unit]
     #|}
     #|
     #|// Create a new bot with configuration
@@ -622,16 +576,16 @@ fn ping_main_template() -> String {
     #|
     #|///|
     #|pub async fn start(bot : Bot) -> Result[Unit, @errors.DirectError] {
-    #|  println("Starting " ++ bot.config.bot_name ++ "...")
+    #|  println("Starting " + bot.config.bot_name + "...")
     #|
-    #|  match await @rpc_client.connect(bot.client) {
+    #|  match @rpc_client.connect(bot.client, bot.tasks) {
     #|    Ok(_) => {
     #|      println("Connected to Direct API")
     #|      setup_handlers(bot)
     #|      Ok(())
     #|    }
     #|    Err(e) => {
-    #|      println("Connection failed: " ++ @errors.direct_error_to_string(e))
+    #|      println("Connection failed: " + @errors.direct_error_to_string(e))
     #|      Err(e)
     #|    }
     #|  }
@@ -643,7 +597,7 @@ fn ping_main_template() -> String {
     #|fn setup_handlers(bot : Bot) -> Unit {
     #|  @rpc_client.on_message(bot.client, fn(msg) {
     #|    bot.tasks.spawn_bg(fn() {
-    #|      await handle_message(bot, msg)
+    #|      handle_message(bot, msg)
     #|    })
     #|  })
     #|
@@ -664,19 +618,19 @@ fn ping_main_template() -> String {
     #|
     #|  // Parse and handle commands
     #|  match text {
-    #|    | "ping" => {
-    #|      await send_pong(bot, msg)
+    #|    "ping" => {
+    #|      send_pong(bot, msg)
     #|      ()
     #|    }
-    #|    | "time" => {
-    #|      await send_time(bot, msg)
+    #|    "time" => {
+    #|      send_time(bot, msg)
     #|      ()
     #|    }
-    #|    | _ => {
+    #|    _ => {
     #|      // Try echo command
     #|      match @shared.match_echo(text) {
     #|        Some(echoed) => {
-    #|          await send_echo(bot, msg, echoed)
+    #|          send_echo(bot, msg, echoed)
     #|          ()
     #|        }
     #|        None => ()
@@ -685,7 +639,7 @@ fn ping_main_template() -> String {
     #|      // Try shout command
     #|      match @shared.match_shout(text) {
     #|        Some(shouted) => {
-    #|          await send_shout(bot, msg, shouted)
+    #|          send_shout(bot, msg, shouted)
     #|          ()
     #|        }
     #|        None => ()
@@ -699,9 +653,9 @@ fn ping_main_template() -> String {
     #|///|
     #|async fn send_pong(bot : Bot, msg : @types.ReceivedMessage) -> Unit {
     #|  let room_id = @shared.get_room_id(msg)
-    #|  match await @shared.safe_send_text(bot.client, room_id, "PONG") {
+    #|  match @shared.safe_send_text(bot.client, room_id, "PONG") {
     #|    Ok(_) => ()
-    #|    Err(e) => println("[ERROR] Failed to send PONG: " ++ e)
+    #|    Err(e) => println("[ERROR] Failed to send PONG: " + e)
     #|  }
     #|}
     #|
@@ -714,9 +668,9 @@ fn ping_main_template() -> String {
     #|  text : String,
     #|) -> Unit {
     #|  let room_id = @shared.get_room_id(msg)
-    #|  match await @shared.safe_send_text(bot.client, room_id, text) {
+    #|  match @shared.safe_send_text(bot.client, room_id, text) {
     #|    Ok(_) => ()
-    #|    Err(e) => println("[ERROR] Failed to send echo: " ++ e)
+    #|    Err(e) => println("[ERROR] Failed to send echo: " + e)
     #|  }
     #|}
     #|
@@ -726,10 +680,10 @@ fn ping_main_template() -> String {
     #|async fn send_time(bot : Bot, msg : @types.ReceivedMessage) -> Unit {
     #|  let room_id = @shared.get_room_id(msg)
     #|  // For now, use a placeholder. In production, you'd get actual time
-    #|  let time_msg = "Server time: " ++ get_current_time()
-    #|  match await @shared.safe_send_text(bot.client, room_id, time_msg) {
+    #|  let time_msg = "Server time: " + get_current_time()
+    #|  match @shared.safe_send_text(bot.client, room_id, time_msg) {
     #|    Ok(_) => ()
-    #|    Err(e) => println("[ERROR] Failed to send time: " ++ e)
+    #|    Err(e) => println("[ERROR] Failed to send time: " + e)
     #|  }
     #|}
     #|
@@ -742,9 +696,9 @@ fn ping_main_template() -> String {
     #|  text : String,
     #|) -> Unit {
     #|  let room_id = @shared.get_room_id(msg)
-    #|  match await @shared.safe_send_text(bot.client, room_id, text) {
+    #|  match @shared.safe_send_text(bot.client, room_id, text) {
     #|    Ok(_) => ()
-    #|    Err(e) => println("[ERROR] Failed to shout: " ++ e)
+    #|    Err(e) => println("[ERROR] Failed to shout: " + e)
     #|  }
     #|}
     #|
@@ -761,7 +715,7 @@ fn ping_main_template() -> String {
     #|// cfg(target="native")
     #|
     #|///|
-    #|pub async fn main {
+    #|async fn main {
     #|  let token = match @sys.get_env_var("HUBOT_DIRECT_TOKEN") {
     #|    Some(value) => value
     #|    None => {
@@ -780,18 +734,18 @@ fn ping_main_template() -> String {
     #|    log_all: true,
     #|  }
     #|
-    #|  await @async.with_task_group(fn(tasks) {
+    #|  @async.with_task_group(fn(tasks) {
     #|    let bot = new_bot(config, tasks)
-    #|    match await start(bot) {
+    #|    match start(bot) {
     #|      Ok(_) => ()
     #|      Err(e) => {
-    #|        println("Failed to start bot: " ++ @errors.direct_error_to_string(e))
+    #|        println("Failed to start bot: " + @errors.direct_error_to_string(e))
     #|        return
     #|      }
     #|    }
     #|    println("Bot running. Press Ctrl+C to stop.")
     #|    while true {
-    #|      await @async.sleep(60_000)
+    #|      @async.sleep(60_000)
     #|    }
     #|  })
     #|}
@@ -862,10 +816,10 @@ fn select_main_template() -> String {
     #|
     #|///|
     #|pub struct Bot {
-    #|  mut client       : @rpc_client.Client
-    #|  mut config       : BotConfig
-    #|  mut menu_tracker : MenuTracker
-    #|  mut tasks        : @async.TaskGroup[Unit]
+    #|  client       : @rpc_client.Client
+    #|  config       : BotConfig
+    #|  menu_tracker : MenuTracker
+    #|  tasks        : @async.TaskGroup[Unit]
     #|}
     #|
     #|// Create a new select stamp bot
@@ -886,16 +840,16 @@ fn select_main_template() -> String {
     #|
     #|///|
     #|pub async fn start(bot : Bot) -> Result[Unit, @errors.DirectError] {
-    #|  println("Starting " ++ bot.config.bot_name ++ "...")
+    #|  println("Starting " + bot.config.bot_name + "...")
     #|
-    #|  match await @rpc_client.connect(bot.client) {
+    #|  match @rpc_client.connect(bot.client, bot.tasks) {
     #|    Ok(_) => {
     #|      println("Connected to Direct API")
     #|      setup_handlers(bot)
     #|      Ok(())
     #|    }
     #|    Err(e) => {
-    #|      println("Connection failed: " ++ @errors.direct_error_to_string(e))
+    #|      println("Connection failed: " + @errors.direct_error_to_string(e))
     #|      Err(e)
     #|    }
     #|  }
@@ -907,7 +861,7 @@ fn select_main_template() -> String {
     #|fn setup_handlers(bot : Bot) -> Unit {
     #|  @rpc_client.on_message(bot.client, fn(msg) {
     #|    bot.tasks.spawn_bg(fn() {
-    #|      await handle_message(bot, msg)
+    #|      handle_message(bot, msg)
     #|    })
     #|  })
     #|
@@ -926,13 +880,13 @@ fn select_main_template() -> String {
     #|
     #|  // Check for menu command
     #|  if @shared.match_menu(text) {
-    #|    await send_menu_to_room(bot, msg)
+    #|    send_menu_to_room(bot, msg)
     #|    return
     #|  }
     #|
     #|  // Check for select stamp reply
     #|  match @shared.is_select_reply(msg) {
-    #|    true => await handle_select_reply(bot, msg)
+    #|    true => handle_select_reply(bot, msg)
     #|    false => ()
     #|  }
     #|}
@@ -943,14 +897,14 @@ fn select_main_template() -> String {
     #|async fn send_menu_to_room(bot : Bot, msg : @types.ReceivedMessage) -> Unit {
     #|  let room_id = @shared.get_room_id(msg)
     #|
-    #|  match await send_menu(bot.client, room_id, bot.menu_tracker) {
+    #|  match send_menu(bot.client, room_id, bot.menu_tracker) {
     #|    Ok(msg_id) => {
-    #|      println("[MENU] Sent menu with message ID: " ++ msg_id)
+    #|      println("[MENU] Sent menu with message ID: " + msg_id)
     #|    }
     #|    Err(e) => {
-    #|      println("[ERROR] Failed to send menu: " ++ e)
+    #|      println("[ERROR] Failed to send menu: " + e)
     #|      let _ =
-    #|        await @shared.safe_send_text(
+    #|        @shared.safe_send_text(
     #|          bot.client,
     #|          room_id,
     #|          "メニューの送信に失敗しました。",
@@ -969,24 +923,24 @@ fn select_main_template() -> String {
     #|
     #|  // Parse the select content
     #|  match @action_stamps.parse_select_content(msg) {
-    #|    | @action_stamps.SelectParseSuccess(reply) => {
+    #|    @action_stamps.SelectParseSuccess(reply) => {
     #|      // Check if this is our menu
     #|      if is_our_menu(bot, reply) {
-    #|        match await handle_selection(bot.client, room_id, reply) {
+    #|        match handle_selection(bot.client, room_id, reply) {
     #|          Ok(_) => {
     #|            // Resend menu after handling selection
-    #|            let _ = await send_menu(bot.client, room_id, bot.menu_tracker)
+    #|            let _ = send_menu(bot.client, room_id, bot.menu_tracker)
     #|          }
     #|          Err(e) => {
-    #|            println("[ERROR] Failed to handle selection: " ++ e)
+    #|            println("[ERROR] Failed to handle selection: " + e)
     #|          }
     #|        }
     #|      }
     #|    }
-    #|    | @action_stamps.SelectParseNotSelect => ()
-    #|    | @action_stamps.SelectParseNoResponse => ()
-    #|    | @action_stamps.SelectParseError(e) => {
-    #|      println("[ERROR] Parse error: " ++ e)
+    #|    @action_stamps.SelectParseNotSelect => ()
+    #|    @action_stamps.SelectParseNoResponse => ()
+    #|    @action_stamps.SelectParseError(e) => {
+    #|      println("[ERROR] Parse error: " + e)
     #|    }
     #|  }
     #|
@@ -1010,7 +964,7 @@ fn select_main_template() -> String {
     #|// cfg(target="native")
     #|
     #|///|
-    #|pub async fn main {
+    #|async fn main {
     #|  let token = match @sys.get_env_var("HUBOT_DIRECT_TOKEN") {
     #|    Some(value) => value
     #|    None => {
@@ -1028,18 +982,18 @@ fn select_main_template() -> String {
     #|    bot_name: "SelectStampBot",
     #|  }
     #|
-    #|  await @async.with_task_group(fn(tasks) {
+    #|  @async.with_task_group(fn(tasks) {
     #|    let bot = new_bot(config, tasks)
-    #|    match await start(bot) {
+    #|    match start(bot) {
     #|      Ok(_) => ()
     #|      Err(e) => {
-    #|        println("Failed to start bot: " ++ @errors.direct_error_to_string(e))
+    #|        println("Failed to start bot: " + @errors.direct_error_to_string(e))
     #|        return
     #|      }
     #|    }
     #|    println("Bot running. Press Ctrl+C to stop.")
     #|    while true {
-    #|      await @async.sleep(60_000)
+    #|      @async.sleep(60_000)
     #|    }
     #|  })
     #|}
@@ -1110,7 +1064,7 @@ fn select_menu_template() -> String {
     #|) -> Result[String, String] {
     #|  let content = @action_stamps.new_select_content(MENU_QUESTION, MENU_OPTIONS)
     #|
-    #|  match await @action_stamps.send_select(client, room_id, content) {
+    #|  match @action_stamps.send_select(client, room_id, content) {
     #|    Ok(msg_id) => {
     #|      // Update tracker
     #|      set_last_id(tracker, msg_id)
@@ -1118,7 +1072,7 @@ fn select_menu_template() -> String {
     #|      Ok(msg_id)
     #|    }
     #|    Err(e) => {
-    #|      Err("Failed to send menu: " ++ @errors.direct_error_to_string(e))
+    #|      Err("Failed to send menu: " + @errors.direct_error_to_string(e))
     #|    }
     #|  }
     #|}
@@ -1152,13 +1106,13 @@ fn select_menu_template() -> String {
     #|
     #|///|
     #|pub fn menu_display_text() -> String {
-    #|  let mut lines = ["Select Stamp Menu:", "Question: " ++ MENU_QUESTION]
+    #|  let mut lines = ["Select Stamp Menu:", "Question: " + MENU_QUESTION]
     #|  let mut idx = 0
     #|  for option in MENU_OPTIONS {
-    #|    lines.push("  " ++ idx.to_string() ++ ". " ++ option)
+    #|    lines.push("  " + idx.to_string() + ". " + option)
     #|    idx = idx + 1
     #|  }
-    #|  String::join("\n", lines)
+    #|  lines.join("\n")
     #|}
     #|
     #|// Parse selection result to human-readable text
@@ -1167,10 +1121,9 @@ fn select_menu_template() -> String {
     #|pub fn format_selection_result(reply : @action_stamps.SelectStampReply) -> String {
     #|  match option_at(reply.response) {
     #|    Some(option) =>
-    #|      "選択されたオプション: " ++ option ++ " (インデックス: " ++ reply.response.to_string()
-    #|        ++ ")"
+    #|      "選択されたオプション: \{option} (インデックス: \{reply.response.to_string()})"
     #|    None =>
-    #|      "無効な選択 (インデックス: " ++ reply.response.to_string() ++ ")"
+    #|      "無効な選択 (インデックス: \{reply.response.to_string()})"
     #|  }
     #|}
     #|
@@ -1201,24 +1154,24 @@ fn select_actions_template() -> String {
     #|  // Get the selected option text
     #|  match option_at(reply.response) {
     #|    Some(option) => {
-    #|      println("[ACTION] Selected: " ++ option)
+    #|      println("[ACTION] Selected: " + option)
     #|
     #|      // Execute the corresponding action
     #|      match option {
-    #|        | "uuid 占い" => await handle_uuid_fortune(client, room_id)
-    #|        | "ミラサポplus事例表示" => await handle_mirasapo_case(client, room_id)
-    #|        | _ => {
+    #|        "uuid 占い" => handle_uuid_fortune(client, room_id)
+    #|        "ミラサポplus事例表示" => handle_mirasapo_case(client, room_id)
+    #|        _ => {
     #|          let msg =
-    #|            "選択肢 " ++ reply.response.to_string() ++ " を受信しました。"
-    #|          await @shared.safe_send_text(client, room_id, msg)
+    #|            "選択肢 " + reply.response.to_string() + " を受信しました。"
+    #|          @shared.safe_send_text(client, room_id, msg)
     #|        }
     #|      }
     #|
     #|      Ok(())
     #|    }
     #|    None => {
-    #|      let msg = "無効な選択です: " ++ reply.response.to_string()
-    #|      let _ = await @shared.safe_send_text(client, room_id, msg)
+    #|      let msg = "無効な選択です: " + reply.response.to_string()
+    #|      let _ = @shared.safe_send_text(client, room_id, msg)
     #|      Err("Invalid selection index")
     #|    }
     #|  }
@@ -1249,12 +1202,12 @@ fn select_actions_template() -> String {
     #|
     #|  let lines = [
     #|    "uuid 占いの結果です。",
-    #|    "UUID: " ++ format_uuid(uuid),
-    #|    "運勢: " ++ fortune,
+    #|    "UUID: " + format_uuid(uuid),
+    #|    "運勢: " + fortune,
     #|  ]
-    #|  let msg = String::join("\n", lines)
+    #|  let msg = lines.join("\n")
     #|
-    #|  match await @shared.safe_send_text(client, room_id, msg) {
+    #|  match @shared.safe_send_text(client, room_id, msg) {
     #|    Ok(_) => Ok(())
     #|    Err(e) => Err(e)
     #|  }
@@ -1271,11 +1224,9 @@ fn select_actions_template() -> String {
     #|  // For now, return a placeholder since MoonBit doesn't have HTTP client yet
     #|  // In production, this would fetch from https://mirasapo-plus.go.jp/jirei-api
     #|  let msg =
-    #|    "ミラサポplus 事例ナビ\n"
-    #|    ++ "(HTTP client integration coming soon)\n"
-    #|    ++ "API: https://mirasapo-plus.go.jp/jirei-api"
+    #|    "ミラサポplus 事例ナビ\n(HTTP client integration coming soon)\nAPI: https://mirasapo-plus.go.jp/jirei-api"
     #|
-    #|  match await @shared.safe_send_text(client, room_id, msg) {
+    #|  match @shared.safe_send_text(client, room_id, msg) {
     #|    Ok(_) => Ok(())
     #|    Err(e) => Err(e)
     #|  }
@@ -1288,12 +1239,7 @@ fn select_actions_template() -> String {
     #|pub fn generate_uuid_v4() -> Array[UByte] {
     #|  // Simple UUID v4 generation
     #|  // In production, use a proper crypto library
-    #|  let mut bytes = []
-    #|  for i in range(0, 16) {
-    #|    // Use a simple pseudo-random value
-    #|    // This is NOT cryptographically secure!
-    #|    bytes.push(pseudo_random_byte(i))
-    #|  }
+    #|  let bytes = Array::makei(16, (i) => pseudo_random_byte(i))
     #|
     #|  // Set version bits (0100xxxx for v4)
     #|  bytes[6] = (bytes[6] & 0x0F) | 0x40
@@ -1336,15 +1282,12 @@ fn select_actions_template() -> String {
     #|
     #|  // Format: 8-4-4-4-12
     #|  let hex = bytes_to_hex(uuid)
-    #|  hex.substring(0, 8)
-    #|    ++ "-"
-    #|    ++ hex.substring(8, 12)
-    #|    ++ "-"
-    #|    ++ hex.substring(12, 16)
-    #|    ++ "-"
-    #|    ++ hex.substring(16, 20)
-    #|    ++ "-"
-    #|    ++ hex.substring(20, 32)
+    #|  let part1 = String::unsafe_substring(hex, start=0, end=8)
+    #|  let part2 = String::unsafe_substring(hex, start=8, end=12)
+    #|  let part3 = String::unsafe_substring(hex, start=12, end=16)
+    #|  let part4 = String::unsafe_substring(hex, start=16, end=20)
+    #|  let part5 = String::unsafe_substring(hex, start=20, end=32)
+    #|  part1 + "-" + part2 + "-" + part3 + "-" + part4 + "-" + part5
     #|}
     #|
     #|// Convert bytes to hex string
@@ -1360,9 +1303,7 @@ fn select_actions_template() -> String {
     #|  for b in bytes {
     #|    let hi = (b >> 4).to_int()
     #|    let lo = (b & 0x0F).to_int()
-    #|    result = result
-    #|      ++ hex_chars[hi].to_string()
-    #|      ++ hex_chars[lo].to_string()
+    #|    result = result + hex_chars[hi].to_string() + hex_chars[lo].to_string()
     #|  }
     #|  result
     #|}

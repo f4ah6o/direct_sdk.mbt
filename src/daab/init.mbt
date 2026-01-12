@@ -31,6 +31,7 @@ fn moon_mod_template(module_name : String) -> String {
     $|    "moonbitlang/async": "\{default_async_version}"
     $|  },
     $|  "readme": "README.md",
+    $|  "preferred-target": "native",
     $|  "description": "daab bot project"
     $|}
   )

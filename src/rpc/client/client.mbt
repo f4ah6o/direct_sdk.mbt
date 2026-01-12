@@ -24,16 +24,15 @@ pub struct Client {
 ///|
 pub struct RequestPromise {
   result_ch : ResultChannel
-  error_ch : ErrorChannel
 }
 
 // Channel types (will use moonbitlang/async channels when available)
 
 ///|
-pub type ResultChannel = Unit // Placeholder
+pub type ResultChannel = @async.Queue[Result[@types.JsonValue, @errors.DirectError]]
 
 ///|
-pub type ErrorChannel = Unit // Placeholder
+pub type ErrorChannel = @async.Queue[@errors.DirectError]
 
 ///|
 pub type MessageChannel = Unit // Placeholder
@@ -87,7 +86,10 @@ pub fn new_client_with_token(token : String) -> Client {
 // cfg(target="native")
 
 ///|
-pub async fn connect(client : Client) -> Result[Unit, @errors.DirectError] {
+pub async fn[T] connect(
+  client : Client,
+  tasks : @async.TaskGroup[T],
+) -> Result[Unit, @errors.DirectError] {
   // Check if already connected
   match client.ws {
     Some(_) => return Err(@errors.already_connected("Already connected"))
@@ -115,13 +117,18 @@ pub async fn connect(client : Client) -> Result[Unit, @errors.DirectError] {
   (client.metrics.record_connection_state)("connected")
 
   // Start background tasks
-  // TODO: Spawn read_loop and ping_loop using TaskGroup
-  // await spawn_bg(true, () => read_loop(client))
-  // await spawn_bg(true, () => ping_loop(client))
+  tasks.spawn_bg(fn() {
+    read_loop(client)
+  })
+  tasks.spawn_bg(fn() {
+    ping_loop(client)
+  })
 
   // Create session if token is provided
   if client.config.token != "" {
-    // TODO: await spawn_bg(true, () => create_session(client))
+    tasks.spawn_bg(fn() {
+      ignore(create_session(client))
+    })
   }
   Ok(())
 }
@@ -197,51 +204,29 @@ pub async fn call(
     Err(e) => return Err(e)
   }
 
+  let promise = { result_ch: @async.Queue::new() }
+  client.pending_requests[msg_id] = promise
+
   // Send request
   match client.ws {
     Some(ws) =>
       match @rpc_websocket.send_binary(ws, data) {
         Ok(_) => ()
-        Err(e) => return Err(@rpc_websocket.ws_error_to_direct(e))
+        Err(e) => {
+          client.pending_requests.remove(msg_id)
+          return Err(@rpc_websocket.ws_error_to_direct(e))
+        }
       }
     None => return Err(@errors.not_connected("WebSocket not connected"))
   }
   let result = @async.with_timeout_opt(client.config.timeout, fn() {
-    wait_for_response(client, msg_id)
+    promise.result_ch.get()
   })
+  client.pending_requests.remove(msg_id)
   match result {
-    Some(value) => value
+    Some(Ok(value)) => Ok(value)
+    Some(Err(err)) => Err(err)
     None => Err(@errors.timeout("Response timeout"))
-  }
-}
-
-///|
-async fn wait_for_response(
-  client : Client,
-  msg_id : Int64,
-) -> Result[@types.JsonValue, @errors.DirectError] {
-  while true {
-    let ws = match client.ws {
-      Some(value) => value
-      None => return Err(@errors.not_connected("WebSocket not connected"))
-    }
-    let data = match @rpc_websocket.receive(ws) {
-      Ok(value) => value
-      Err(err) => return Err(@rpc_websocket.ws_error_to_direct(err))
-    }
-    match @rpc_msgpack.decode_message(data) {
-      Ok(@rpc_msgpack.Response(resp)) =>
-        if resp.msg_id == msg_id {
-          match resp.error {
-            Some(err) => return Err(rpc_error_from_json(err))
-            None => return Ok(resp.result)
-          }
-        }
-      Ok(@rpc_msgpack.Request(req)) => handle_notification(client, req)
-      Err(err) => return Err(err)
-    }
-  } else {
-    Err(@errors.timeout("Response loop ended"))
   }
 }
 
@@ -296,8 +281,9 @@ pub async fn send_text(
   room_id : String,
   text : String,
 ) -> Result[Unit, @errors.DirectError] {
+  let talk_id = @types.string_to_id(room_id)
   let params = [
-    @types.JsonString(room_id),
+    @types.id_to_json(talk_id),
     @types.JsonNumber(
       Float::from_int(@types.msg_type_to_wire(@types.MsgTypeText)),
     ),
@@ -328,7 +314,7 @@ async fn create_session(client : Client) -> Result[Unit, @errors.DirectError] {
       emit(client, @constants.EVENT_SESSION_CREATED, result)
 
       // Start notification
-      // TODO: await start_notification(client)
+      ignore(start_notification(client))
 
       Ok(())
     }
@@ -339,6 +325,67 @@ async fn create_session(client : Client) -> Result[Unit, @errors.DirectError] {
         @types.JsonString(e |> @errors.direct_error_to_string),
       )
       Err(e)
+    }
+  }
+}
+
+///|
+async fn start_notification(
+  client : Client,
+) -> Result[Unit, @errors.DirectError] {
+  let start_result = call(client, @constants.METHOD_START_NOTIFICATION, [])
+  match start_result {
+    Ok(@types.JsonBool(false)) => {
+      match call(client, @constants.METHOD_RESET_NOTIFICATION, []) {
+        Ok(_) =>
+          match call(client, @constants.METHOD_START_NOTIFICATION, []) {
+            Ok(_) => {
+              let update_result = call(
+                client,
+                @constants.METHOD_UPDATE_LAST_USED_AT,
+                [],
+              )
+              match update_result {
+                Ok(value) => {
+                  emit(client, @constants.EVENT_DATA_RECOVERED, value)
+                  Ok(())
+                }
+                Err(_) => {
+                  emit(client, @constants.EVENT_DATA_RECOVERED, @types.JsonNull)
+                  Ok(())
+                }
+              }
+            }
+            Err(err) => {
+              emit(
+                client,
+                @constants.EVENT_NOTIFICATION_ERROR,
+                @types.JsonString(@errors.direct_error_to_string(err)),
+              )
+              Err(err)
+            }
+          }
+        Err(err) => {
+          emit(
+            client,
+            @constants.EVENT_NOTIFICATION_ERROR,
+            @types.JsonString(@errors.direct_error_to_string(err)),
+          )
+          Err(err)
+        }
+      }
+    }
+    Ok(value) => {
+      emit(client, @constants.EVENT_DATA_RECOVERED, value)
+      Ok(())
+    }
+    Err(err) => {
+      emit(
+        client,
+        @constants.EVENT_NOTIFICATION_ERROR,
+        @types.JsonString(@errors.direct_error_to_string(err)),
+      )
+      Err(err)
     }
   }
 }
@@ -425,57 +472,55 @@ pub fn emit(client : Client, event : String, data : @types.JsonValue) -> Unit {
 
 ///|
 async fn read_loop(client : Client) -> Unit {
-  // TODO: Implement using TaskGroup
-  // loop {
-  //   match client.ws {
-  //     | Some(ws) => {
-  //       match await rpc/websocket.receive(ws) {
-  //         | Ok(data) => handle_message(client, data)
-  //         | Err(e) => {
-  //           emit(client, @constants.EVENT_ERROR, @types.JsonString(e |> @rpc_websocket.ws_error_to_string))
-  //           await close(client)
-  //           break
-  //         }
-  //       }
-  //     }
-  //     | None => break
-  //   }
-  // }
-  ()
+  while true {
+    match client.ws {
+      Some(ws) =>
+        match @rpc_websocket.receive(ws) {
+          Ok(data) => handle_message(client, data)
+          Err(e) => {
+            emit(
+              client,
+              @constants.EVENT_ERROR,
+              @types.JsonString(@rpc_websocket.ws_error_to_string(e)),
+            )
+            ignore(close(client))
+            break
+          }
+        }
+      None => break
+    }
+  }
 }
 
 // Ping loop for keepalive
 
 ///|
 async fn ping_loop(client : Client) -> Unit {
-  // TODO: Implement using TaskGroup and interval
-  // let ticker = async/interval(client.config.timeout / 2)
-  // loop {
-  //   select {
-  //     _ = await ticker.tick() => {
-  //       match client.ws {
-  //         | Some(ws) => {
-  //           match await @rpc_websocket.ping(ws) {
-  //             | Ok(_) => ()
-  //             | Err(e) => {
-  //               await close(client)
-  //               break
-  //             }
-  //           }
-  //         }
-  //         | None => break
-  //       }
-  //     }
-  //     _ = await client.done_channel.receive() => break
-  //   }
-  // }
-  ()
+  let interval = if client.config.timeout > 0 {
+    client.config.timeout / 2
+  } else {
+    @constants.DEFAULT_REQUEST_TIMEOUT / 2
+  }
+  while true {
+    @async.sleep(interval)
+    match client.ws {
+      Some(ws) =>
+        match @rpc_websocket.ping(ws) {
+          Ok(_) => ()
+          Err(_) => {
+            ignore(close(client))
+            break
+          }
+        }
+      None => break
+    }
+  }
 }
 
 // Handle incoming message
 
 ///|
-fn handle_message(client : Client, data : Bytes) -> Unit {
+async fn handle_message(client : Client, data : Bytes) -> Unit {
   match @rpc_msgpack.decode_message(data) {
     Ok(@rpc_msgpack.Response(resp)) => handle_response(client, resp)
     Ok(@rpc_msgpack.Request(req)) => handle_notification(client, req)
@@ -491,18 +536,18 @@ fn handle_message(client : Client, data : Bytes) -> Unit {
 // Handle RPC response
 
 ///|
-fn handle_response(client : Client, resp : @rpc_msgpack.RpcResponse) -> Unit {
+async fn handle_response(
+  client : Client,
+  resp : @rpc_msgpack.RpcResponse,
+) -> Unit {
   match client.pending_requests.get(resp.msg_id) {
     Some(promise) => {
       client.pending_requests.remove(resp.msg_id)
-      match resp.error {
-        Some(err) =>
-          // TODO: Send to error channel
-          ()
-        None =>
-          // TODO: Send result to result channel
-          ()
+      let result = match resp.error {
+        Some(err) => Err(rpc_error_from_json(err))
+        None => Ok(resp.result)
       }
+      promise.result_ch.put(result)
     }
     None => ()
   }
@@ -512,9 +557,14 @@ fn handle_response(client : Client, resp : @rpc_msgpack.RpcResponse) -> Unit {
 
 ///|
 fn handle_notification(client : Client, req : @rpc_msgpack.RpcRequest) -> Unit {
-  let _ = client
-  let _ = req
-  // TODO: Dispatch notifications by method.
+  let data = if req.params.length() == 0 {
+    @types.JsonNull
+  } else if req.params.length() == 1 {
+    req.params[0]
+  } else {
+    @types.JsonArray(req.params)
+  }
+  emit(client, req.method, data)
 }
 
 // === Helper Functions ===
