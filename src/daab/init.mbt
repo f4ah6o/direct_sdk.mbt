@@ -52,7 +52,7 @@ fn main_template() -> String {
     #|fn main {
     #|  println("daab bot template")
     #|  println("Edit cmd/main/main.mbt to implement your bot.")
-    #|  println("Run 'daab login' to save your token in .env.")
+    #|  println("Run 'daab login' (or 'daab login --token ...') to save your token in .env.")
     #|}
   )
 }
@@ -67,10 +67,10 @@ fn readme_template(project_name : String) -> String {
     $|## Getting Started
     $|
     $|1. Save your access token in `.env`:
-    $|   - Run `daab login --token <token>`
+    $|   - Run `daab login` or `daab login --token <token>`
     $|2. Edit `cmd/main/main.mbt` with your bot logic.
     $|3. Run the bot:
-    $|   - `moon run cmd/main`
+    $|   - `daab run` (or `moon run cmd/main`)
     $|
     $|## Environment
     $|

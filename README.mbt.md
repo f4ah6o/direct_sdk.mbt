@@ -124,10 +124,13 @@ let client = rpc /
 # Login to obtain access token
 daab login
 
+# Or save a token directly
+daab login --token <token>
+
 # Initialize a new bot project
 daab init my-bot
 
-# Run the bot (prints the command to run)
+# Run the bot
 cd my-bot
 daab run
 

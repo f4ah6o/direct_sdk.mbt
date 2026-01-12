@@ -3,7 +3,7 @@ let usage_text : String =
   #|daab - Direct bot helper CLI
   #|
   #|Usage:
-  #|  daab login [--env <path>]
+  #|  daab login [--env <path>] [--token <token>]
   #|  daab init <project-name>
   #|  daab run [--env <path>]
   #|  daab --help
@@ -25,13 +25,14 @@ let usage_text : String =
 ///|
 let login_help_text : String =
   #|Usage:
-  #|  daab login [--env <path>]
+  #|  daab login [--env <path>] [--token <token>]
   #|
   #|Options:
   #|  --env <path>   Path to the env file (default: .env)
+  #|  --token <token>  Save the token directly without prompting
   #|
   #|Notes:
-  #|  Login prompts for email and password.
+  #|  Login prompts for email and password unless --token is provided.
   #|  Endpoint/proxy settings are read from environment variables.
   #|
 
@@ -48,8 +49,7 @@ let run_help_text : String =
   #|Usage:
   #|  daab run [--env <path>]
   #|
-  #|Checks the current directory for a MoonBit bot project and prints
-  #|the command to run it.
+  #|Runs the bot by executing `moon run cmd/main` in the current directory.
   #|
 
 ///|
