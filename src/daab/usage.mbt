@@ -4,12 +4,14 @@ let usage_text : String =
   #|
   #|Usage:
   #|  daab login [--env <path>] [--token <token>]
+  #|  daab create <project-name> [--template <name>]
   #|  daab init <project-name>
   #|  daab run [--env <path>]
   #|  daab --help
   #|
   #|Commands:
   #|  login   Login and save access token into .env
+  #|  create  Create a new bot project from a template
   #|  init    Create a new bot project
   #|  run     Run the bot in the current directory
   #|  help    Show this help
@@ -45,6 +47,18 @@ let init_help_text : String =
   #|
 
 ///|
+let create_help_text : String =
+  #|Usage:
+  #|  daab create <project-name> [--template <name>]
+  #|
+  #|Options:
+  #|  --template <name>  Template name (empty, ping-bot, selectstamp-bot)
+  #|
+  #|Notes:
+  #|  The default template is "empty" (same as daab init).
+  #|
+
+///|
 let run_help_text : String =
   #|Usage:
   #|  daab run [--env <path>]
@@ -65,6 +79,11 @@ pub fn print_login_help() -> Unit {
 ///|
 pub fn print_init_help() -> Unit {
   println(init_help_text)
+}
+
+///|
+pub fn print_create_help() -> Unit {
+  println(create_help_text)
 }
 
 ///|

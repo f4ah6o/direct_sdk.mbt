@@ -12,6 +12,7 @@ async fn dispatch(args : Array[String]) -> Result[Unit, String] {
       Ok(())
     }
     "login" => run_login(rest)
+    "create" => run_create(rest)
     "init" => run_init(rest)
     "run" => run_run(rest)
     _ => Err("unknown command: " + command)

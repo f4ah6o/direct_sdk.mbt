@@ -130,6 +130,9 @@ daab login --token <token>
 # Initialize a new bot project
 daab init my-bot
 
+# Create a new bot project from a template
+daab create my-bot --template ping-bot
+
 # Run the bot
 cd my-bot
 daab run

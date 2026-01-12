@@ -32,6 +32,8 @@ pub fn has_token(String) -> Result[Bool, String]
 
 pub fn load_env_file(String) -> Result[Unit, String]
 
+pub fn print_create_help() -> Unit
+
 pub fn print_init_help() -> Unit
 
 pub fn print_login_help() -> Unit
@@ -46,6 +48,8 @@ pub fn read_file_or_empty(String) -> Result[String, String]
 
 pub fn resolve_token(String) -> Result[String?, String]
 
+pub fn run_create(ArrayView[String]) -> Result[Unit, String]
+
 pub fn run_init(ArrayView[String]) -> Result[Unit, String]
 
 pub async fn run_login(ArrayView[String]) -> Result[Unit, String]
@@ -59,6 +63,7 @@ pub fn write_file(String, String) -> Result[Unit, String]
 // Errors
 
 // Types and methods
+type TemplateKind
 
 // Type aliases
 

@@ -95,15 +95,7 @@ fn gitignore_template() -> String {
 }
 
 ///|
-pub fn run_init(args : ArrayView[String]) -> Result[Unit, String] {
-  if has_flag(args, "--help") || has_flag(args, "-h") {
-    print_init_help()
-    return Ok(())
-  }
-  let project_name = match first_non_flag(args) {
-    Some(name) => name
-    None => return Err("project name is required")
-  }
+fn scaffold_project(project_name : String) -> Result[Unit, String] {
   if @fs.path_exists(project_name) {
     return Err("path already exists: " + project_name)
   }
@@ -158,6 +150,23 @@ pub fn run_init(args : ArrayView[String]) -> Result[Unit, String] {
   }
   match
     write_file(join_path(project_name, ".gitignore"), gitignore_template()) {
+    Ok(_) => ()
+    Err(msg) => return Err(msg)
+  }
+  Ok(())
+}
+
+///|
+pub fn run_init(args : ArrayView[String]) -> Result[Unit, String] {
+  if has_flag(args, "--help") || has_flag(args, "-h") {
+    print_init_help()
+    return Ok(())
+  }
+  let project_name = match first_non_flag(args) {
+    Some(name) => name
+    None => return Err("project name is required")
+  }
+  match scaffold_project(project_name) {
     Ok(_) => ()
     Err(msg) => return Err(msg)
   }
