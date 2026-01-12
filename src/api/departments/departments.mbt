@@ -190,6 +190,7 @@ fn parse_department(
     _ => []
   }
   let user_count = match obj.get("user_count") {
+    Some(@types.JsonInt(i)) => i.to_int()
     Some(@types.JsonNumber(n)) => n.to_int()
     _ => 0
   }
@@ -245,10 +246,12 @@ fn parse_department_user_count(
     None => return Err(@errors.invalid_response("Missing department_id"))
   }
   let all = match obj.get("all") {
+    Some(@types.JsonInt(i)) => i.to_int()
     Some(@types.JsonNumber(n)) => n.to_int()
     _ => 0
   }
   let partial = match obj.get("partial") {
+    Some(@types.JsonInt(i)) => i.to_int()
     Some(@types.JsonNumber(n)) => n.to_int()
     _ => 0
   }

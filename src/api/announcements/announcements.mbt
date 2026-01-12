@@ -201,10 +201,12 @@ fn parse_announcement(
     None => @types.IDString("")
   }
   let created_at = match obj.get("created_at") {
+    Some(@types.JsonInt(i)) => i
     Some(@types.JsonNumber(n)) => n.to_int().to_int64()
     _ => 0L
   }
   let updated_at = match obj.get("updated_at") {
+    Some(@types.JsonInt(i)) => i
     Some(@types.JsonNumber(n)) => n.to_int().to_int64()
     _ => 0L
   }
@@ -235,6 +237,7 @@ fn parse_announcement(
     _ => []
   }
   let unread_user_count = match obj.get("unread_user_count") {
+    Some(@types.JsonInt(i)) => i.to_int()
     Some(@types.JsonNumber(n)) => n.to_int()
     _ => 0
   }
@@ -267,6 +270,7 @@ fn parse_announcement_status(
     None => return Err(@errors.invalid_response("Missing domain_id"))
   }
   let unread_count = match obj.get("unread_count") {
+    Some(@types.JsonInt(i)) => i.to_int()
     Some(@types.JsonNumber(n)) => n.to_int()
     _ => 0
   }

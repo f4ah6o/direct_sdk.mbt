@@ -266,6 +266,7 @@ fn parse_received_message(
         Some(v) =>
           match v {
             @types.JsonString(s) => s
+            @types.JsonInt(i) => i.to_string()
             @types.JsonNumber(n) => n.to_string()
             _ => return Err(@errors.invalid_response("Invalid message_id"))
           }
@@ -274,6 +275,7 @@ fn parse_received_message(
             Some(v) =>
               match v {
                 @types.JsonString(s) => s
+                @types.JsonInt(i) => i.to_string()
                 @types.JsonNumber(n) => n.to_string()
                 _ => return Err(@errors.invalid_response("Invalid id"))
               }
@@ -284,6 +286,7 @@ fn parse_received_message(
         Some(v) =>
           match v {
             @types.JsonString(s) => s
+            @types.JsonInt(i) => i.to_string()
             @types.JsonNumber(n) => n.to_string()
             _ => ""
           }
@@ -292,10 +295,14 @@ fn parse_received_message(
       let room_id = talk_id
       let user_id = match obj.get("user_id") {
         Some(@types.JsonString(s)) => s
+        Some(@types.JsonInt(i)) => i.to_string()
+        Some(@types.JsonNumber(n)) => n.to_string()
         _ => ""
       }
       let domain_id = match obj.get("domain_id") {
         Some(@types.JsonString(s)) => s
+        Some(@types.JsonInt(i)) => i.to_string()
+        Some(@types.JsonNumber(n)) => n.to_string()
         _ => ""
       }
       let text = match obj.get("content") {
@@ -308,6 +315,11 @@ fn parse_received_message(
         _ => ""
       }
       let msg_type = match obj.get("type") {
+        Some(@types.JsonInt(i)) =>
+          match @types.wire_to_msg_type(i.to_int()) {
+            Some(t) => t
+            None => @types.MsgTypeText
+          }
         Some(@types.JsonNumber(n)) =>
           match @types.wire_to_msg_type(n.to_int()) {
             Some(t) => t
@@ -320,6 +332,7 @@ fn parse_received_message(
         None => @types.JsonNull
       }
       let created = match obj.get("created") {
+        Some(@types.JsonInt(i)) => i
         Some(@types.JsonNumber(n)) => n.to_int().to_int64()
         _ => 0L
       }
@@ -365,6 +378,7 @@ fn parse_talk(
         None => @types.IDString("")
       }
       let talk_type = match obj.get("type") {
+        Some(@types.JsonInt(i)) => i.to_int()
         Some(@types.JsonNumber(n)) => n.to_int()
         _ => 0
       }
@@ -523,6 +537,7 @@ fn parse_domain_info(
           }
       }
       let updated_at = match obj.get("updated_at") {
+        Some(@types.JsonInt(i)) => i
         Some(@types.JsonNumber(n)) => n.to_int().to_int64()
         _ => 0L
       }
@@ -585,6 +600,7 @@ fn parse_conference_info(
         _ => ""
       }
       let created = match obj.get("created") {
+        Some(@types.JsonInt(i)) => i
         Some(@types.JsonNumber(n)) => n.to_int().to_int64()
         _ => 0L
       }

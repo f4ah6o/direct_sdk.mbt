@@ -241,6 +241,7 @@ fn parse_domain_info(
       }
   }
   let updated_at = match obj.get("updated_at") {
+    Some(@types.JsonInt(i)) => i
     Some(@types.JsonNumber(n)) => n.to_int().to_int64()
     _ => 0L
   }
@@ -302,6 +303,7 @@ fn parse_domain_invite_info(
     None => @types.IDString("")
   }
   let updated_at = match obj.get("updated_at") {
+    Some(@types.JsonInt(i)) => i
     Some(@types.JsonNumber(n)) => n.to_int().to_int64()
     _ => 0L
   }

@@ -202,10 +202,12 @@ fn parse_conference(
     None => @types.IDString("")
   }
   let created_at = match obj.get("created_at") {
+    Some(@types.JsonInt(i)) => i
     Some(@types.JsonNumber(n)) => n.to_int().to_int64()
     _ => 0L
   }
   let expired_at = match obj.get("expired_at") {
+    Some(@types.JsonInt(i)) => i
     Some(@types.JsonNumber(n)) => n.to_int().to_int64()
     _ => 0L
   }
@@ -223,6 +225,7 @@ fn parse_conference(
     _ => []
   }
   let skyway_version = match obj.get("skyway_version") {
+    Some(@types.JsonInt(i)) => i.to_int()
     Some(@types.JsonNumber(n)) => n.to_int()
     _ => 0
   }
@@ -257,10 +260,12 @@ fn parse_conference_join_info(
   let credential = json_get_string(obj, "credential").unwrap_or("")
   let mode = json_get_string(obj, "mode").unwrap_or("")
   let timestamp = match obj.get("timestamp") {
+    Some(@types.JsonInt(i)) => i
     Some(@types.JsonNumber(n)) => n.to_int().to_int64()
     _ => 0L
   }
   let skyway_version = match obj.get("skyway_version") {
+    Some(@types.JsonInt(i)) => i.to_int()
     Some(@types.JsonNumber(n)) => n.to_int()
     _ => 0
   }

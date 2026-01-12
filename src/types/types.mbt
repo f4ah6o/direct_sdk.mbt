@@ -390,6 +390,7 @@ pub(all) enum JsonValue {
   JsonNull
   JsonBool(Bool)
   JsonNumber(Float)
+  JsonInt(Int64)
   JsonString(String)
   JsonArray(Array[JsonValue])
   JsonObject(Map[String, JsonValue])
@@ -401,7 +402,7 @@ pub(all) enum JsonValue {
 pub fn id_to_json(id : ID) -> JsonValue {
   match id {
     IDString(s) => JsonString(s)
-    IDInt(i) => JsonNumber(Float::from_int64(i))
+    IDInt(i) => JsonInt(i)
   }
 }
 
@@ -411,6 +412,7 @@ pub fn id_to_json(id : ID) -> JsonValue {
 pub fn json_to_id(v : JsonValue) -> ID? {
   match v {
     JsonString(s) => Some(string_to_id(s))
+    JsonInt(i) => Some(IDInt(i))
     JsonNumber(n) => {
       let int_val = n.to_int()
       if Float::from_int(int_val) == n {

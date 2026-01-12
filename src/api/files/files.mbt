@@ -54,7 +54,7 @@ pub async fn create_upload_auth(
   let params = [
     @types.JsonString(filename),
     @types.JsonString(content_type),
-    @types.JsonNumber(Float::from_int64(size)),
+    @types.JsonInt(size),
     @types.JsonNumber(0.0), // thumbnail flag (0 = no thumbnail)
     @types.JsonString(use_type),
   ]
@@ -283,10 +283,12 @@ fn parse_attachment(
   let content_type = json_get_string(obj, "content_type").unwrap_or("")
   let url = json_get_string(obj, "url").unwrap_or("")
   let content_size = match obj.get("content_size") {
+    Some(@types.JsonInt(i)) => i
     Some(@types.JsonNumber(n)) => n.to_int().to_int64()
     _ => 0L
   }
   let created_at = match obj.get("created_at") {
+    Some(@types.JsonInt(i)) => i
     Some(@types.JsonNumber(n)) => n.to_int().to_int64()
     _ => 0L
   }

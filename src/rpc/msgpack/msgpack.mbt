@@ -38,8 +38,8 @@ pub enum RpcMessage {
 pub fn encode_request(req : RpcRequest) -> Result[Bytes, @errors.DirectError] {
   // Build array: [type, msgId, method, params]
   let arr = [
-    @types.JsonNumber(Float::from_int(req.msg_type)),
-    @types.JsonNumber(Float::from_int64(req.msg_id)),
+    @types.JsonInt(Int64::from_int(req.msg_type)),
+    @types.JsonInt(req.msg_id),
     @types.JsonString(req.method),
     @types.JsonArray(req.params),
   ]
@@ -114,8 +114,8 @@ pub fn encode_notification(
   params : Array[@types.JsonValue],
 ) -> Result[Bytes, @errors.DirectError] {
   let arr = [
-    @types.JsonNumber(Float::from_int(@constants.RPC_REQUEST)),
-    @types.JsonNumber(0.0), // msgId is 0 for notifications
+    @types.JsonInt(Int64::from_int(@constants.RPC_REQUEST)),
+    @types.JsonInt(0L), // msgId is 0 for notifications
     @types.JsonString(method),
     @types.JsonArray(params),
   ]
@@ -149,6 +149,14 @@ fn is_null_or_nil(v : @types.JsonValue) -> Bool {
 ///|
 fn json_number_to_int(value : @types.JsonValue) -> Result[Int, String] {
   match value {
+    @types.JsonInt(i) => {
+      let int_val = i.to_int()
+      if Int64::from_int(int_val) == i {
+        Ok(int_val)
+      } else {
+        Err("Expected integer number")
+      }
+    }
     @types.JsonNumber(n) => {
       let int_val = n.to_int()
       if Float::from_int(int_val) == n {
@@ -163,9 +171,13 @@ fn json_number_to_int(value : @types.JsonValue) -> Result[Int, String] {
 
 ///|
 fn json_number_to_int64(value : @types.JsonValue) -> Result[Int64, String] {
-  match json_number_to_int(value) {
-    Ok(int_val) => Ok(Int64::from_int(int_val))
-    Err(msg) => Err(msg)
+  match value {
+    @types.JsonInt(i) => Ok(i)
+    _ =>
+      match json_number_to_int(value) {
+        Ok(int_val) => Ok(Int64::from_int(int_val))
+        Err(msg) => Err(msg)
+      }
   }
 }
 
@@ -254,6 +266,10 @@ fn encode_value(enc : Encoder, v : @types.JsonValue) -> Result[Unit, String] {
       Ok(())
     }
     @types.JsonNumber(value) => encode_number(enc, value)
+    @types.JsonInt(value) => {
+      encode_int64(enc, value)
+      Ok(())
+    }
     @types.JsonString(value) => encode_string(enc, value)
     @types.JsonArray(values) => encode_array(enc, values)
     @types.JsonObject(values) => encode_map(enc, values)
@@ -306,6 +322,42 @@ fn encode_int(enc : Encoder, value : Int) -> Unit {
     enc.push_byte(0xd3)
     let i64 = Int64::from_int(value)
     enc.push_u64(i64.reinterpret_as_uint64())
+  }
+}
+
+///|
+fn encode_int64(enc : Encoder, value : Int64) -> Unit {
+  if value >= 0L {
+    let u = value.reinterpret_as_uint64()
+    if value <= 0x7fL {
+      enc.push_byte(value.to_byte())
+    } else if value <= 0xffL {
+      enc.push_byte(0xcc)
+      enc.push_byte(value.to_byte())
+    } else if value <= 0xffffL {
+      enc.push_byte(0xcd)
+      enc.push_u16(value.to_int())
+    } else if value <= 4_294_967_295L {
+      enc.push_byte(0xce)
+      enc.push_u32_from_uint64(u)
+    } else {
+      enc.push_byte(0xcf)
+      enc.push_u64(u)
+    }
+  } else if value >= -32L {
+    enc.push_byte((value.to_int() + 256).to_byte())
+  } else if value >= -128L {
+    enc.push_byte(0xd0)
+    enc.push_byte((value.to_int() + 256).to_byte())
+  } else if value >= -32_768L {
+    enc.push_byte(0xd1)
+    enc.push_u16(value.to_int() + 65_536)
+  } else if value >= -2_147_483_648L {
+    enc.push_byte(0xd2)
+    enc.push_u32_from_uint64(value.reinterpret_as_uint64())
+  } else {
+    enc.push_byte(0xd3)
+    enc.push_u64(value.reinterpret_as_uint64())
   }
 }
 
@@ -475,10 +527,10 @@ fn decode_value(dec : Decoder) -> Result[@types.JsonValue, String] {
     Err(msg) => return Err(msg)
   }
   if prefix <= 0x7f {
-    return Ok(@types.JsonNumber(Float::from_int(prefix)))
+    return Ok(@types.JsonInt(Int64::from_int(prefix)))
   }
   if prefix >= 0xe0 {
-    return Ok(@types.JsonNumber(Float::from_int(prefix - 256)))
+    return Ok(@types.JsonInt(Int64::from_int(prefix - 256)))
   }
   if prefix >= 0x80 && prefix <= 0x8f {
     let len = prefix - 0x80
@@ -498,42 +550,50 @@ fn decode_value(dec : Decoder) -> Result[@types.JsonValue, String] {
     0xc3 => Ok(@types.JsonBool(true))
     0xcc =>
       match dec.read_byte() {
-        Ok(value) => Ok(@types.JsonNumber(Float::from_int(value.to_int())))
+        Ok(value) => Ok(@types.JsonInt(Int64::from_int(value.to_int())))
         Err(msg) => Err(msg)
       }
     0xcd =>
       match dec.read_uint(2) {
-        Ok(value) => Ok(@types.JsonNumber(Float::from_uint64(value)))
+        Ok(value) => Ok(@types.JsonInt(value.reinterpret_as_int64()))
         Err(msg) => Err(msg)
       }
     0xce =>
       match dec.read_uint(4) {
-        Ok(value) => Ok(@types.JsonNumber(Float::from_uint64(value)))
+        Ok(value) => Ok(@types.JsonInt(value.reinterpret_as_int64()))
         Err(msg) => Err(msg)
       }
     0xcf =>
       match dec.read_uint(8) {
-        Ok(value) => Ok(@types.JsonNumber(Float::from_uint64(value)))
+        Ok(value) => {
+          let max_i64 = 9_223_372_036_854_775_807L
+          let max_u64 = max_i64.reinterpret_as_uint64()
+          if value <= max_u64 {
+            Ok(@types.JsonInt(value.reinterpret_as_int64()))
+          } else {
+            Ok(@types.JsonNumber(Float::from_uint64(value)))
+          }
+        }
         Err(msg) => Err(msg)
       }
     0xd0 =>
       match dec.read_int(8) {
-        Ok(value) => Ok(@types.JsonNumber(Float::from_int64(value)))
+        Ok(value) => Ok(@types.JsonInt(value))
         Err(msg) => Err(msg)
       }
     0xd1 =>
       match dec.read_int(16) {
-        Ok(value) => Ok(@types.JsonNumber(Float::from_int64(value)))
+        Ok(value) => Ok(@types.JsonInt(value))
         Err(msg) => Err(msg)
       }
     0xd2 =>
       match dec.read_int(32) {
-        Ok(value) => Ok(@types.JsonNumber(Float::from_int64(value)))
+        Ok(value) => Ok(@types.JsonInt(value))
         Err(msg) => Err(msg)
       }
     0xd3 =>
       match dec.read_int(64) {
-        Ok(value) => Ok(@types.JsonNumber(Float::from_int64(value)))
+        Ok(value) => Ok(@types.JsonInt(value))
         Err(msg) => Err(msg)
       }
     0xca =>

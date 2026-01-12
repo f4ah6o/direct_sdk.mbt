@@ -82,6 +82,7 @@ pub(all) enum JsonValue {
   JsonNull
   JsonBool(Bool)
   JsonNumber(Float)
+  JsonInt(Int64)
   JsonString(String)
   JsonArray(Array[JsonValue])
   JsonObject(Map[String, JsonValue])

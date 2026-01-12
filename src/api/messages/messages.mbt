@@ -309,7 +309,7 @@ pub async fn schedule_message(
     @types.id_to_json(talk_id),
     @types.JsonNumber(Float::from_int(@types.msg_type_to_wire(msg_type))),
     content,
-    @types.JsonNumber(Float::from_int64(scheduled_at)),
+    @types.JsonInt(scheduled_at),
   ]
   let result = match
     @rpc_client.call(client, @constants.METHOD_SCHEDULE_MESSAGE, params) {
@@ -349,7 +349,7 @@ pub async fn reschedule_message(
 ) -> Result[Unit, @errors.DirectError] {
   let params = [
     @types.id_to_json(message_id),
-    @types.JsonNumber(Float::from_int64(new_scheduled_at)),
+    @types.JsonInt(new_scheduled_at),
   ]
   match @rpc_client.call(client, @constants.METHOD_RESCHEDULE_MESSAGE, params) {
     Ok(_) => Ok(())
@@ -477,6 +477,7 @@ fn parse_message(
     Some(v) =>
       match v {
         @types.JsonString(s) => s
+        @types.JsonInt(i) => i.to_string()
         @types.JsonNumber(n) => n.to_string()
         _ => return Err(@errors.invalid_response("Invalid message_id"))
       }
@@ -485,6 +486,7 @@ fn parse_message(
         Some(v) =>
           match v {
             @types.JsonString(s) => s
+            @types.JsonInt(i) => i.to_string()
             @types.JsonNumber(n) => n.to_string()
             _ => return Err(@errors.invalid_response("Invalid id"))
           }
@@ -495,6 +497,7 @@ fn parse_message(
     Some(v) =>
       match v {
         @types.JsonString(s) => s
+        @types.JsonInt(i) => i.to_string()
         @types.JsonNumber(n) => n.to_string()
         _ => ""
       }
@@ -503,10 +506,14 @@ fn parse_message(
   let room_id = talk_id // Alias for talk_id
   let user_id = match obj.get("user_id") {
     Some(@types.JsonString(s)) => s
+    Some(@types.JsonInt(i)) => i.to_string()
+    Some(@types.JsonNumber(n)) => n.to_string()
     _ => ""
   }
   let domain_id = match obj.get("domain_id") {
     Some(@types.JsonString(s)) => s
+    Some(@types.JsonInt(i)) => i.to_string()
+    Some(@types.JsonNumber(n)) => n.to_string()
     _ => ""
   }
   let text = match obj.get("content") {
@@ -519,6 +526,11 @@ fn parse_message(
     _ => ""
   }
   let msg_type = match obj.get("type") {
+    Some(@types.JsonInt(i)) =>
+      match @types.wire_to_msg_type(i.to_int()) {
+        Some(t) => t
+        None => @types.MsgTypeText
+      }
     Some(@types.JsonNumber(n)) =>
       match @types.wire_to_msg_type(n.to_int()) {
         Some(t) => t
@@ -531,6 +543,7 @@ fn parse_message(
     None => @types.JsonNull
   }
   let created = match obj.get("created") {
+    Some(@types.JsonInt(i)) => i
     Some(@types.JsonNumber(n)) => n.to_int().to_int64()
     _ => 0L
   }
@@ -555,6 +568,7 @@ fn parse_search_result(
   obj : Map[String, @types.JsonValue],
 ) -> Result[SearchMessagesResult, @errors.DirectError] {
   let total = match obj.get("total") {
+    Some(@types.JsonInt(i)) => i.to_int()
     Some(@types.JsonNumber(n)) => n.to_int()
     _ => 0
   }
@@ -638,6 +652,7 @@ fn parse_message_search_content(
     None => @types.IDString("")
   }
   let match_score = match obj.get("match_score") {
+    Some(@types.JsonInt(i)) => Float::from_int64(i)
     Some(@types.JsonNumber(n)) => n
     _ => 0.0
   }
@@ -675,6 +690,11 @@ fn parse_scheduled_message(
     None => @types.IDString("")
   }
   let msg_type = match obj.get("type") {
+    Some(@types.JsonInt(i)) =>
+      match @types.wire_to_msg_type(i.to_int()) {
+        Some(t) => t
+        None => @types.MsgTypeText
+      }
     Some(@types.JsonNumber(n)) =>
       match @types.wire_to_msg_type(n.to_int()) {
         Some(t) => t
@@ -687,10 +707,12 @@ fn parse_scheduled_message(
     None => @types.JsonNull
   }
   let scheduled_at = match obj.get("scheduled_at") {
+    Some(@types.JsonInt(i)) => i
     Some(@types.JsonNumber(n)) => n.to_int().to_int64()
     _ => 0L
   }
   let created_at = match obj.get("created_at") {
+    Some(@types.JsonInt(i)) => i
     Some(@types.JsonNumber(n)) => n.to_int().to_int64()
     _ => 0L
   }
@@ -739,6 +761,7 @@ fn parse_reaction_user(
     None => @types.IDString("")
   }
   let created_at = match obj.get("created_at") {
+    Some(@types.JsonInt(i)) => i
     Some(@types.JsonNumber(n)) => n.to_int().to_int64()
     _ => 0L
   }

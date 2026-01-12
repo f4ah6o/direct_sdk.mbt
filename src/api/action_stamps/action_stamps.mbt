@@ -73,10 +73,11 @@ pub async fn send_select(
     Float::from_int(content.closing_type),
   )
   let content_json = @types.JsonObject(content_map)
+  let talk_id = @types.string_to_id(room_id)
 
   // Build params for create_message RPC call
   let params = [
-    @types.JsonString(room_id),
+    @types.id_to_json(talk_id),
     @types.JsonNumber(
       Float::from_int(@types.msg_type_to_wire(@types.MsgTypeSelect)),
     ),
@@ -89,10 +90,12 @@ pub async fn send_select(
         @types.JsonObject(obj) =>
           match obj.get("id") {
             Some(@types.JsonString(id)) => Ok(id)
+            Some(@types.JsonInt(i)) => Ok(i.to_string())
             Some(@types.JsonNumber(n)) => Ok(n.to_string())
             _ => Ok("unknown")
           }
         @types.JsonString(id) => Ok(id)
+        @types.JsonInt(i) => Ok(i.to_string())
         _ => Ok("unknown")
       }
     Err(e) => Err(e)
@@ -133,10 +136,26 @@ fn parse_select_reply_content(
         _ => []
       }
       match obj.get("response") {
+        Some(@types.JsonInt(i)) => {
+          let response_idx = i.to_int()
+          let in_reply_to = match obj.get("in_reply_to") {
+            Some(@types.JsonString(s)) => s
+            Some(@types.JsonInt(num)) => num.to_string()
+            Some(@types.JsonNumber(num)) => num.to_string()
+            _ => ""
+          }
+          SelectParseSuccess({
+            question,
+            options,
+            response: response_idx,
+            in_reply_to,
+          })
+        }
         Some(@types.JsonNumber(n)) => {
           let response_idx = n.to_int()
           let in_reply_to = match obj.get("in_reply_to") {
             Some(@types.JsonString(s)) => s
+            Some(@types.JsonInt(num)) => num.to_string()
             Some(@types.JsonNumber(num)) => num.to_string()
             _ => ""
           }
@@ -190,6 +209,7 @@ fn parse_string_array(arr : Array[@types.JsonValue]) -> Array[String] {
   for item in arr {
     match item {
       @types.JsonString(s) => result.push(s)
+      @types.JsonInt(i) => result.push(i.to_string())
       @types.JsonNumber(n) => result.push(n.to_string())
       _ => ()
     }

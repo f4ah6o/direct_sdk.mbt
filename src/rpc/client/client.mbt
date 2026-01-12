@@ -236,6 +236,14 @@ fn rpc_error_from_json(value : @types.JsonValue) -> @errors.DirectError {
     @types.JsonString(msg) => @errors.rpc_error(0, msg)
     @types.JsonObject(obj) => {
       let code = match obj.get("code") {
+        Some(@types.JsonInt(i)) => {
+          let int_val = i.to_int()
+          if Int64::from_int(int_val) == i {
+            int_val
+          } else {
+            0
+          }
+        }
         Some(@types.JsonNumber(n)) => {
           let int_val = n.to_int()
           if Float::from_int(int_val) == n {

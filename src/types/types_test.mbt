@@ -41,17 +41,19 @@ test "id_to_json converts ID to JsonValue" {
   inspect(json1, content="JsonString(\"test-id\")")
   let int_id = @types.IDInt(123L)
   let json2 = @types.id_to_json(int_id)
-  inspect(json2, content="JsonNumber(123)")
+  inspect(json2, content="JsonInt(123)")
 }
 
 ///|
 test "json_to_id parses JsonValue to ID" {
   let json1 = @types.JsonString("test-id")
   inspect(@types.json_to_id(json1), content="Some(IDString(\"test-id\"))")
-  let json2 = @types.JsonNumber(123.0)
+  let json2 = @types.JsonInt(123L)
   inspect(@types.json_to_id(json2), content="Some(IDInt(123))")
-  let json3 = @types.JsonBool(true)
-  inspect(@types.json_to_id(json3), content="None")
+  let json3 = @types.JsonNumber(123.0)
+  inspect(@types.json_to_id(json3), content="Some(IDInt(123))")
+  let json4 = @types.JsonBool(true)
+  inspect(@types.json_to_id(json4), content="None")
 }
 
 ///|

@@ -243,6 +243,7 @@ fn parse_talk(
     None => @types.IDString("")
   }
   let talk_type = match obj.get("type") {
+    Some(@types.JsonInt(i)) => i.to_int()
     Some(@types.JsonNumber(n)) => n.to_int()
     _ => 0
   }
@@ -283,6 +284,7 @@ fn parse_talk_status(
     None => return Err(@errors.invalid_response("Missing talk_id"))
   }
   let unread_count = match obj.get("unread_count") {
+    Some(@types.JsonInt(i)) => i.to_int()
     Some(@types.JsonNumber(n)) => n.to_int()
     _ => 0
   }
