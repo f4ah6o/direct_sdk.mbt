@@ -12,22 +12,14 @@ fn join_path(base : String, leaf : String) -> String {
 }
 
 ///|
-let default_direct_sdk_version : String = "0.3.0"
-
-///|
-let default_async_version : String = "0.16.0"
-
-///|
-let default_moon_x_version : String = "0.4.38"
-
-///|
 fn moon_mod_template(module_name : String) -> String {
+  let direct_sdk_version = resolve_direct_sdk_version()
   (
     $|{
     $|  "name": "\{module_name}",
     $|  "version": "0.1.0",
     $|  "deps": {
-    $|    "f4ah6o/direct_sdk": "\{default_direct_sdk_version}",
+    $|    "f4ah6o/direct_sdk": "\{direct_sdk_version}",
     $|    "moonbitlang/async": "\{default_async_version}"
     $|  },
     $|  "readme": "README.md",

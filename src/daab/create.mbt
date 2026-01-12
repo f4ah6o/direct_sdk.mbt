@@ -59,12 +59,13 @@ fn ensure_dir(path : String) -> Result[Unit, String] {
 
 ///|
 fn moon_mod_template_with_x(module_name : String) -> String {
+  let direct_sdk_version = resolve_direct_sdk_version()
   (
     $|{
     $|  "name": "\{module_name}",
     $|  "version": "0.1.0",
     $|  "deps": {
-    $|    "f4ah6o/direct_sdk": "\{default_direct_sdk_version}",
+    $|    "f4ah6o/direct_sdk": "\{direct_sdk_version}",
     $|    "moonbitlang/async": "\{default_async_version}",
     $|    "moonbitlang/x": "\{default_moon_x_version}"
     $|  },
@@ -1012,7 +1013,7 @@ fn select_menu_template() -> String {
     #|pub const MENU_QUESTION : String = "機能メニュー"
     #|
     #|///|
-    #|pub const MENU_OPTIONS : Array[String] = [
+    #|pub let menu_options : Array[String] = [
     #|  "uuid 占い",
     #|  "ミラサポplus事例表示",
     #|]
@@ -1062,7 +1063,7 @@ fn select_menu_template() -> String {
     #|  room_id : String,
     #|  tracker : MenuTracker,
     #|) -> Result[String, String] {
-    #|  let content = @action_stamps.new_select_content(MENU_QUESTION, MENU_OPTIONS)
+    #|  let content = @action_stamps.new_select_content(MENU_QUESTION, menu_options)
     #|
     #|  match @action_stamps.send_select(client, room_id, content) {
     #|    Ok(msg_id) => {
@@ -1081,8 +1082,8 @@ fn select_menu_template() -> String {
     #|
     #|///|
     #|pub fn option_at(index : Int) -> String? {
-    #|  if index >= 0 && index < MENU_OPTIONS.length() {
-    #|    Some(MENU_OPTIONS[index])
+    #|  if index >= 0 && index < menu_options.length() {
+    #|    Some(menu_options[index])
     #|  } else {
     #|    None
     #|  }
@@ -1093,7 +1094,7 @@ fn select_menu_template() -> String {
     #|///|
     #|pub fn index_of_option(text : String) -> Int? {
     #|  let mut idx = 0
-    #|  for option in MENU_OPTIONS {
+    #|  for option in menu_options {
     #|    if text == option {
     #|      return Some(idx)
     #|    }
@@ -1106,9 +1107,9 @@ fn select_menu_template() -> String {
     #|
     #|///|
     #|pub fn menu_display_text() -> String {
-    #|  let mut lines = ["Select Stamp Menu:", "Question: " + MENU_QUESTION]
+    #|  let lines = ["Select Stamp Menu:", "Question: " + MENU_QUESTION]
     #|  let mut idx = 0
-    #|  for option in MENU_OPTIONS {
+    #|  for option in menu_options {
     #|    lines.push("  " + idx.to_string() + ". " + option)
     #|    idx = idx + 1
     #|  }
@@ -1166,8 +1167,6 @@ fn select_actions_template() -> String {
     #|          @shared.safe_send_text(client, room_id, msg)
     #|        }
     #|      }
-    #|
-    #|      Ok(())
     #|    }
     #|    None => {
     #|      let msg = "無効な選択です: " + reply.response.to_string()
@@ -1236,16 +1235,16 @@ fn select_actions_template() -> String {
     #|// Returns 16 bytes representing a UUID
     #|
     #|///|
-    #|pub fn generate_uuid_v4() -> Array[UByte] {
+    #|pub fn generate_uuid_v4() -> Array[Byte] {
     #|  // Simple UUID v4 generation
     #|  // In production, use a proper crypto library
     #|  let bytes = Array::makei(16, (i) => pseudo_random_byte(i))
     #|
     #|  // Set version bits (0100xxxx for v4)
-    #|  bytes[6] = (bytes[6] & 0x0F) | 0x40
+    #|  bytes[6] = bytes[6].land(b'\x0f').lor(b'\x40')
     #|
     #|  // Set variant bits (10xxxxxx for standard variant)
-    #|  bytes[8] = (bytes[8] & 0x3F) | 0x80
+    #|  bytes[8] = bytes[8].land(b'\x3f').lor(b'\x80')
     #|
     #|  bytes
     #|}
@@ -1254,18 +1253,18 @@ fn select_actions_template() -> String {
     #|// This is a placeholder - NOT cryptographically secure!
     #|
     #|///|
-    #|fn pseudo_random_byte(seed : Int) -> UByte {
+    #|fn pseudo_random_byte(seed : Int) -> Byte {
     #|  // Linear congruential generator
     #|  let a = 1103515245
     #|  let c = 12345
     #|  let m = 256
-    #|  ((seed * a + c) % m).to_ubyte()
+    #|  ((seed * a + c) % m).to_byte()
     #|}
     #|
     #|// Calculate a simple hash from UUID bytes for fortune selection
     #|
     #|///|
-    #|pub fn uuid_hash(uuid : Array[UByte]) -> Int {
+    #|pub fn uuid_hash(uuid : Array[Byte]) -> Int {
     #|  if uuid.length() == 0 {
     #|    return 0
     #|  }
@@ -1275,7 +1274,7 @@ fn select_actions_template() -> String {
     #|// Format UUID as standard string (e.g., "123e4567-e89b-12d3-a456-426614174000")
     #|
     #|///|
-    #|pub fn format_uuid(uuid : Array[UByte]) -> String {
+    #|pub fn format_uuid(uuid : Array[Byte]) -> String {
     #|  if uuid.length() != 16 {
     #|    return "<invalid-uuid>"
     #|  }
@@ -1293,17 +1292,10 @@ fn select_actions_template() -> String {
     #|// Convert bytes to hex string
     #|
     #|///|
-    #|fn bytes_to_hex(bytes : Array[UByte]) -> String {
-    #|  let hex_chars = [
-    #|    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e',
-    #|    'f',
-    #|  ]
-    #|
+    #|fn bytes_to_hex(bytes : Array[Byte]) -> String {
     #|  let mut result = ""
     #|  for b in bytes {
-    #|    let hi = (b >> 4).to_int()
-    #|    let lo = (b & 0x0F).to_int()
-    #|    result = result + hex_chars[hi].to_string() + hex_chars[lo].to_string()
+    #|    result = result + b.to_hex()
     #|  }
     #|  result
     #|}
