@@ -50,7 +50,7 @@ pub fn run_init(ArrayView[String]) -> Result[Unit, String]
 
 pub async fn run_login(ArrayView[String]) -> Result[Unit, String]
 
-pub fn run_run(ArrayView[String]) -> Result[Unit, String]
+pub async fn run_run(ArrayView[String]) -> Result[Unit, String]
 
 pub fn set_env_value(String, String, String) -> Result[Unit, String]
 
