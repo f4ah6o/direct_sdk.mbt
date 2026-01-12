@@ -64,9 +64,9 @@ fn moon_mod_template_with_x(module_name : String) -> String {
     $|  "name": "\{module_name}",
     $|  "version": "0.1.0",
     $|  "deps": {
-    $|    "f4ah6o/direct_sdk": "*",
-    $|    "moonbitlang/async": "*",
-    $|    "moonbitlang/x": "*"
+    $|    "f4ah6o/direct_sdk": "\{default_direct_sdk_version}",
+    $|    "moonbitlang/async": "\{default_async_version}",
+    $|    "moonbitlang/x": "\{default_moon_x_version}"
     $|  },
     $|  "readme": "README.md",
     $|  "description": "daab bot project"
