@@ -14,6 +14,25 @@ pub async fn run_login(args : ArrayView[String]) -> Result[Unit, String] {
     Some(path) => path
     None => DEFAULT_ENV_PATH
   }
+  let token_flag = flag_value(args, "--token")
+  if has_flag(args, "--token") && token_flag is None {
+    return Err("token is required")
+  }
+  match token_flag {
+    Some(token) => {
+      if token == "" {
+        return Err("token is required")
+      }
+      match set_env_value(env_path, ENV_TOKEN_KEY, token) {
+        Ok(_) => {
+          println("Token saved to: " + env_path)
+          return Ok(())
+        }
+        Err(msg) => return Err("failed to save token: " + msg)
+      }
+    }
+    None => ()
+  }
   match has_token(env_path) {
     Ok(true) => {
       println("Already logged in.")
