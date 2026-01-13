@@ -1,10 +1,10 @@
 {
   "name": "f4ah6o/direct_sdk",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "deps": {
     "moonbitlang/quickcheck": "0.9.9",
     "moonbitlang/x": "0.4.38",
-    "moonbitlang/async": "0.16.0"
+    "moonbitlang/async": "0.15.0"
   },
   "readme": "README.mbt.md",
   "repository": "https://github.com/f4ah6o/direct_sdk.mbt",

@@ -29,7 +29,9 @@ pub struct RequestPromise {
 // Channel types (will use moonbitlang/async channels when available)
 
 ///|
-pub type ResultChannel = @async.Queue[Result[@types.JsonValue, @errors.DirectError]]
+pub type ResultChannel = @async.Queue[
+  Result[@types.JsonValue, @errors.DirectError],
+]
 
 ///|
 pub type ErrorChannel = @async.Queue[@errors.DirectError]
@@ -117,18 +119,12 @@ pub async fn[T] connect(
   (client.metrics.record_connection_state)("connected")
 
   // Start background tasks
-  tasks.spawn_bg(fn() {
-    read_loop(client)
-  })
-  tasks.spawn_bg(fn() {
-    ping_loop(client)
-  })
+  tasks.spawn_bg(fn() { read_loop(client) })
+  tasks.spawn_bg(fn() { ping_loop(client) })
 
   // Create session if token is provided
   if client.config.token != "" {
-    tasks.spawn_bg(fn() {
-      ignore(create_session(client))
-    })
+    tasks.spawn_bg(fn() { ignore(create_session(client)) })
   }
   Ok(())
 }
@@ -203,7 +199,6 @@ pub async fn call(
     Ok(bytes) => bytes
     Err(e) => return Err(e)
   }
-
   let promise = { result_ch: @async.Queue::new() }
   client.pending_requests[msg_id] = promise
 
@@ -323,7 +318,6 @@ async fn create_session(client : Client) -> Result[Unit, @errors.DirectError] {
 
       // Start notification
       ignore(start_notification(client))
-
       Ok(())
     }
     Err(e) => {
@@ -343,7 +337,7 @@ async fn start_notification(
 ) -> Result[Unit, @errors.DirectError] {
   let start_result = call(client, @constants.METHOD_START_NOTIFICATION, [])
   match start_result {
-    Ok(@types.JsonBool(false)) => {
+    Ok(@types.JsonBool(false)) =>
       match call(client, @constants.METHOD_RESET_NOTIFICATION, []) {
         Ok(_) =>
           match call(client, @constants.METHOD_START_NOTIFICATION, []) {
@@ -382,7 +376,6 @@ async fn start_notification(
           Err(err)
         }
       }
-    }
     Ok(value) => {
       emit(client, @constants.EVENT_DATA_RECOVERED, value)
       Ok(())

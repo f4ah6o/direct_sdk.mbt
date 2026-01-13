@@ -347,10 +347,7 @@ pub async fn reschedule_message(
   message_id : @types.ID,
   new_scheduled_at : Int64,
 ) -> Result[Unit, @errors.DirectError] {
-  let params = [
-    @types.id_to_json(message_id),
-    @types.JsonInt(new_scheduled_at),
-  ]
+  let params = [@types.id_to_json(message_id), @types.JsonInt(new_scheduled_at)]
   match @rpc_client.call(client, @constants.METHOD_RESCHEDULE_MESSAGE, params) {
     Ok(_) => Ok(())
     Err(e) => Err(e)

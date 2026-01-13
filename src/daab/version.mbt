@@ -65,8 +65,7 @@ fn find_executable_in_path(exe_name : String) -> String? {
     if dir == "" {
       continue
     }
-    let candidate = @path.Path::join(@path.Path(dir), @path.Path(exe_name))
-      .to_string()
+    let candidate = @path.Path::join(@path.Path(dir), @path.Path(exe_name)).to_string()
     match resolve_existing_path(candidate) {
       Some(found) => return Some(found)
       None => ()
