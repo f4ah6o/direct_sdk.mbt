@@ -4,7 +4,8 @@
   "deps": {
     "moonbitlang/quickcheck": "0.9.9",
     "moonbitlang/x": "0.4.38",
-    "moonbitlang/async": "0.15.0"
+    "moonbitlang/async": "0.15.0",
+    "f4ah6o/uuidm": { "path": "../../uuidm" }
   },
   "readme": "README.mbt.md",
   "repository": "https://github.com/f4ah6o/direct_sdk.mbt",
