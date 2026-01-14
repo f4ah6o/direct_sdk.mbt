@@ -66,7 +66,7 @@ fn moon_mod_template_with_x(module_name : String) -> String {
     $|  "version": "0.1.0",
     $|  "deps": {
     $|    "f4ah6o/direct_sdk": "\{direct_sdk_version}",
-    $|    "moonbitlang/async": "\{default_async_version}",
+    $|    "moonbitlang/async": "0.15.0",
     $|    "moonbitlang/x": "\{default_moon_x_version}"
     $|  },
     $|  "readme": "README.md",
