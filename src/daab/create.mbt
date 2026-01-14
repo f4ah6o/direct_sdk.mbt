@@ -1233,12 +1233,13 @@ fn select_actions_template() -> String {
     #|
     #|// Generate a UUID v4 (simplified implementation)
     #|// Returns 16 bytes representing a UUID
+    #|// cfg(target="native")
     #|
     #|///|
     #|pub fn generate_uuid_v4() -> Array[Byte] {
-    #|  // Simple UUID v4 generation
-    #|  // In production, use a proper crypto library
-    #|  let bytes = Array::makei(16, (i) => pseudo_random_byte(i))
+    #|  // Use current time as seed for randomness
+    #|  let seed = @env.now().reinterpret_as_int64()
+    #|  let bytes = Array::makei(16, (i) => pseudo_random_byte(seed + i.to_int64()))
     #|
     #|  // Set version bits (0100xxxx for v4)
     #|  bytes[6] = bytes[6].land(b'\x0f').lor(b'\x40')
@@ -1253,12 +1254,12 @@ fn select_actions_template() -> String {
     #|// This is a placeholder - NOT cryptographically secure!
     #|
     #|///|
-    #|fn pseudo_random_byte(seed : Int) -> Byte {
+    #|fn pseudo_random_byte(seed : Int64) -> Byte {
     #|  // Linear congruential generator
-    #|  let a = 1103515245
-    #|  let c = 12345
-    #|  let m = 256
-    #|  ((seed * a + c) % m).to_byte()
+    #|  let a = 1103515245L
+    #|  let c = 12345L
+    #|  let m = 256L
+    #|  ((seed * a + c) % m).to_int().to_byte()
     #|}
     #|
     #|// Calculate a simple hash from UUID bytes for fortune selection
