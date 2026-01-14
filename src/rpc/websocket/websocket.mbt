@@ -437,7 +437,7 @@ pub async fn send_close(
 // Close connection
 
 ///|
-pub async fn close(conn : WebSocketConnection) -> Result[Unit, WebSocketError] {
+pub fn close(conn : WebSocketConnection) -> Result[Unit, WebSocketError] {
   close_native(conn)
 }
 

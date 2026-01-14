@@ -11,7 +11,7 @@
 pub struct RpcRequest {
   msg_type : Int // Always @constants.RPC_REQUEST (0)
   msg_id : Int64
-  method : String
+  rpc_method : String
   params : Array[@types.JsonValue]
 }
 
@@ -36,11 +36,11 @@ pub enum RpcMessage {
 
 ///|
 pub fn encode_request(req : RpcRequest) -> Result[Bytes, @errors.DirectError] {
-  // Build array: [type, msgId, method, params]
+  // Build array: [type, msgId, rpc_method, params]
   let arr = [
     @types.JsonInt(Int64::from_int(req.msg_type)),
     @types.JsonInt(req.msg_id),
-    @types.JsonString(req.method),
+    @types.JsonString(req.rpc_method),
     @types.JsonArray(req.params),
   ]
   match encode_json_value(@types.JsonArray(arr)) {
@@ -67,7 +67,7 @@ pub fn decode_message(data : Bytes) -> Result[RpcMessage, @errors.DirectError] {
         Err(msg) => return Err(@errors.invalid_response(msg))
       }
       if msg_type == @constants.RPC_REQUEST {
-        let method = match arr[2] {
+        let rpc_method = match arr[2] {
           @types.JsonString(value) => value
           _ =>
             return Err(
@@ -79,7 +79,7 @@ pub fn decode_message(data : Bytes) -> Result[RpcMessage, @errors.DirectError] {
           _ =>
             return Err(@errors.invalid_response("Request params must be array"))
         }
-        Ok(Request({ msg_type, msg_id, method, params }))
+        Ok(Request({ msg_type, msg_id, rpc_method, params }))
       } else if msg_type == @constants.RPC_RESPONSE {
         let error = if is_null_or_nil(arr[2]) { None } else { Some(arr[2]) }
         let result = arr[3]
@@ -110,13 +110,13 @@ pub fn decode_response(
 
 ///|
 pub fn encode_notification(
-  method : String,
+  rpc_method : String,
   params : Array[@types.JsonValue],
 ) -> Result[Bytes, @errors.DirectError] {
   let arr = [
     @types.JsonInt(Int64::from_int(@constants.RPC_REQUEST)),
     @types.JsonInt(0L), // msgId is 0 for notifications
-    @types.JsonString(method),
+    @types.JsonString(rpc_method),
     @types.JsonArray(params),
   ]
   match encode_json_value(@types.JsonArray(arr)) {
@@ -130,10 +130,10 @@ pub fn encode_notification(
 ///|
 pub fn create_request(
   msg_id : Int64,
-  method : String,
+  rpc_method : String,
   params : Array[@types.JsonValue],
 ) -> RpcRequest {
-  { msg_type: @constants.RPC_REQUEST, msg_id, method, params }
+  { msg_type: @constants.RPC_REQUEST, msg_id, rpc_method, params }
 }
 
 // Helper: Check if @types.JsonValue is null or nil
@@ -708,10 +708,10 @@ fn decode_float32(bits : UInt64) -> Float {
     }
     let base = Float::from_int(2)
     let exponent = Float::from_int(-126)
-    return sign * Float::pow(base, exponent) * fraction
+    return sign * @math.powf(base, exponent) * fraction
   }
   let exp_value = exp - 127
   let base = Float::from_int(2)
   let exponent = Float::from_int(exp_value)
-  sign * Float::pow(base, exponent) * (Float::from_int(1) + fraction)
+  sign * @math.powf(base, exponent) * (Float::from_int(1) + fraction)
 }

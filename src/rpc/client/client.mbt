@@ -51,7 +51,7 @@ pub type EventHandler = (@types.JsonValue) -> Unit
 
 ///|
 pub struct ResponseHandler {
-  method : String
+  rpc_method : String
   on_success : (@types.JsonValue) -> Unit
   on_error : (@types.JsonValue) -> Unit
 }
@@ -133,7 +133,7 @@ pub async fn[T] connect(
 // cfg(target="native")
 
 ///|
-pub async fn close(client : Client) -> Result[Unit, @errors.DirectError] {
+pub fn close(client : Client) -> Result[Unit, @errors.DirectError] {
   match client.ws {
     Some(ws) =>
       match @rpc_websocket.close(ws) {
@@ -180,7 +180,7 @@ pub fn health(client : Client) -> @config.HealthStatus {
 ///|
 pub async fn call(
   client : Client,
-  method : String,
+  rpc_method : String,
   params : Array[@types.JsonValue],
 ) -> Result[@types.JsonValue, @errors.DirectError] {
   if !client.connected {
@@ -192,7 +192,7 @@ pub async fn call(
   let msg_id = client.msg_id
 
   // Create RPC request
-  let req = @rpc_msgpack.create_request(msg_id, method, params)
+  let req = @rpc_msgpack.create_request(msg_id, rpc_method, params)
 
   // Encode request
   let data = match @rpc_msgpack.encode_request(req) {
@@ -264,9 +264,9 @@ fn rpc_error_from_json(value : @types.JsonValue) -> @errors.DirectError {
 ///|
 pub fn call_sync(
   client : Client,
-  method : String,
-  params : Array[@types.JsonValue],
-  timeout_ms : Int,
+  _rpc_method : String,
+  _params : Array[@types.JsonValue],
+  _timeout_ms : Int,
 ) -> Result[@types.JsonValue, @errors.DirectError] {
   if !client.connected {
     return Err(@errors.not_connected("Not connected"))
@@ -565,7 +565,7 @@ fn handle_notification(client : Client, req : @rpc_msgpack.RpcRequest) -> Unit {
   } else {
     @types.JsonArray(req.params)
   }
-  emit(client, req.method, data)
+  emit(client, req.rpc_method, data)
 }
 
 // === Helper Functions ===
