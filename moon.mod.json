@@ -1,6 +1,6 @@
 {
   "name": "f4ah6o/direct_sdk",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "deps": {
     "moonbitlang/quickcheck": "0.9.9",
     "moonbitlang/x": "0.4.38",
