@@ -1,0 +1,1 @@
+import "test" { "f4ah6o/direct_sdk/rpc/websocket" as @rpc_websocket }
