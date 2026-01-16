@@ -199,7 +199,7 @@ pub async fn call(
     Ok(bytes) => bytes
     Err(e) => return Err(e)
   }
-  let promise = { result_ch: @async.Queue::new() }
+  let promise = { result_ch: @async.Queue::new(kind=Unbounded) }
   client.pending_requests[msg_id] = promise
 
   // Send request
