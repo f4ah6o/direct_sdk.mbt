@@ -1,0 +1,7 @@
+import {
+  "moonbitlang/async" as @async,
+  "moonbitlang/async/http" as @http,
+  "moonbitlang/async/websocket" as @async_ws,
+  "f4ah6o/direct_sdk/constants" as @constants,
+  "f4ah6o/direct_sdk/errors" as @errors,
+}

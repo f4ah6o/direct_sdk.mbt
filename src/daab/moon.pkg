@@ -1,0 +1,20 @@
+import {
+  "moonbitlang/async" as @async,
+  "moonbitlang/async/io" as @io,
+  "moonbitlang/async/process" as @process,
+  "moonbitlang/async/stdio" as @stdio,
+  "f4ah6o/direct_sdk/config" as @config,
+  "f4ah6o/direct_sdk/constants" as @constants,
+  "f4ah6o/direct_sdk/errors" as @errors,
+  "f4ah6o/direct_sdk/rpc/client" as @rpc_client,
+  "f4ah6o/direct_sdk/types" as @types,
+  "moonbitlang/x/fs" as @fs,
+  "moonbitlang/x/path" as @path,
+  "moonbitlang/x/sys" as @sys,
+}
+
+import "test" { "moonbitlang/x/fs" as @fs, "f4ah6o/direct_sdk/types" as @types }
+
+options(
+  "is-main": true,
+)
