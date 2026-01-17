@@ -3,3 +3,5 @@ import {
   "f4ah6o/direct_sdk/types" as @types,
   "f4ah6o/direct_sdk/errors" as @errors,
 }
+
+import "test" { "moonbitlang/quickcheck" as @qc }
