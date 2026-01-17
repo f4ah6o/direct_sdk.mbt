@@ -1,12 +1,13 @@
 {
   "name": "f4ah6o/direct_sdk",
-  "version": "0.7.0",
+  "version": "0.9.0",
   "deps": {
     "moonbitlang/quickcheck": "0.9.9",
     "moonbitlang/x": "0.4.38",
-    "moonbitlang/async": "0.15.0"
+    "moonbitlang/async": "0.16.0",
+    "f4ah6o/uuidm": "0.1.0"
   },
-  "preferred-target": "native", 
+  "preferred-target": "native",
   "readme": "README.mbt.md",
   "repository": "https://github.com/f4ah6o/direct_sdk.mbt",
   "license": "Apache-2.0",
