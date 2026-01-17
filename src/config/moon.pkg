@@ -3,4 +3,7 @@ import {
   "f4ah6o/direct_sdk/errors" as @errors,
 }
 
-import "test" { "f4ah6o/direct_sdk/rpc/client" as @rpc_client }
+import "test" {
+  "f4ah6o/direct_sdk/rpc/client" as @rpc_client,
+  "moonbitlang/quickcheck" as @qc
+}
