@@ -2,8 +2,8 @@ import "test" { "f4ah6o/direct_sdk/rpc/websocket" as @rpc_websocket }
 
 options(
   targets: {
-    "errors.mbt": [ "native", "js" ],
+    "errors.mbt": [ "native", "js", "wasm-gc" ],
     "errors_test.mbt": [ "native" ],
-    "pkg.generated.mbti": [ "native", "js" ],
+    "pkg.generated.mbti": [ "native", "js", "wasm-gc" ],
   },
 )
