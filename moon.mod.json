@@ -5,7 +5,7 @@
     "moonbitlang/quickcheck": "0.9.9",
     "moonbitlang/x": "0.4.38",
     "moonbitlang/async": "0.16.0",
-    "f4ah6o/uuidm": "0.1.0"
+    "f4ah6o/uuidm": "0.2.0"
   },
   "preferred-target": "native",
   "readme": "README.mbt.md",
