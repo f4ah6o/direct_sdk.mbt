@@ -18,7 +18,7 @@ pub async fn call(Client, String, Array[@types.JsonValue]) -> Result[@types.Json
 
 pub fn call_sync(Client, String, Array[@types.JsonValue], Int) -> Result[@types.JsonValue, @errors.DirectError]
 
-pub async fn close(Client) -> Result[Unit, @errors.DirectError]
+pub fn close(Client) -> Result[Unit, @errors.DirectError]
 
 pub async fn[T] connect(Client, @async.TaskGroup[T]) -> Result[Unit, @errors.DirectError]
 
@@ -81,7 +81,7 @@ pub struct RequestPromise {
 }
 
 pub struct ResponseHandler {
-  method : String
+  rpc_method : String
   on_success : (@types.JsonValue) -> Unit
   on_error : (@types.JsonValue) -> Unit
 }

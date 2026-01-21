@@ -28,7 +28,7 @@ pub enum RpcMessage {
 pub struct RpcRequest {
   msg_type : Int
   msg_id : Int64
-  method : String
+  rpc_method : String
   params : Array[@types.JsonValue]
 }
 

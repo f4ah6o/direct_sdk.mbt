@@ -6,7 +6,7 @@ import(
 )
 
 // Values
-pub async fn close(WebSocketConnection) -> Result[Unit, WebSocketError]
+pub fn close(WebSocketConnection) -> Result[Unit, WebSocketError]
 
 pub fn close_code_to_int(CloseCode) -> Int
 
