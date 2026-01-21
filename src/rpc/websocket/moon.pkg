@@ -5,3 +5,10 @@ import {
   "f4ah6o/direct_sdk/constants" as @constants,
   "f4ah6o/direct_sdk/errors" as @errors,
 }
+
+options(
+  targets: {
+    "websocket.mbt": [ "native" ],
+    "pkg.generated.mbti": [ "native" ],
+  },
+)

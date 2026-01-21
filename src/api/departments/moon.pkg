@@ -4,3 +4,9 @@ import {
   "f4ah6o/direct_sdk/errors" as @errors,
   "f4ah6o/direct_sdk/constants" as @constants,
 }
+options(
+  targets: {
+    "departments.mbt": [ "native" ],
+    "pkg.generated.mbti": [ "native" ],
+  },
+)

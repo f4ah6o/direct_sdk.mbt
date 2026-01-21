@@ -8,3 +8,10 @@ import {
   "f4ah6o/direct_sdk/rpc/msgpack" as @rpc_msgpack,
   "f4ah6o/direct_sdk/events/handler" as @events_handler,
 }
+
+options(
+  targets: {
+    "client.mbt": [ "native" ],
+    "pkg.generated.mbti": [ "native" ],
+  },
+)

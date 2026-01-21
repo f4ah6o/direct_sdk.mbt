@@ -7,3 +7,13 @@ import "test" {
   "f4ah6o/direct_sdk/rpc/client" as @rpc_client,
   "moonbitlang/quickcheck" as @qc
 }
+
+options(
+  targets: {
+    "config.mbt": [ "native", "js" ],
+    "config.pbt.mbt.md": [ "native" ],
+    "config_test.mbt": [ "native" ],
+    "pbt_generated_test.mbt": [ "native" ],
+    "pkg.generated.mbti": [ "native", "js" ],
+  },
+)
