@@ -1,11 +1,11 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "f4ah6o/direct_sdk/api/announcements"
 
-import(
-  "f4ah6o/direct_sdk/errors"
-  "f4ah6o/direct_sdk/rpc/client"
-  "f4ah6o/direct_sdk/types"
-)
+import {
+  "f4ah6o/direct_sdk/errors",
+  "f4ah6o/direct_sdk/rpc/client",
+  "f4ah6o/direct_sdk/types",
+}
 
 // Values
 pub async fn create_announcement(@client.Client, @types.ID, String, String, Array[@types.ID]) -> Result[Announcement, @errors.DirectError]

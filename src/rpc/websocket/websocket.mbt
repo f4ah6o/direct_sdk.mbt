@@ -148,6 +148,40 @@ pub struct WebSocketConfig {
 
 ///|
 pub fn default_websocket_config(endpoint : String) -> WebSocketConfig {
+  WebSocketConfig::new(endpoint)
+}
+
+// Builder pattern for WebSocketConfig
+
+///|
+pub fn with_proxy(cfg : WebSocketConfig, proxy_url : String) -> WebSocketConfig {
+  cfg.with_proxy(proxy_url)
+}
+
+///|
+pub fn with_headers(
+  cfg : WebSocketConfig,
+  headers : Map[String, String],
+) -> WebSocketConfig {
+  cfg.with_headers(headers)
+}
+
+///|
+pub fn with_timeout(cfg : WebSocketConfig, timeout_ms : Int) -> WebSocketConfig {
+  cfg.with_timeout(timeout_ms)
+}
+
+///|
+/// Create a config and chain builder-style updates.
+///
+/// # Example
+/// ```mbt check
+/// test {
+///   let cfg = WebSocketConfig::new("ws://example.invalid").with_timeout(1234)
+///   inspect(cfg.timeout, content="1234")
+/// }
+/// ```
+pub fn WebSocketConfig::new(endpoint : String) -> WebSocketConfig {
   {
     endpoint,
     proxy_url: None,
@@ -156,27 +190,31 @@ pub fn default_websocket_config(endpoint : String) -> WebSocketConfig {
   }
 }
 
-// Builder pattern for WebSocketConfig
-
 ///|
-pub fn with_proxy(cfg : WebSocketConfig, proxy_url : String) -> WebSocketConfig {
-  cfg.proxy_url = Some(proxy_url)
-  cfg
+pub fn WebSocketConfig::with_proxy(
+  self : WebSocketConfig,
+  proxy_url : String,
+) -> WebSocketConfig {
+  self.proxy_url = Some(proxy_url)
+  self
 }
 
 ///|
-pub fn with_headers(
-  cfg : WebSocketConfig,
+pub fn WebSocketConfig::with_headers(
+  self : WebSocketConfig,
   headers : Map[String, String],
 ) -> WebSocketConfig {
-  cfg.headers = Some(headers)
-  cfg
+  self.headers = Some(headers)
+  self
 }
 
 ///|
-pub fn with_timeout(cfg : WebSocketConfig, timeout_ms : Int) -> WebSocketConfig {
-  cfg.timeout = timeout_ms
-  cfg
+pub fn WebSocketConfig::with_timeout(
+  self : WebSocketConfig,
+  timeout_ms : Int,
+) -> WebSocketConfig {
+  self.timeout = timeout_ms
+  self
 }
 
 // WebSocket connection wrapper

@@ -1,9 +1,9 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "f4ah6o/direct_sdk/events/handler"
 
-import(
-  "f4ah6o/direct_sdk/types"
-)
+import {
+  "f4ah6o/direct_sdk/types",
+}
 
 // Values
 pub fn emit(EventDispatcher, String, @types.JsonValue) -> Unit
@@ -49,6 +49,21 @@ pub struct EventDispatcher {
   mut domain_handlers : Array[(@types.DomainInfo) -> Unit]
   mut conference_handlers : Array[(@types.ConferenceInfo) -> Unit]
 }
+pub fn EventDispatcher::emit(Self, String, @types.JsonValue) -> Unit
+pub fn EventDispatcher::emit_message(Self, @types.ReceivedMessage) -> Unit
+pub fn EventDispatcher::emit_talk(Self, @types.Talk) -> Unit
+pub fn EventDispatcher::emit_user(Self, @types.UserInfo) -> Unit
+pub fn EventDispatcher::handler_count(Self, String) -> Int
+pub fn EventDispatcher::on(Self, String, (@types.JsonValue) -> Unit) -> Unit
+pub fn EventDispatcher::on_conference(Self, (@types.ConferenceInfo) -> Unit) -> Unit
+pub fn EventDispatcher::on_domain(Self, (@types.DomainInfo) -> Unit) -> Unit
+pub fn EventDispatcher::on_message(Self, (@types.ReceivedMessage) -> Unit) -> Unit
+pub fn EventDispatcher::on_talk(Self, (@types.Talk) -> Unit) -> Unit
+pub fn EventDispatcher::on_user(Self, (@types.UserInfo) -> Unit) -> Unit
+pub fn EventDispatcher::remove_all_handlers(Self) -> Unit
+pub fn EventDispatcher::remove_handler(Self, String) -> Unit
+pub fn EventDispatcher::remove_message_handlers(Self) -> Unit
+pub fn EventDispatcher::total_handler_count(Self) -> Int
 
 // Type aliases
 pub type ConferenceEventHandler = (@types.ConferenceInfo) -> Unit

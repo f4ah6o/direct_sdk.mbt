@@ -7,8 +7,5 @@ import {
 }
 
 options(
-  targets: {
-    "websocket.mbt": [ "native" ],
-    "pkg.generated.mbti": [ "native" ],
-  },
+  targets: { "pkg.generated.mbti": [ "native" ], "websocket.mbt": [ "native" ] },
 )

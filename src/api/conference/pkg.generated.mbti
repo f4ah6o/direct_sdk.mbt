@@ -1,11 +1,11 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "f4ah6o/direct_sdk/api/conference"
 
-import(
-  "f4ah6o/direct_sdk/errors"
-  "f4ah6o/direct_sdk/rpc/client"
-  "f4ah6o/direct_sdk/types"
-)
+import {
+  "f4ah6o/direct_sdk/errors",
+  "f4ah6o/direct_sdk/rpc/client",
+  "f4ah6o/direct_sdk/types",
+}
 
 // Values
 pub async fn get_conference_participants(@client.Client, @types.ID) -> Result[Array[@types.ID], @errors.DirectError]

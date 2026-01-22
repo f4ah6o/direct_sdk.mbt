@@ -4,9 +4,7 @@ import {
   "f4ah6o/direct_sdk/errors" as @errors,
   "f4ah6o/direct_sdk/constants" as @constants,
 }
+
 options(
-  targets: {
-    "talks.mbt": [ "native" ],
-    "pkg.generated.mbti": [ "native" ],
-  },
+  targets: { "pkg.generated.mbti": [ "native" ], "talks.mbt": [ "native" ] },
 )

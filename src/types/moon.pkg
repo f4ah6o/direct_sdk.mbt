@@ -1,1 +1,7 @@
-import "test" { "moonbitlang/quickcheck" as @qc }
+import {
+  "moonbitlang/core/strconv" as @strconv,
+}
+
+import "test" {
+  "moonbitlang/quickcheck" as @qc,
+}

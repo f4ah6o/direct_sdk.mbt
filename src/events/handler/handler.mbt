@@ -37,6 +37,198 @@ pub fn new_dispatcher() -> EventDispatcher {
   }
 }
 
+///|
+pub fn EventDispatcher::on(
+  self : EventDispatcher,
+  event_name : String,
+  handler : @events_types.JsonEventHandler,
+) -> Unit {
+  let handlers = match self.handlers.get(event_name) {
+    Some(h) => h
+    None => []
+  }
+  handlers.push(handler)
+  self.handlers[event_name] = handlers
+}
+
+///|
+pub fn EventDispatcher::on_message(
+  self : EventDispatcher,
+  handler : @events_types.MessageEventHandler,
+) -> Unit {
+  self.message_handlers.push(handler)
+}
+
+///|
+pub fn EventDispatcher::on_talk(
+  self : EventDispatcher,
+  handler : @events_types.TalkEventHandler,
+) -> Unit {
+  self.talk_handlers.push(handler)
+}
+
+///|
+pub fn EventDispatcher::on_user(
+  self : EventDispatcher,
+  handler : @events_types.UserEventHandler,
+) -> Unit {
+  self.user_handlers.push(handler)
+}
+
+///|
+pub fn EventDispatcher::on_domain(
+  self : EventDispatcher,
+  handler : DomainEventHandler,
+) -> Unit {
+  self.domain_handlers.push(handler)
+}
+
+///|
+pub fn EventDispatcher::on_conference(
+  self : EventDispatcher,
+  handler : ConferenceEventHandler,
+) -> Unit {
+  self.conference_handlers.push(handler)
+}
+
+///|
+pub fn EventDispatcher::emit(
+  self : EventDispatcher,
+  event_name : String,
+  data : @types.JsonValue,
+) -> Unit {
+  match self.handlers.get(event_name) {
+    Some(handlers) =>
+      for h in handlers {
+        h(data)
+      }
+    None => ()
+  }
+  match event_name {
+    "notify_create_message" =>
+      match parse_received_message(data) {
+        Ok(msg) =>
+          for h in self.message_handlers {
+            h(msg)
+          }
+        Err(_) => ()
+      }
+    "notify_create_group_talk"
+    | "notify_create_pair_talk"
+    | "notify_update_talk" =>
+      match parse_talk(data) {
+        Ok(talk) =>
+          for h in self.talk_handlers {
+            h(talk)
+          }
+        Err(_) => ()
+      }
+    "notify_add_friend" | "notify_update_user" | "notify_add_acquaintance" =>
+      match parse_user_info(data) {
+        Ok(user) =>
+          for h in self.user_handlers {
+            h(user)
+          }
+        Err(_) => ()
+      }
+    "notify_join_domain" =>
+      match parse_domain_info(data) {
+        Ok(domain) =>
+          for h in self.domain_handlers {
+            h(domain)
+          }
+        Err(_) => ()
+      }
+    "notify_create_conference" =>
+      match parse_conference_info(data) {
+        Ok(conference) =>
+          for h in self.conference_handlers {
+            h(conference)
+          }
+        Err(_) => ()
+      }
+    _ => ()
+  }
+}
+
+///|
+pub fn EventDispatcher::emit_message(
+  self : EventDispatcher,
+  message : @types.ReceivedMessage,
+) -> Unit {
+  for h in self.message_handlers {
+    h(message)
+  }
+}
+
+///|
+pub fn EventDispatcher::emit_talk(
+  self : EventDispatcher,
+  talk : @types.Talk,
+) -> Unit {
+  for h in self.talk_handlers {
+    h(talk)
+  }
+}
+
+///|
+pub fn EventDispatcher::emit_user(
+  self : EventDispatcher,
+  user : @types.UserInfo,
+) -> Unit {
+  for h in self.user_handlers {
+    h(user)
+  }
+}
+
+///|
+pub fn EventDispatcher::remove_handler(
+  self : EventDispatcher,
+  event_name : String,
+) -> Unit {
+  self.handlers.remove(event_name)
+}
+
+///|
+pub fn EventDispatcher::remove_message_handlers(self : EventDispatcher) -> Unit {
+  self.message_handlers = []
+}
+
+///|
+pub fn EventDispatcher::remove_all_handlers(self : EventDispatcher) -> Unit {
+  self.handlers = Map::new()
+  self.message_handlers = []
+  self.talk_handlers = []
+  self.user_handlers = []
+  self.domain_handlers = []
+  self.conference_handlers = []
+}
+
+///|
+pub fn EventDispatcher::handler_count(
+  self : EventDispatcher,
+  event_name : String,
+) -> Int {
+  match self.handlers.get(event_name) {
+    Some(handlers) => handlers.length()
+    None => 0
+  }
+}
+
+///|
+pub fn EventDispatcher::total_handler_count(self : EventDispatcher) -> Int {
+  let mut total = 0
+  for handlers in self.handlers.to_array() {
+    total = total + handlers.1.length()
+  }
+  total = total + self.message_handlers.length()
+  total = total + self.talk_handlers.length()
+  total = total + self.user_handlers.length()
+  total = total + self.domain_handlers.length()
+  total = total + self.conference_handlers.length()
+  total
+}
+
 // Register a handler for a specific event by name
 
 ///|
@@ -45,12 +237,7 @@ pub fn on(
   event_name : String,
   handler : @events_types.JsonEventHandler,
 ) -> Unit {
-  let handlers = match dispatcher.handlers.get(event_name) {
-    Some(h) => h
-    None => []
-  }
-  handlers.push(handler)
-  dispatcher.handlers[event_name] = handlers
+  dispatcher.on(event_name, handler)
 }
 
 // Register a handler for message events
@@ -60,7 +247,7 @@ pub fn on_message(
   dispatcher : EventDispatcher,
   handler : @events_types.MessageEventHandler,
 ) -> Unit {
-  dispatcher.message_handlers.push(handler)
+  dispatcher.on_message(handler)
 }
 
 // Register a handler for talk events
@@ -70,7 +257,7 @@ pub fn on_talk(
   dispatcher : EventDispatcher,
   handler : @events_types.TalkEventHandler,
 ) -> Unit {
-  dispatcher.talk_handlers.push(handler)
+  dispatcher.on_talk(handler)
 }
 
 // Register a handler for user events
@@ -80,7 +267,7 @@ pub fn on_user(
   dispatcher : EventDispatcher,
   handler : @events_types.UserEventHandler,
 ) -> Unit {
-  dispatcher.user_handlers.push(handler)
+  dispatcher.on_user(handler)
 }
 
 // Register a handler for domain events
@@ -90,7 +277,7 @@ pub fn on_domain(
   dispatcher : EventDispatcher,
   handler : DomainEventHandler,
 ) -> Unit {
-  dispatcher.domain_handlers.push(handler)
+  dispatcher.on_domain(handler)
 }
 
 // Register a handler for conference events
@@ -100,7 +287,7 @@ pub fn on_conference(
   dispatcher : EventDispatcher,
   handler : ConferenceEventHandler,
 ) -> Unit {
-  dispatcher.conference_handlers.push(handler)
+  dispatcher.on_conference(handler)
 }
 
 // Emit an event to all registered handlers for that event name
@@ -111,60 +298,7 @@ pub fn emit(
   event_name : String,
   data : @types.JsonValue,
 ) -> Unit {
-  match dispatcher.handlers.get(event_name) {
-    Some(handlers) =>
-      for h in handlers {
-        h(data)
-      }
-    None => ()
-  }
-
-  // Also dispatch to specific typed handlers based on event name
-  match event_name {
-    "notify_create_message" =>
-      match parse_received_message(data) {
-        Ok(msg) =>
-          for h in dispatcher.message_handlers {
-            h(msg)
-          }
-        Err(_) => ()
-      }
-    "notify_create_group_talk"
-    | "notify_create_pair_talk"
-    | "notify_update_talk" =>
-      match parse_talk(data) {
-        Ok(talk) =>
-          for h in dispatcher.talk_handlers {
-            h(talk)
-          }
-        Err(_) => ()
-      }
-    "notify_add_friend" | "notify_update_user" | "notify_add_acquaintance" =>
-      match parse_user_info(data) {
-        Ok(user) =>
-          for h in dispatcher.user_handlers {
-            h(user)
-          }
-        Err(_) => ()
-      }
-    "notify_join_domain" =>
-      match parse_domain_info(data) {
-        Ok(domain) =>
-          for h in dispatcher.domain_handlers {
-            h(domain)
-          }
-        Err(_) => ()
-      }
-    "notify_create_conference" =>
-      match parse_conference_info(data) {
-        Ok(conference) =>
-          for h in dispatcher.conference_handlers {
-            h(conference)
-          }
-        Err(_) => ()
-      }
-    _ => ()
-  }
+  dispatcher.emit(event_name, data)
 }
 
 // Emit a message event directly (without JSON parsing)
@@ -174,27 +308,21 @@ pub fn emit_message(
   dispatcher : EventDispatcher,
   message : @types.ReceivedMessage,
 ) -> Unit {
-  for h in dispatcher.message_handlers {
-    h(message)
-  }
+  dispatcher.emit_message(message)
 }
 
 // Emit a talk event directly (without JSON parsing)
 
 ///|
 pub fn emit_talk(dispatcher : EventDispatcher, talk : @types.Talk) -> Unit {
-  for h in dispatcher.talk_handlers {
-    h(talk)
-  }
+  dispatcher.emit_talk(talk)
 }
 
 // Emit a user event directly (without JSON parsing)
 
 ///|
 pub fn emit_user(dispatcher : EventDispatcher, user : @types.UserInfo) -> Unit {
-  for h in dispatcher.user_handlers {
-    h(user)
-  }
+  dispatcher.emit_user(user)
 }
 
 // Remove all handlers for a specific event
@@ -204,52 +332,35 @@ pub fn remove_handler(
   dispatcher : EventDispatcher,
   event_name : String,
 ) -> Unit {
-  dispatcher.handlers.remove(event_name)
+  dispatcher.remove_handler(event_name)
 }
 
 // Remove all message handlers
 
 ///|
 pub fn remove_message_handlers(dispatcher : EventDispatcher) -> Unit {
-  dispatcher.message_handlers = []
+  dispatcher.remove_message_handlers()
 }
 
 // Remove all handlers (reset)
 
 ///|
 pub fn remove_all_handlers(dispatcher : EventDispatcher) -> Unit {
-  dispatcher.handlers = Map::new()
-  dispatcher.message_handlers = []
-  dispatcher.talk_handlers = []
-  dispatcher.user_handlers = []
-  dispatcher.domain_handlers = []
-  dispatcher.conference_handlers = []
+  dispatcher.remove_all_handlers()
 }
 
 // Get the count of handlers for a specific event
 
 ///|
 pub fn handler_count(dispatcher : EventDispatcher, event_name : String) -> Int {
-  match dispatcher.handlers.get(event_name) {
-    Some(handlers) => handlers.length()
-    None => 0
-  }
+  dispatcher.handler_count(event_name)
 }
 
 // Get the total count of all handlers
 
 ///|
 pub fn total_handler_count(dispatcher : EventDispatcher) -> Int {
-  let mut total = 0
-  for handlers in dispatcher.handlers.to_array() {
-    total = total + handlers.1.length()
-  }
-  total = total + dispatcher.message_handlers.length()
-  total = total + dispatcher.talk_handlers.length()
-  total = total + dispatcher.user_handlers.length()
-  total = total + dispatcher.domain_handlers.length()
-  total = total + dispatcher.conference_handlers.length()
-  total
+  dispatcher.total_handler_count()
 }
 
 // === Helper functions for parsing event data ===

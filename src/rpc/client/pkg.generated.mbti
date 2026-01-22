@@ -1,15 +1,15 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "f4ah6o/direct_sdk/rpc/client"
 
-import(
-  "f4ah6o/direct_sdk/config"
-  "f4ah6o/direct_sdk/errors"
-  "f4ah6o/direct_sdk/events/handler"
-  "f4ah6o/direct_sdk/rpc/websocket"
-  "f4ah6o/direct_sdk/types"
-  "moonbitlang/async"
-  "moonbitlang/async/aqueue"
-)
+import {
+  "f4ah6o/direct_sdk/config",
+  "f4ah6o/direct_sdk/errors",
+  "f4ah6o/direct_sdk/events/handler",
+  "f4ah6o/direct_sdk/rpc/websocket",
+  "f4ah6o/direct_sdk/types",
+  "moonbitlang/async",
+  "moonbitlang/async/aqueue",
+}
 
 // Values
 pub fn cache_talk_domain(Client, String, String) -> Unit

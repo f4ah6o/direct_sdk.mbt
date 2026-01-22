@@ -17,71 +17,56 @@ pub struct Config {
 
 ///|
 pub fn default_config() -> Config {
-  {
-    token: "",
-    endpoint: @constants.DEFAULT_ENDPOINT,
-    proxy_url: None,
-    timeout: @constants.DEFAULT_REQUEST_TIMEOUT,
-    name: "direct-moonbit",
-    debug: false,
-  }
+  Config::default()
 }
 
 // Create a Config with minimal required fields
 
 ///|
 pub fn new_config(token : String) -> Config {
-  let cfg = default_config()
-  cfg.token = token
-  cfg
+  Config::new(token)
 }
 
 // Builder pattern: Set endpoint
 
 ///|
 pub fn with_endpoint(cfg : Config, endpoint : String) -> Config {
-  cfg.endpoint = endpoint
-  cfg
+  cfg.with_endpoint(endpoint)
 }
 
 // Builder pattern: Set token
 
 ///|
 pub fn with_token(cfg : Config, token : String) -> Config {
-  cfg.token = token
-  cfg
+  cfg.with_token(token)
 }
 
 // Builder pattern: Set proxy URL
 
 ///|
 pub fn with_proxy(cfg : Config, proxy_url : String) -> Config {
-  cfg.proxy_url = Some(proxy_url)
-  cfg
+  cfg.with_proxy(proxy_url)
 }
 
 // Builder pattern: Set timeout (milliseconds)
 
 ///|
 pub fn with_timeout(cfg : Config, timeout_ms : Int) -> Config {
-  cfg.timeout = timeout_ms
-  cfg
+  cfg.with_timeout(timeout_ms)
 }
 
 // Builder pattern: Set name
 
 ///|
 pub fn with_name(cfg : Config, name : String) -> Config {
-  cfg.name = name
-  cfg
+  cfg.with_name(name)
 }
 
 // Builder pattern: Set debug mode
 
 ///|
 pub fn with_debug(cfg : Config, debug : Bool) -> Config {
-  cfg.debug = debug
-  cfg
+  cfg.with_debug(debug)
 }
 
 // Validate configuration
@@ -89,50 +74,21 @@ pub fn with_debug(cfg : Config, debug : Bool) -> Config {
 
 ///|
 pub fn validate(cfg : Config) -> Result[Config, String] {
-  // Token is required
-  if cfg.token == "" {
-    return Err("config: Token is required")
-  }
-
-  // Validate timeout range (100ms to 5 minutes)
-  if cfg.timeout < 100 {
-    return Err("config: Timeout must be at least 100ms")
-  }
-  if cfg.timeout > 300_000 {
-    return Err("config: Timeout must be at most 5 minutes (300000ms)")
-  }
-
-  // Validate endpoint format (basic check)
-  if !cfg.endpoint.has_prefix("ws://") && !cfg.endpoint.has_prefix("wss://") {
-    return Err("config: Endpoint must start with ws:// or wss://")
-  }
-  Ok(cfg)
+  cfg.validate()
 }
 
 // Apply defaults to empty fields
 
 ///|
 pub fn apply_defaults(cfg : Config) -> Config {
-  let result = cfg
-  if result.endpoint == "" {
-    result.endpoint = @constants.DEFAULT_ENDPOINT
-  }
-  if result.timeout == 0 {
-    result.timeout = @constants.DEFAULT_REQUEST_TIMEOUT
-  }
-  if result.name == "" {
-    result.name = "direct-moonbit"
-  }
-  result
+  cfg.apply_defaults()
 }
 
 // Create and validate a Config in one step
 
 ///|
 pub fn create_config(token : String) -> Result[Config, String] {
-  let cfg = new_config(token)
-  let cfg = apply_defaults(cfg)
-  validate(cfg)
+  Config::create(token)
 }
 
 // Options type for backward compatibility with Go SDK API
@@ -150,14 +106,139 @@ pub struct Options {
 
 ///|
 pub fn to_options(cfg : Config) -> Options {
+  cfg.to_options()
+}
+
+///|
+pub fn Config::default() -> Config {
   {
-    endpoint: cfg.endpoint,
-    access_token: cfg.token,
-    proxy_url: match cfg.proxy_url {
+    token: "",
+    endpoint: @constants.DEFAULT_ENDPOINT,
+    proxy_url: None,
+    timeout: @constants.DEFAULT_REQUEST_TIMEOUT,
+    name: "direct-moonbit",
+    debug: false,
+  }
+}
+
+///|
+/// Create a config with the provided token and allow chaining.
+///
+/// # Example
+/// ```mbt check
+/// test {
+///   let cfg = Config::new("token")
+///     .with_endpoint("wss://example.invalid")
+///     .with_name("bot")
+///   let opts = cfg.to_options()
+///   inspect(opts.access_token, content="token")
+///   inspect(opts.name, content="bot")
+/// }
+/// ```
+pub fn Config::new(token : String) -> Config {
+  let cfg = Config::default()
+  cfg.token = token
+  cfg
+}
+
+///|
+pub fn Config::with_endpoint(self : Config, endpoint : String) -> Config {
+  self.endpoint = endpoint
+  self
+}
+
+///|
+pub fn Config::with_token(self : Config, token : String) -> Config {
+  self.token = token
+  self
+}
+
+///|
+pub fn Config::with_proxy(self : Config, proxy_url : String) -> Config {
+  self.proxy_url = Some(proxy_url)
+  self
+}
+
+///|
+pub fn Config::with_timeout(self : Config, timeout_ms : Int) -> Config {
+  self.timeout = timeout_ms
+  self
+}
+
+///|
+pub fn Config::with_name(self : Config, name : String) -> Config {
+  self.name = name
+  self
+}
+
+///|
+pub fn Config::with_debug(self : Config, debug : Bool) -> Config {
+  self.debug = debug
+  self
+}
+
+///|
+pub fn Config::validate(self : Config) -> Result[Config, String] {
+  if self.token == "" {
+    return Err("config: Token is required")
+  }
+  if self.timeout < 100 {
+    return Err("config: Timeout must be at least 100ms")
+  }
+  if self.timeout > 300_000 {
+    return Err("config: Timeout must be at most 5 minutes (300000ms)")
+  }
+  if !self.endpoint.has_prefix("ws://") && !self.endpoint.has_prefix("wss://") {
+    return Err("config: Endpoint must start with ws:// or wss://")
+  }
+  Ok(self)
+}
+
+///|
+pub fn Config::apply_defaults(self : Config) -> Config {
+  let result = self
+  if result.endpoint == "" {
+    result.endpoint = @constants.DEFAULT_ENDPOINT
+  }
+  if result.timeout == 0 {
+    result.timeout = @constants.DEFAULT_REQUEST_TIMEOUT
+  }
+  if result.name == "" {
+    result.name = "direct-moonbit"
+  }
+  result
+}
+
+///|
+/// Create, apply defaults, and validate in one step.
+///
+/// # Example
+/// ```mbt check
+/// test {
+///   let result = Config::create("token")
+///   let ok = match result {
+///     Ok(_) => true
+///     Err(_) => false
+///   }
+///   inspect(ok, content="true")
+/// }
+/// ```
+pub fn Config::create(token : String) -> Result[Config, String] {
+  let cfg = Config::new(token)
+  let cfg = cfg.apply_defaults()
+  cfg.validate()
+}
+
+///|
+pub fn Config::to_options(self : Config) -> Options {
+  {
+    endpoint: self.endpoint,
+    access_token: self.token,
+    proxy_url: match self.proxy_url {
       Some(url) => url
       None => ""
     },
-    name: cfg.name,
+    name: self.name,
   }
 }
 

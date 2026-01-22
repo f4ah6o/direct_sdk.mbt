@@ -10,8 +10,5 @@ import {
 }
 
 options(
-  targets: {
-    "client.mbt": [ "native" ],
-    "pkg.generated.mbti": [ "native" ],
-  },
+  targets: { "client.mbt": [ "native" ], "pkg.generated.mbti": [ "native" ] },
 )

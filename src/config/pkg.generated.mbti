@@ -1,9 +1,9 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "f4ah6o/direct_sdk/config"
 
-import(
-  "f4ah6o/direct_sdk/errors"
-)
+import {
+  "f4ah6o/direct_sdk/errors",
+}
 
 // Values
 pub fn apply_defaults(Config) -> Config
@@ -47,6 +47,18 @@ pub struct Config {
   mut name : String
   mut debug : Bool
 }
+pub fn Config::apply_defaults(Self) -> Self
+pub fn Config::create(String) -> Result[Self, String]
+pub fn Config::default() -> Self
+pub fn Config::new(String) -> Self
+pub fn Config::to_options(Self) -> Options
+pub fn Config::validate(Self) -> Result[Self, String]
+pub fn Config::with_debug(Self, Bool) -> Self
+pub fn Config::with_endpoint(Self, String) -> Self
+pub fn Config::with_name(Self, String) -> Self
+pub fn Config::with_proxy(Self, String) -> Self
+pub fn Config::with_timeout(Self, Int) -> Self
+pub fn Config::with_token(Self, String) -> Self
 
 pub struct HealthStatus {
   connected : Bool

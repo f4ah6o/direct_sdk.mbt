@@ -8,12 +8,16 @@ import {
   "f4ah6o/direct_sdk/errors" as @errors,
   "f4ah6o/direct_sdk/rpc/client" as @rpc_client,
   "f4ah6o/direct_sdk/types" as @types,
+  "moonbitlang/core/json" as @json,
   "moonbitlang/x/fs" as @fs,
   "moonbitlang/x/path" as @path,
   "moonbitlang/x/sys" as @sys,
 }
 
-import "test" { "moonbitlang/x/fs" as @fs, "f4ah6o/direct_sdk/types" as @types }
+import "test" {
+  "moonbitlang/x/fs" as @fs,
+  "f4ah6o/direct_sdk/types" as @types,
+}
 
 options(
   "is-main": true,
@@ -27,9 +31,9 @@ options(
     "login_test.mbt": [ "native" ],
     "main.mbt": [ "native" ],
     "main_js.mbt": [ "js" ],
+    "pkg.generated.mbti": [ "native" ],
     "run.mbt": [ "native" ],
     "usage.mbt": [ "native" ],
     "version.mbt": [ "native" ],
-    "pkg.generated.mbti": [ "native" ],
   },
 )

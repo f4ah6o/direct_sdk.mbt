@@ -5,7 +5,7 @@ import {
 
 import "test" {
   "f4ah6o/direct_sdk/rpc/client" as @rpc_client,
-  "moonbitlang/quickcheck" as @qc
+  "moonbitlang/quickcheck" as @qc,
 }
 
 options(

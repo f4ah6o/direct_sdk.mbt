@@ -1,9 +1,9 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "f4ah6o/direct_sdk/daab"
 
-import(
-  "f4ah6o/direct_sdk/types"
-)
+import {
+  "f4ah6o/direct_sdk/types",
+}
 
 // Values
 pub const DEFAULT_ENV_PATH : String = ".env"

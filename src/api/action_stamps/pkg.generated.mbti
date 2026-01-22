@@ -1,11 +1,11 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "f4ah6o/direct_sdk/api/action_stamps"
 
-import(
-  "f4ah6o/direct_sdk/errors"
-  "f4ah6o/direct_sdk/rpc/client"
-  "f4ah6o/direct_sdk/types"
-)
+import {
+  "f4ah6o/direct_sdk/errors",
+  "f4ah6o/direct_sdk/rpc/client",
+  "f4ah6o/direct_sdk/types",
+}
 
 // Values
 pub fn format_select_reply(SelectStampReply) -> String

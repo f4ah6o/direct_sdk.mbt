@@ -1,9 +1,9 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "f4ah6o/direct_sdk/rpc/websocket"
 
-import(
-  "f4ah6o/direct_sdk/errors"
-)
+import {
+  "f4ah6o/direct_sdk/errors",
+}
 
 // Values
 pub fn close(WebSocketConnection) -> Result[Unit, WebSocketError]
@@ -77,6 +77,10 @@ pub struct WebSocketConfig {
   mut headers : Map[String, String]?
   mut timeout : Int
 }
+pub fn WebSocketConfig::new(String) -> Self
+pub fn WebSocketConfig::with_headers(Self, Map[String, String]) -> Self
+pub fn WebSocketConfig::with_proxy(Self, String) -> Self
+pub fn WebSocketConfig::with_timeout(Self, Int) -> Self
 
 pub struct WebSocketConnection {
   mut conn : @moonbitlang/async/websocket.Conn?
