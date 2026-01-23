@@ -75,6 +75,7 @@ test "quickcheck: direct_error_to_string matches variant format" {
       }
       @qc.collect(prop, label)
     }),
+    max_success=1000,
   )
 }
 
