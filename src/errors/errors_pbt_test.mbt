@@ -20,9 +20,11 @@ let error_spec_gen : @qc.Gen[(Int, String, Int)] = error_tag_gen.bind(fn(
 
 ///|
 test "quickcheck: direct_error_to_string matches variant format" {
+  let tag_offset = @env.now().to_int() % 11
   @qc.quick_check(
     @qc.forall(error_spec_gen, fn(spec : (Int, String, Int)) {
       let (tag, msg, code) = spec
+      let tag = (tag + tag_offset) % 11
       let prop = match tag {
         0 =>
           @errors.direct_error_to_string(@errors.not_connected(msg)) ==
@@ -58,47 +60,20 @@ test "quickcheck: direct_error_to_string matches variant format" {
           @errors.direct_error_to_string(@errors.internal_error(msg)) ==
           "internal error: " + msg
       }
-      @qc.classify(
-        @qc.classify(
-          @qc.classify(
-            @qc.classify(
-              @qc.classify(
-                @qc.classify(
-                  @qc.classify(
-                    @qc.classify(
-                      @qc.classify(
-                        @qc.classify(
-                          @qc.classify(prop, tag == 0, "not_connected"),
-                          tag == 1,
-                          "timeout",
-                        ),
-                        tag == 2,
-                        "invalid_response",
-                      ),
-                      tag == 3,
-                      "already_connected",
-                    ),
-                    tag == 4,
-                    "room_not_found",
-                  ),
-                  tag == 5,
-                  "user_not_found",
-                ),
-                tag == 6,
-                "rpc_error",
-              ),
-              tag == 7,
-              "connection_error",
-            ),
-            tag == 8,
-            "decode_error",
-          ),
-          tag == 9,
-          "auth_error",
-        ),
-        tag == 10,
-        "internal_error",
-      )
+      let label = match tag {
+        0 => "not_connected"
+        1 => "timeout"
+        2 => "invalid_response"
+        3 => "already_connected"
+        4 => "room_not_found"
+        5 => "user_not_found"
+        6 => "rpc_error"
+        7 => "connection_error"
+        8 => "decode_error"
+        9 => "auth_error"
+        _ => "internal_error"
+      }
+      @qc.collect(prop, label)
     }),
   )
 }
