@@ -1,4 +1,7 @@
 # Direct SDK for Moonbit
+<!-- bdg:begin -->
+![moonbit](https://img.shields.io/badge/moonbit-f4ah6o/direct_sdk-informational)
+<!-- bdg:end -->
 
 MoonBit用のDirect4B WebSocket API SDKです。`direct-go-sdk`を移植したものです。
 
@@ -173,3 +176,5 @@ Apache-2.0
 
 - [direct-go-sdk](https://github.com/f4ah6o/direct-go-sdk) - Go版SDK
 - [Direct4B](https://www.direct4b.com/) - サービスサイト
+
+
