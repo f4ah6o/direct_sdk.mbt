@@ -2,12 +2,11 @@
   "name": "f4ah6o/direct_sdk",
   "version": "0.10.1",
   "deps": {
-    "moonbitlang/quickcheck": "0.9.9",
+    "moonbitlang/quickcheck": "0.9.10",
     "moonbitlang/x": "0.4.38",
-    "moonbitlang/async": "0.16.0",
+    "moonbitlang/async": "0.16.4",
     "f4ah6o/uuidm": "0.2.0"
   },
-  "preferred-target": "native",
   "readme": "README.mbt.md",
   "repository": "https://github.com/f4ah6o/direct_sdk.mbt",
   "license": "Apache-2.0",
@@ -20,5 +19,6 @@
     "api"
   ],
   "description": "MoonBit SDK for Direct4B WebSocket API with MessagePack RPC",
-  "source": "src"
+  "source": "src",
+  "preferred-target": "native"
 }

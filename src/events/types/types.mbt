@@ -1,9 +1,10 @@
 // Event types for Direct SDK
 // Reference: direct-go-sdk/direct-go/events.go
 
+///|
+#warnings("-unused_constructor")
 // Server-to-client notification events
 
-///|
 pub enum ServerEvent {
   // Connection events
   SessionCreated(SessionData)
@@ -69,6 +70,7 @@ pub enum ServerEvent {
 // Session data from session_created event
 
 ///|
+#warnings("-struct_never_constructed")
 pub struct SessionData {
   user_id : @sdk_types.ID
   access_token : String
@@ -78,6 +80,7 @@ pub struct SessionData {
 // Data for notify_delete_message
 
 ///|
+#warnings("-struct_never_constructed")
 pub struct MessageDeletedData {
   message_id : @sdk_types.ID
   talk_id : @sdk_types.ID
@@ -87,6 +90,7 @@ pub struct MessageDeletedData {
 // Data for notify_add_talkers
 
 ///|
+#warnings("-struct_never_constructed")
 pub struct UsersAddedData {
   talk_id : @sdk_types.ID
   user_ids : Array[@sdk_types.ID]
@@ -95,6 +99,7 @@ pub struct UsersAddedData {
 // Data for notify_delete_talker
 
 ///|
+#warnings("-struct_never_constructed")
 pub struct UserRemovedData {
   talk_id : @sdk_types.ID
   user_id : @sdk_types.ID
@@ -103,6 +108,7 @@ pub struct UserRemovedData {
 // Data for notify_delete_friend
 
 ///|
+#warnings("-struct_never_constructed")
 pub struct UserDeletedData {
   user_id : @sdk_types.ID
 }
@@ -110,6 +116,7 @@ pub struct UserDeletedData {
 // Data for notify_join_domain
 
 ///|
+#warnings("-struct_never_constructed")
 pub struct DomainJoinedData {
   domain_id : @sdk_types.ID
   name : String
@@ -118,6 +125,7 @@ pub struct DomainJoinedData {
 // Data for notify_leave_domain
 
 ///|
+#warnings("-struct_never_constructed")
 pub struct DomainLeftData {
   domain_id : @sdk_types.ID
 }
@@ -125,6 +133,7 @@ pub struct DomainLeftData {
 // Domain invitation information
 
 ///|
+#warnings("-struct_never_constructed")
 pub struct DomainInviteInfo {
   id : @sdk_types.ID
   name : String
@@ -135,6 +144,7 @@ pub struct DomainInviteInfo {
 // Data for notify_delete_domain_invite
 
 ///|
+#warnings("-struct_never_constructed")
 pub struct DomainInviteDeletedData {
   invite_id : @sdk_types.ID
 }
@@ -142,6 +152,7 @@ pub struct DomainInviteDeletedData {
 // Attachment information
 
 ///|
+#warnings("-struct_never_constructed")
 pub struct AttachmentInfo {
   id : @sdk_types.ID
   file_id : @sdk_types.ID
@@ -156,6 +167,7 @@ pub struct AttachmentInfo {
 // Data for notify_delete_attachment
 
 ///|
+#warnings("-struct_never_constructed")
 pub struct AttachmentDeletedData {
   attachment_id : @sdk_types.ID
   talk_id : @sdk_types.ID
@@ -164,6 +176,7 @@ pub struct AttachmentDeletedData {
 // Note information
 
 ///|
+#warnings("-struct_never_constructed")
 pub struct NoteInfo {
   id : @sdk_types.ID
   talk_id : @sdk_types.ID
@@ -178,6 +191,7 @@ pub struct NoteInfo {
 // Data for notify_delete_note
 
 ///|
+#warnings("-struct_never_constructed")
 pub struct NoteDeletedData {
   note_id : @sdk_types.ID
   talk_id : @sdk_types.ID
@@ -186,6 +200,7 @@ pub struct NoteDeletedData {
 // Data for favorite talk notifications
 
 ///|
+#warnings("-struct_never_constructed")
 pub struct FavoriteTalkData {
   talk_id : @sdk_types.ID
   domain_id : @sdk_types.ID
@@ -194,6 +209,7 @@ pub struct FavoriteTalkData {
 // Announcement information
 
 ///|
+#warnings("-struct_never_constructed")
 pub struct AnnouncementInfo {
   id : @sdk_types.ID
   domain_id : @sdk_types.ID
@@ -207,6 +223,7 @@ pub struct AnnouncementInfo {
 // Data for notify_delete_announcement
 
 ///|
+#warnings("-struct_never_constructed")
 pub struct AnnouncementDeletedData {
   announcement_id : @sdk_types.ID
   domain_id : @sdk_types.ID
@@ -215,6 +232,7 @@ pub struct AnnouncementDeletedData {
 // Data for notify_update_read_status
 
 ///|
+#warnings("-struct_never_constructed")
 pub struct ReadStatusData {
   talk_id : @sdk_types.ID
   user_id : @sdk_types.ID
@@ -225,6 +243,7 @@ pub struct ReadStatusData {
 // Data for notify_update_talk_status
 
 ///|
+#warnings("-struct_never_constructed")
 pub struct TalkStatusData {
   talk_id : @sdk_types.ID
   unread_count : Int
@@ -234,6 +253,7 @@ pub struct TalkStatusData {
 // Conference information
 
 ///|
+#warnings("-struct_never_constructed")
 pub struct ConferenceInfo {
   id : @sdk_types.ID
   talk_id : @sdk_types.ID
@@ -245,6 +265,7 @@ pub struct ConferenceInfo {
 // Data for notify_close_conference
 
 ///|
+#warnings("-struct_never_constructed")
 pub struct ConferenceClosedData {
   conference_id : @sdk_types.ID
   talk_id : @sdk_types.ID
@@ -253,6 +274,7 @@ pub struct ConferenceClosedData {
 // Data for conference participant notifications
 
 ///|
+#warnings("-struct_never_constructed")
 pub struct ConferenceParticipantData {
   conference_id : @sdk_types.ID
   talk_id : @sdk_types.ID
