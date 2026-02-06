@@ -50,6 +50,7 @@ pub type EventHandler = (@types.JsonValue) -> Unit
 // Response handler for RPC calls (for callback-style API)
 
 ///|
+#warnings("-struct_never_constructed")
 pub struct ResponseHandler {
   rpc_method : String
   on_success : (@types.JsonValue) -> Unit

@@ -167,7 +167,7 @@ pub fn extract_token(result : @types.JsonValue) -> String {
 
 ///|
 async fn prompt_credentials() -> Result[(String, String), String] {
-  let reader = @io.BufferedReader::new(@stdio.stdin)
+  let reader = @stdio.stdin
   @stdio.stdout.write("Email: ")
   let email = match read_line(reader) {
     Ok(value) => value
@@ -183,9 +183,9 @@ async fn prompt_credentials() -> Result[(String, String), String] {
 
 ///|
 async fn read_line(
-  reader : @io.BufferedReader[@stdio.Input],
+  reader : @stdio.Input,
 ) -> Result[String, String] {
-  match reader.read_line() {
+  match reader.read_until("\n") {
     Some(line) => Ok(line.trim().to_string())
     None => Err("stdin closed")
   }
@@ -193,7 +193,7 @@ async fn read_line(
 
 ///|
 async fn read_password(
-  reader : @io.BufferedReader[@stdio.Input],
+  reader : @stdio.Input,
 ) -> Result[String, String] {
   let echo_disabled = set_tty_echo(false)
   let result = read_line(reader)
