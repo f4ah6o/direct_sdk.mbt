@@ -120,12 +120,12 @@ pub async fn[T] connect(
   (client.metrics.record_connection_state)("connected")
 
   // Start background tasks
-  tasks.spawn_bg(() => { read_loop(client) })
-  tasks.spawn_bg(() => { ping_loop(client) })
+  tasks.spawn_bg(() => read_loop(client))
+  tasks.spawn_bg(() => ping_loop(client))
 
   // Create session if token is provided
   if client.config.token != "" {
-    tasks.spawn_bg(() => { ignore(create_session(client)) })
+    tasks.spawn_bg(() => ignore(create_session(client)))
   }
   Ok(())
 }

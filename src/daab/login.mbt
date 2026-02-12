@@ -76,7 +76,7 @@ pub async fn run_login(args : ArrayView[String]) -> Result[Unit, String] {
     cfg
   }
   let client = @rpc_client.new_client(cfg)
-  let result = @async.with_task_group((tasks) => {
+  let result = @async.with_task_group(tasks => {
     match @rpc_client.connect(client, tasks) {
       Ok(_) => {
         println("Authenticating...")
