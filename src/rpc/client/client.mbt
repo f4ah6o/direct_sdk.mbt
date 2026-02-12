@@ -120,12 +120,12 @@ pub async fn[T] connect(
   (client.metrics.record_connection_state)("connected")
 
   // Start background tasks
-  tasks.spawn_bg(fn() { read_loop(client) })
-  tasks.spawn_bg(fn() { ping_loop(client) })
+  tasks.spawn_bg(() => { read_loop(client) })
+  tasks.spawn_bg(() => { ping_loop(client) })
 
   // Create session if token is provided
   if client.config.token != "" {
-    tasks.spawn_bg(fn() { ignore(create_session(client)) })
+    tasks.spawn_bg(() => { ignore(create_session(client)) })
   }
   Ok(())
 }
@@ -215,7 +215,7 @@ pub async fn call(
       }
     None => return Err(@errors.not_connected("WebSocket not connected"))
   }
-  let result = @async.with_timeout_opt(client.config.timeout, fn() {
+  let result = @async.with_timeout_opt(client.config.timeout, () => {
     promise.result_ch.get()
   })
   client.pending_requests.remove(msg_id)

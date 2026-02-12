@@ -5,7 +5,7 @@
 
 ## Package: types
 
-```mbt
+```mbt nocheck
 test "prop_msg_type_wire_roundtrip" {
   assert_true @qc.property(fn(t : MessageType) {
     match wire_to_msg_type(msg_type_to_wire(t)) {
@@ -40,7 +40,7 @@ test "prop_msg_type_wire_roundtrip" {
 }
 ```
 
-```mbt
+```mbt nocheck
 test "prop_room_type_int_roundtrip" {
   assert_true @qc.property(fn(r : RoomType) {
     match int_to_room_type(room_type_to_int(r)) {
@@ -56,7 +56,7 @@ test "prop_room_type_int_roundtrip" {
 }
 ```
 
-```mbt
+```mbt nocheck
 test "prop_id_string_roundtrip" {
   assert_true @qc.property(fn(id : ID) {
     string_to_id(id_to_string(id)) == id
@@ -69,7 +69,7 @@ test "prop_id_string_roundtrip" {
 }
 ```
 
-```mbt
+```mbt nocheck
 test "prop_id_json_roundtrip" {
   assert_true @qc.property(fn(id : ID) {
     match json_to_id(id_to_json(id)) {

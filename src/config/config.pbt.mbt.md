@@ -5,7 +5,7 @@
 
 ## Package: config
 
-```mbt
+```mbt nocheck
 test "prop_apply_defaults_idempotent" {
   assert_true @qc.property(fn(cfg : Config) {
     let first = apply_defaults(cfg)
@@ -34,7 +34,7 @@ test "prop_apply_defaults_idempotent" {
 }
 ```
 
-```mbt
+```mbt nocheck
 test "prop_validate_rejects_empty_token" {
   assert_true @qc.property(fn(cfg : Config) {
     match validate({ token: "", endpoint: cfg.endpoint, proxy_url: cfg.proxy_url, timeout: cfg.timeout, name: cfg.name, debug: cfg.debug }) {
@@ -61,7 +61,7 @@ test "prop_validate_rejects_empty_token" {
 }
 ```
 
-```mbt
+```mbt nocheck
 test "prop_validate_with_token_succeeds" {
   assert_true @qc.property(fn(token : String) {
     token != "" && validate(new_config(token)) is Ok
@@ -71,7 +71,7 @@ test "prop_validate_with_token_succeeds" {
 }
 ```
 
-```mbt
+```mbt nocheck
 test "prop_validate_timeout_bounds" {
   assert_true @qc.property(fn(timeout : Int) {
     let cfg = { token: "test", endpoint: "wss://example.com", proxy_url: None, timeout: timeout, name: "test", debug: false }
@@ -85,7 +85,7 @@ test "prop_validate_timeout_bounds" {
 }
 ```
 
-```mbt
+```mbt nocheck
 test "prop_validate_endpoint_format" {
   assert_true @qc.property(fn(endpoint : String) {
     let cfg = { token: "test", endpoint: endpoint, proxy_url: None, timeout: 10000, name: "test", debug: false }

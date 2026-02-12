@@ -1,9 +1,9 @@
 import {
-  "moonbitlang/async" as @async,
-  "moonbitlang/async/http" as @http,
-  "moonbitlang/async/websocket" as @async_ws,
-  "f4ah6o/direct_sdk/constants" as @constants,
-  "f4ah6o/direct_sdk/errors" as @errors,
+  "moonbitlang/async" @async,
+  "moonbitlang/async/http" @http,
+  "moonbitlang/async/websocket" @async_ws,
+  "f4ah6o/direct_sdk/constants" @constants,
+  "f4ah6o/direct_sdk/errors" @errors,
 }
 
 options(

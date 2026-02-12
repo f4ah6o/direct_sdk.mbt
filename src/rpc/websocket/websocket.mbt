@@ -280,7 +280,7 @@ pub async fn connect_native(
     }
     None => None
   }
-  let result = @async.with_timeout_opt(config.timeout, fn() {
+  let result = @async.with_timeout_opt(config.timeout, () => {
     try {
       let ws = @async_ws.Conn::connect(
         config.endpoint,

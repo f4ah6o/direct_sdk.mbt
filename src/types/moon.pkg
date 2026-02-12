@@ -1,7 +1,7 @@
 import {
-  "moonbitlang/core/strconv" as @strconv,
+  "moonbitlang/core/strconv" @strconv,
 }
 
-import "test" {
-  "moonbitlang/quickcheck" as @qc,
-}
+import {
+  "moonbitlang/quickcheck" @qc,
+} for "test"

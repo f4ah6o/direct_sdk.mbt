@@ -76,7 +76,7 @@ pub async fn run_login(args : ArrayView[String]) -> Result[Unit, String] {
     cfg
   }
   let client = @rpc_client.new_client(cfg)
-  let result = @async.with_task_group(fn(tasks) {
+  let result = @async.with_task_group((tasks) => {
     match @rpc_client.connect(client, tasks) {
       Ok(_) => {
         println("Authenticating...")
@@ -182,9 +182,7 @@ async fn prompt_credentials() -> Result[(String, String), String] {
 }
 
 ///|
-async fn read_line(
-  reader : @stdio.Input,
-) -> Result[String, String] {
+async fn read_line(reader : @stdio.Input) -> Result[String, String] {
   match reader.read_until("\n") {
     Some(line) => Ok(line.trim().to_string())
     None => Err("stdin closed")
@@ -192,9 +190,7 @@ async fn read_line(
 }
 
 ///|
-async fn read_password(
-  reader : @stdio.Input,
-) -> Result[String, String] {
+async fn read_password(reader : @stdio.Input) -> Result[String, String] {
   let echo_disabled = set_tty_echo(false)
   let result = read_line(reader)
   if echo_disabled {

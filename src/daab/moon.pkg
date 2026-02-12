@@ -1,23 +1,23 @@
 import {
-  "moonbitlang/async" as @async,
-  "moonbitlang/async/io" as @io,
-  "moonbitlang/async/process" as @process,
-  "moonbitlang/async/stdio" as @stdio,
-  "f4ah6o/direct_sdk/config" as @config,
-  "f4ah6o/direct_sdk/constants" as @constants,
-  "f4ah6o/direct_sdk/errors" as @errors,
-  "f4ah6o/direct_sdk/rpc/client" as @rpc_client,
-  "f4ah6o/direct_sdk/types" as @types,
-  "moonbitlang/core/json" as @json,
-  "moonbitlang/x/fs" as @fs,
-  "moonbitlang/x/path" as @path,
-  "moonbitlang/x/sys" as @sys,
+  "moonbitlang/async" @async,
+  "moonbitlang/async/io",
+  "moonbitlang/async/process" @process,
+  "moonbitlang/async/stdio" @stdio,
+  "f4ah6o/direct_sdk/config" @config,
+  "f4ah6o/direct_sdk/constants" @constants,
+  "f4ah6o/direct_sdk/errors" @errors,
+  "f4ah6o/direct_sdk/rpc/client" @rpc_client,
+  "f4ah6o/direct_sdk/types" @types,
+  "moonbitlang/core/json" @json,
+  "moonbitlang/x/fs" @fs,
+  "moonbitlang/x/path" @path,
+  "moonbitlang/x/sys" @sys,
 }
 
-import "test" {
-  "moonbitlang/x/fs" as @fs,
-  "f4ah6o/direct_sdk/types" as @types,
-}
+import {
+  "moonbitlang/x/fs" @fs,
+  "f4ah6o/direct_sdk/types" @types,
+} for "test"
 
 options(
   "is-main": true,

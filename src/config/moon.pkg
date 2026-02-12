@@ -1,12 +1,12 @@
 import {
-  "f4ah6o/direct_sdk/constants" as @constants,
-  "f4ah6o/direct_sdk/errors" as @errors,
+  "f4ah6o/direct_sdk/constants" @constants,
+  "f4ah6o/direct_sdk/errors" @errors,
 }
 
-import "test" {
-  "f4ah6o/direct_sdk/rpc/client" as @rpc_client,
-  "moonbitlang/quickcheck" as @qc,
-}
+import {
+  "f4ah6o/direct_sdk/rpc/client" @rpc_client,
+  "moonbitlang/quickcheck" @qc,
+} for "test"
 
 options(
   targets: {

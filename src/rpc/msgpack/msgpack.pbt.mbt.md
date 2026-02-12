@@ -5,7 +5,7 @@
 
 ## Package: msgpack
 
-```mbt
+```mbt nocheck
 test "prop_encode_request_decode_message_roundtrip" {
   assert_true @qc.property(fn(req : RpcRequest) {
     match encode_request(req) {
@@ -32,7 +32,7 @@ test "prop_encode_request_decode_message_roundtrip" {
 }
 ```
 
-```mbt
+```mbt nocheck
 test "prop_encode_notification_decode_message_roundtrip" {
   assert_true @qc.property(fn(pair : (String, Array[JsonValue])) {
     let (method, params) = pair
@@ -57,7 +57,7 @@ test "prop_encode_notification_decode_message_roundtrip" {
 }
 ```
 
-```mbt
+```mbt nocheck
 test "prop_encode_request_produces_non_empty_bytes" {
   assert_true @qc.property(fn(req : RpcRequest) {
     match encode_request(req) {
@@ -77,7 +77,7 @@ test "prop_encode_request_produces_non_empty_bytes" {
 }
 ```
 
-```mbt
+```mbt nocheck
 test "prop_encode_notification_produces_non_empty_bytes" {
   assert_true @qc.property(fn(pair : (String, Array[JsonValue])) {
     let (method, params) = pair

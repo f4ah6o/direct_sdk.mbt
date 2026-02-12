@@ -1,8 +1,8 @@
-import "test" {
-  "f4ah6o/direct_sdk/rpc/websocket" as @rpc_websocket,
-  "moonbitlang/core/env" as @env,
-  "moonbitlang/quickcheck" as @qc,
-}
+import {
+  "f4ah6o/direct_sdk/rpc/websocket" @rpc_websocket,
+  "moonbitlang/core/env" @env,
+  "moonbitlang/quickcheck" @qc,
+} for "test"
 
 options(
   targets: {
