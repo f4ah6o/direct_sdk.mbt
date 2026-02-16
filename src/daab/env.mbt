@@ -17,6 +17,12 @@ pub const ENV_HTTPS_PROXY_KEY : String = "HTTPS_PROXY"
 pub const ENV_HTTP_PROXY_KEY : String = "HTTP_PROXY"
 
 ///|
+pub const ENV_BOT_USER_ID_KEY : String = "DIRECT4B_BOT_USER_ID"
+
+///|
+pub const ENV_USER_PASSWORD_KEY : String = "DIRECT4B_USER_PASSWORD"
+
+///|
 fn parse_env_value(content : String, key : String) -> String? {
   let lines = content.split("\n").to_array()
   for line_view in lines {

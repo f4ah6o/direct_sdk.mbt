@@ -151,6 +151,8 @@ daab --help
 
 Environment variables used by `daab login`:
 
+- `DIRECT4B_BOT_USER_ID` (optional, with `DIRECT4B_USER_PASSWORD`)
+- `DIRECT4B_USER_PASSWORD` (optional, with `DIRECT4B_BOT_USER_ID`)
 - `HUBOT_DIRECT_ENDPOINT` (optional)
 - `HUBOT_DIRECT_PROXY_URL` (optional)
 - `HTTPS_PROXY` / `HTTP_PROXY` (fallback)
@@ -176,6 +178,5 @@ Apache-2.0
 
 - [direct-go-sdk](https://github.com/f4ah6o/direct-go-sdk) - Go版SDK
 - [Direct4B](https://www.direct4b.com/) - サービスサイト
-
 
 

@@ -20,6 +20,8 @@ let usage_text : String =
   #|  HUBOT_DIRECT_TOKEN       Access token used by run
   #|  HUBOT_DIRECT_ENDPOINT    Override WebSocket endpoint
   #|  HUBOT_DIRECT_PROXY_URL   Proxy URL for WebSocket
+  #|  DIRECT4B_BOT_USER_ID     Login user id (for daab login)
+  #|  DIRECT4B_USER_PASSWORD   Login password (for daab login)
   #|  HTTPS_PROXY              Proxy URL (fallback)
   #|  HTTP_PROXY               Proxy URL (fallback)
   #|
@@ -35,6 +37,7 @@ let login_help_text : String =
   #|
   #|Notes:
   #|  Login prompts for email and password unless --token is provided.
+  #|  If DIRECT4B_BOT_USER_ID and DIRECT4B_USER_PASSWORD are set, prompt is skipped.
   #|  Endpoint/proxy settings are read from environment variables.
   #|
 

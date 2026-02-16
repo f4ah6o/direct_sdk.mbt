@@ -55,9 +55,9 @@ pub async fn run_login(args : ArrayView[String]) -> Result[Unit, String] {
     None => @constants.DEFAULT_ENDPOINT
   }
   let proxy_url = resolve_proxy_url()
-  let (email, password) = match prompt_credentials() {
+  let (email, password) = match resolve_credentials() {
     Ok(result) => result
-    Err(msg) => return Err("failed to read credentials: " + msg)
+    Err(msg) => return Err(msg)
   }
   if email == "" {
     return Err("email is required")
@@ -68,71 +68,30 @@ pub async fn run_login(args : ArrayView[String]) -> Result[Unit, String] {
   println("")
   println("Connecting to direct for authentication...")
   println("Endpoint: " + endpoint)
-  let cfg = @config.new_config("")
-  let cfg = @config.with_endpoint(cfg, endpoint)
-  let cfg = if proxy_url != "" {
-    @config.with_proxy(cfg, proxy_url)
-  } else {
-    cfg
-  }
-  let client = @rpc_client.new_client(cfg)
-  let result = @async.with_task_group(tasks => {
-    match @rpc_client.connect(client, tasks) {
-      Ok(_) => {
-        println("Authenticating...")
-        let params = [
-          @types.JsonString(email),
-          @types.JsonString(password),
-          @types.JsonString(login_device_name),
-          @types.JsonString(login_device_info),
-          @types.JsonString(""),
-        ]
-        let call_result = @rpc_client.call(
-          client,
-          @constants.METHOD_CREATE_ACCESS_TOKEN,
-          params,
+  println("Authenticating...")
+  match request_access_token(endpoint, proxy_url, email, password) {
+    Ok(value) => {
+      let token = extract_token(value)
+      if token == "" {
+        return Err(
+          "failed to extract token from response: " +
+          value.to_string() +
+          "\n\n" +
+          "The server returned an unexpected response format.\n" +
+          "Please contact support if the problem persists.",
         )
-        ignore(@rpc_client.close(client))
-        Ok(call_result)
       }
-      Err(err) => Err(err)
+      match set_env_value(env_path, ENV_TOKEN_KEY, token) {
+        Ok(_) => {
+          println("Logged in successfully!")
+          println("Token saved to: " + env_path)
+          Ok(())
+        }
+        Err(msg) => Err("failed to save token: " + msg)
+      }
     }
-  })
-  match result {
-    Ok(call_result) =>
-      match call_result {
-        Ok(value) => {
-          let token = extract_token(value)
-          if token == "" {
-            return Err(
-              "failed to extract token from response: " +
-              value.to_string() +
-              "\n\n" +
-              "The server returned an unexpected response format.\n" +
-              "Please contact support if the problem persists.",
-            )
-          }
-          match set_env_value(env_path, ENV_TOKEN_KEY, token) {
-            Ok(_) => {
-              println("Logged in successfully!")
-              println("Token saved to: " + env_path)
-              Ok(())
-            }
-            Err(msg) => Err("failed to save token: " + msg)
-          }
-        }
-        Err(err) => {
-          let msg = "login failed\n\n" +
-            "Troubleshooting:\n" +
-            "  - Verify your email and password are correct\n" +
-            "  - Make sure the account is a bot account\n" +
-            "  - Check if the account is active\n" +
-            "  Error: " +
-            @errors.direct_error_to_string(err)
-          Err(msg)
-        }
-      }
-    Err(err) => {
+    Err(err) if err.has_prefix("connect:") => {
+      let err_msg = err[8:].to_string()
       let msg = "failed to connect\n\n" +
         "Troubleshooting:\n" +
         "  - Check your network connection\n" +
@@ -141,9 +100,161 @@ pub async fn run_login(args : ArrayView[String]) -> Result[Unit, String] {
         "\n" +
         "  - Check if a proxy is required\n" +
         "  Error: " +
-        @errors.direct_error_to_string(err)
+        err_msg
       Err(msg)
     }
+    Err(err) if err == "timeout" => {
+      let msg = "login timed out\n\n" +
+        "Troubleshooting:\n" +
+        "  - The server may be slow or dropping responses\n" +
+        "  - Check if a proxy/firewall is interfering\n" +
+        "  - Retry, or use `daab login --token <token>` as a workaround"
+      Err(msg)
+    }
+    Err(err) => {
+      let err_msg = if err.has_prefix("auth:") {
+        err[5:].to_string()
+      } else {
+        err
+      }
+      let msg = "login failed\n\n" +
+        "Troubleshooting:\n" +
+        "  - Verify your email and password are correct\n" +
+        "  - Make sure the account is a bot account\n" +
+        "  - Check if the account is active\n" +
+        "  Error: " +
+        err_msg
+      Err(msg)
+    }
+  }
+}
+
+///|
+async fn request_access_token(
+  endpoint : String,
+  proxy_url : String,
+  email : String,
+  password : String,
+) -> Result[@types.JsonValue, String] {
+  let ws_cfg = @rpc_websocket.default_websocket_config(endpoint)
+  let ws_cfg = if proxy_url != "" {
+    @rpc_websocket.with_proxy(ws_cfg, proxy_url)
+  } else {
+    ws_cfg
+  }
+  let ws = match @rpc_websocket.connect(ws_cfg) {
+    Ok(conn) => conn
+    Err(err) =>
+      return Err(
+        "connect:" +
+        @errors.direct_error_to_string(@rpc_websocket.ws_error_to_direct(err)),
+      )
+  }
+  let params = [
+    @types.JsonString(email),
+    @types.JsonString(password),
+    @types.JsonString(login_device_name),
+    @types.JsonString(login_device_info),
+    @types.JsonString(""),
+  ]
+  let request = @rpc_msgpack.create_request(
+    1L,
+    @constants.METHOD_CREATE_ACCESS_TOKEN,
+    params,
+  )
+  let payload = match @rpc_msgpack.encode_request(request) {
+    Ok(bytes) => bytes
+    Err(err) => {
+      ignore(@rpc_websocket.close(ws))
+      return Err("auth:" + @errors.direct_error_to_string(err))
+    }
+  }
+  match @rpc_websocket.send_binary(ws, payload) {
+    Ok(_) => ()
+    Err(err) => {
+      ignore(@rpc_websocket.close(ws))
+      return Err(
+        "auth:" +
+        @errors.direct_error_to_string(@rpc_websocket.ws_error_to_direct(err)),
+      )
+    }
+  }
+  let result = @async.with_timeout_opt(@constants.DEFAULT_REQUEST_TIMEOUT, () => {
+    wait_for_login_response(ws, request.msg_id)
+  })
+  ignore(@rpc_websocket.close(ws))
+  match result {
+    Some(Ok(value)) => Ok(value)
+    Some(Err(err)) => Err("auth:" + @errors.direct_error_to_string(err))
+    None => Err("timeout")
+  }
+}
+
+///|
+async fn wait_for_login_response(
+  ws : @rpc_websocket.WebSocketConnection,
+  msg_id : Int64,
+) -> Result[@types.JsonValue, @errors.DirectError] {
+  while true {
+    let data = match @rpc_websocket.receive(ws) {
+      Ok(bytes) => bytes
+      Err(err) => return Err(@rpc_websocket.ws_error_to_direct(err))
+    }
+    match @rpc_msgpack.decode_message(data) {
+      Ok(@rpc_msgpack.Response(resp)) => {
+        if resp.msg_id != msg_id {
+          continue
+        }
+        match resp.error {
+          Some(err) => return Err(rpc_error_from_json(err))
+          None => return Ok(resp.result)
+        }
+      }
+      Ok(@rpc_msgpack.Request(req)) =>
+        // Some servers emit token-change notification during login.
+        if req.rpc_method == @constants.EVENT_ACCESS_TOKEN_CHANGED {
+          let token = extract_token(@types.JsonArray(req.params))
+          if token != "" {
+            return Ok(@types.JsonString(token))
+          }
+        }
+      Err(_) => ()
+    }
+  }
+  abort("unreachable")
+}
+
+///|
+fn rpc_error_from_json(value : @types.JsonValue) -> @errors.DirectError {
+  match value {
+    @types.JsonString(msg) => @errors.rpc_error(0, msg)
+    @types.JsonObject(obj) => {
+      let code = match obj.get("code") {
+        Some(@types.JsonInt(i)) => {
+          let int_val = i.to_int()
+          if Int64::from_int(int_val) == i {
+            int_val
+          } else {
+            0
+          }
+        }
+        Some(@types.JsonNumber(n)) => {
+          let int_val = n.to_int()
+          if Float::from_int(int_val) == n {
+            int_val
+          } else {
+            0
+          }
+        }
+        _ => 0
+      }
+      let msg = match obj.get("message") {
+        Some(@types.JsonString(text)) => text
+        _ => value.to_string()
+      }
+      @errors.rpc_error(code, msg)
+    }
+    _ => @errors.rpc_error(0, value.to_string())
   }
 }
 
@@ -179,6 +290,29 @@ async fn prompt_credentials() -> Result[(String, String), String] {
     Err(msg) => return Err(msg)
   }
   Ok((email, password))
+}
+
+///|
+async fn resolve_credentials() -> Result[(String, String), String] {
+  let user_id = match @sys.get_env_var(ENV_BOT_USER_ID_KEY) {
+    Some(value) if value != "" => Some(value)
+    _ => None
+  }
+  let user_password = match @sys.get_env_var(ENV_USER_PASSWORD_KEY) {
+    Some(value) if value != "" => Some(value)
+    _ => None
+  }
+  match (user_id, user_password) {
+    (Some(email), Some(password)) => {
+      println("Using credentials from environment variables.")
+      Ok((email, password))
+    }
+    _ =>
+      match prompt_credentials() {
+        Ok(result) => Ok(result)
+        Err(msg) => Err("failed to read credentials: " + msg)
+      }
+  }
 }
 
 ///|
