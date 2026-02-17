@@ -11,6 +11,15 @@ pub struct UploadAuth {
   put_url : String
 }
 
+// Download authentication credentials for file download
+
+///|
+pub struct DownloadAuth {
+  file_id : @types.ID
+  url : String
+  headers : Map[String, String]
+}
+
 // File attachment information
 
 ///|
@@ -65,6 +74,32 @@ pub async fn create_upload_auth(
   }
   match result {
     @types.JsonObject(obj) => parse_upload_auth(obj)
+    _ => Err(@errors.invalid_response("Expected object"))
+  }
+}
+
+// Create authentication credentials for downloading a file.
+// cfg(target="native")
+
+///|
+pub async fn create_download_auth(
+  client : @rpc_client.Client,
+  talk_id : @types.ID,
+  message_id : @types.ID,
+  file_id : @types.ID,
+) -> Result[DownloadAuth, @errors.DirectError] {
+  let params = [
+    @types.id_to_json(talk_id),
+    @types.id_to_json(message_id),
+    @types.id_to_json(file_id),
+  ]
+  let result = match
+    @rpc_client.call(client, @constants.METHOD_CREATE_DOWNLOAD_AUTH, params) {
+    Ok(value) => value
+    Err(e) => return Err(e)
+  }
+  match result {
+    @types.JsonObject(obj) => parse_download_auth(obj)
     _ => Err(@errors.invalid_response("Expected object"))
   }
 }
@@ -202,6 +237,40 @@ pub async fn get_file_preview(
 }
 
 // === Helper functions for parsing file data ===
+
+// Parse DownloadAuth from @types.JsonValue
+
+///|
+fn parse_download_auth(
+  obj : Map[String, @types.JsonValue],
+) -> Result[DownloadAuth, @errors.DirectError] {
+  let file_id = match obj.get("file_id") {
+    Some(v) =>
+      match @types.json_to_id(v) {
+        Some(id) => id
+        None => @types.IDString("")
+      }
+    None => @types.IDString("")
+  }
+  let url = match obj.get("get_url") {
+    Some(@types.JsonString(s)) => s
+    _ => ""
+  }
+  let headers = match obj.get("get_headers") {
+    Some(@types.JsonObject(raw)) => {
+      let result = Map::new()
+      for kv in raw.to_array() {
+        match kv.1 {
+          @types.JsonString(s) => result[kv.0] = s
+          _ => ()
+        }
+      }
+      result
+    }
+    _ => Map::new()
+  }
+  Ok({ file_id, url, headers })
+}
 
 // Parse UploadAuth from @types.JsonValue
 

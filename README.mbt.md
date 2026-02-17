@@ -8,7 +8,7 @@ MoonBit用のDirect4B WebSocket API SDKです。`direct-go-sdk`を移植した�
 ## Features
 
 - **WebSocket通信**: MessagePack RPCプロトコルによる非同期通信
-- **完全なAPIカバレッジ**: 68個のRPCメソッド、40種類のイベント
+- **完全なAPIカバレッジ**: 69個のRPCメソッド、40種類のイベント
 - **型安全**: MoonBitの型システムによる静的型チェック
 - **イベント駆動**: サーバー通知のハンドラー登録
 - **非同期I/O**: `async`/`await`による効率的な並行処理
@@ -100,7 +100,7 @@ let client = @rpc_client.new_client_with_token("your-access-token")
 | `api/talks` | トーク/部屋の管理 |
 | `api/messages` | メッセージ送受信、検索 |
 | `api/domains` | ドメイン/組織の管理 |
-| `api/files` | ファイルアップロード、添付ファイル |
+| `api/files` | ファイルのアップロード/ダウンロード認証、添付ファイル |
 | `api/conference` | 会議/通話機能 |
 | `api/announcements` | お知らせ機能 |
 | `api/departments` | 組織図/部門 |
@@ -178,5 +178,4 @@ Apache-2.0
 
 - [direct-go-sdk](https://github.com/f4ah6o/direct-go-sdk) - Go版SDK
 - [Direct4B](https://www.direct4b.com/) - サービスサイト
-
 

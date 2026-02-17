@@ -8,6 +8,8 @@ import {
 }
 
 // Values
+pub async fn create_download_auth(@client.Client, @types.ID, @types.ID, @types.ID) -> Result[DownloadAuth, @errors.DirectError]
+
 pub async fn create_file_preview(@client.Client, @types.ID) -> Result[FilePreview, @errors.DirectError]
 
 pub async fn create_upload_auth(@client.Client, String, String, Int64, String) -> Result[UploadAuth, @errors.DirectError]
@@ -33,6 +35,12 @@ pub struct Attachment {
   content_size : Int64
   url : String
   created_at : Int64
+}
+
+pub struct DownloadAuth {
+  file_id : @types.ID
+  url : String
+  headers : Map[String, String]
 }
 
 pub struct FilePreview {

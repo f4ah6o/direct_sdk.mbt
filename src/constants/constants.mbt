@@ -374,6 +374,9 @@ pub const METHOD_GET_MESSAGE_REACTION_USERS : String = "get_message_reaction_use
 pub const METHOD_CREATE_UPLOAD_AUTH : String = "create_upload_auth"
 
 ///|
+pub const METHOD_CREATE_DOWNLOAD_AUTH : String = "create_download_auth"
+
+///|
 pub const METHOD_GET_ATTACHMENTS : String = "get_attachments"
 
 ///|

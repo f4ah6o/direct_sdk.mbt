@@ -110,6 +110,8 @@ pub const METHOD_CREATE_ACCESS_TOKEN_BY_ID : String = "create_access_token_by_id
 
 pub const METHOD_CREATE_ANNOUNCEMENT : String = "create_announcement"
 
+pub const METHOD_CREATE_DOWNLOAD_AUTH : String = "create_download_auth"
+
 pub const METHOD_CREATE_FILE_PREVIEW : String = "create_file_preview"
 
 pub const METHOD_CREATE_GROUP_TALK : String = "create_group_talk"

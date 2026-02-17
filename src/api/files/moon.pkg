@@ -6,5 +6,9 @@ import {
 }
 
 options(
-  targets: { "files.mbt": [ "native" ], "pkg.generated.mbti": [ "native" ] },
+  targets: {
+    "files.mbt": [ "native" ],
+    "files_wbtest.mbt": [ "native" ],
+    "pkg.generated.mbti": [ "native" ],
+  },
 )
