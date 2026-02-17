@@ -1,13 +1,28 @@
 import {
+  "f4ah6o/direct_sdk/constants" @constants,
+  "f4ah6o/direct_sdk/errors" @errors,
   "f4ah6o/direct_sdk/rpc/client" @rpc_client,
   "f4ah6o/direct_sdk/types" @types,
-  "f4ah6o/direct_sdk/errors" @errors,
-  "f4ah6o/direct_sdk/constants" @constants,
 }
+
+import {
+  "f4ah6o/direct_sdk/daab" @daab,
+  "f4ah6o/direct_sdk/api/talks" @api_talks,
+  "f4ah6o/direct_sdk/config" @config,
+  "moonbitlang/async" @async,
+  "moonbitlang/async/http" @http,
+  "moonbitlang/async/io" @io,
+  "moonbitlang/async/process" @process,
+  "moonbitlang/core/encoding/utf8" @utf8,
+  "moonbitlang/core/json" @json,
+  "moonbitlang/x/fs" @fs,
+  "moonbitlang/x/sys" @sys,
+} for "test"
 
 options(
   targets: {
     "files.mbt": [ "native" ],
+    "files_e2e_test.mbt": [ "native" ],
     "files_wbtest.mbt": [ "native" ],
     "pkg.generated.mbti": [ "native" ],
   },
