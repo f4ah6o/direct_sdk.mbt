@@ -79,6 +79,7 @@ pub async fn create_upload_auth(
 }
 
 // Create authentication credentials for downloading a file.
+// Parameters are: talk_id, message_id, file_id.
 // cfg(target="native")
 
 ///|
@@ -88,11 +89,7 @@ pub async fn create_download_auth(
   message_id : @types.ID,
   file_id : @types.ID,
 ) -> Result[DownloadAuth, @errors.DirectError] {
-  let params = [
-    @types.id_to_json(talk_id),
-    @types.id_to_json(message_id),
-    @types.id_to_json(file_id),
-  ]
+  let params = create_download_auth_params(talk_id, message_id, file_id)
   let result = match
     @rpc_client.call(client, @constants.METHOD_CREATE_DOWNLOAD_AUTH, params) {
     Ok(value) => value
@@ -117,8 +114,10 @@ pub async fn get_attachments(
   limit : Int,
 ) -> Result[Array[Attachment], @errors.DirectError] {
   let params = [
-    @types.id_to_json(talk_id),
-    @types.JsonNumber(Float::from_int(limit)),
+    id_to_rpc_json(talk_id),
+    @types.JsonInt(limit.to_int64()),
+    @types.JsonNull,
+    @types.JsonNull,
   ]
   let result = match
     @rpc_client.call(client, @constants.METHOD_GET_ATTACHMENTS, params) {
@@ -272,6 +271,27 @@ fn parse_download_auth(
   Ok({ file_id, url, headers })
 }
 
+///|
+fn id_to_rpc_json(id : @types.ID) -> @types.JsonValue {
+  match id {
+    @types.IDInt(i) => @types.JsonInt(i)
+    @types.IDString(s) =>
+      match @types.string_to_id(s) {
+        @types.IDInt(i) => @types.JsonInt(i)
+        @types.IDString(_) => @types.JsonString(s)
+      }
+  }
+}
+
+///|
+fn create_download_auth_params(
+  talk_id : @types.ID,
+  message_id : @types.ID,
+  file_id : @types.ID,
+) -> Array[@types.JsonValue] {
+  [id_to_rpc_json(talk_id), id_to_rpc_json(message_id), id_to_rpc_json(file_id)]
+}
+
 // Parse UploadAuth from @types.JsonValue
 
 ///|
@@ -322,7 +342,16 @@ fn parse_attachment(
         Some(id) => id
         None => return Err(@errors.invalid_response("Invalid id"))
       }
-    None => return Err(@errors.invalid_response("Missing id"))
+    None =>
+      match obj.get("attachment_id") {
+        Some(v) =>
+          match @types.json_to_id(v) {
+            Some(id) => id
+            None =>
+              return Err(@errors.invalid_response("Invalid attachment_id"))
+          }
+        None => return Err(@errors.invalid_response("Missing id"))
+      }
   }
   let message_id = match obj.get("message_id") {
     Some(v) =>

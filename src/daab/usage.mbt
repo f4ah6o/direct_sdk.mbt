@@ -3,7 +3,7 @@ let usage_text : String =
   #|daab - Direct bot helper CLI
   #|
   #|Usage:
-  #|  daab login [--env <path>] [--token <token>]
+  #|  daab login [--env <path>] [--token <token>] [--force]
   #|  daab create <project-name> [--template <name>]
   #|  daab init <project-name>
   #|  daab run [--env <path>]
@@ -29,11 +29,12 @@ let usage_text : String =
 ///|
 let login_help_text : String =
   #|Usage:
-  #|  daab login [--env <path>] [--token <token>]
+  #|  daab login [--env <path>] [--token <token>] [--force]
   #|
   #|Options:
   #|  --env <path>   Path to the env file (default: .env)
   #|  --token <token>  Save the token directly without prompting
+  #|  --force          Ignore existing token and perform login again
   #|
   #|Notes:
   #|  Login prompts for email and password unless --token is provided.

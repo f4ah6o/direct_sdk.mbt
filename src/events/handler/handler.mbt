@@ -11,6 +11,20 @@ pub struct EventDispatcher {
   mut user_handlers : Array[@events_types.UserEventHandler]
   mut domain_handlers : Array[DomainEventHandler]
   mut conference_handlers : Array[ConferenceEventHandler]
+  mut pending_attachments : Map[String, PendingAttachment]
+}
+
+///|
+struct PendingAttachment {
+  url : String
+  name : String
+  content_type : String
+}
+
+///|
+priv struct PendingAttachmentEvent {
+  key : String
+  attachment : PendingAttachment
 }
 
 // Domain event handler
@@ -34,6 +48,7 @@ pub fn new_dispatcher() -> EventDispatcher {
     user_handlers: [],
     domain_handlers: [],
     conference_handlers: [],
+    pending_attachments: Map::new(),
   }
 }
 
@@ -107,10 +122,24 @@ pub fn EventDispatcher::emit(
   match event_name {
     "notify_create_message" =>
       match parse_received_message(data) {
-        Ok(msg) =>
-          for h in self.message_handlers {
-            h(msg)
+        Ok(msg) => {
+          let key = attachment_key(msg.talk_id, msg.id)
+          let message = match self.pending_attachments.get(key) {
+            Some(att) => {
+              self.pending_attachments.remove(key)
+              merge_message_attachment(msg, att)
+            }
+            None => msg
           }
+          for h in self.message_handlers {
+            h(message)
+          }
+        }
+        Err(_) => ()
+      }
+    "notify_create_attachment" =>
+      match parse_pending_attachment(data) {
+        Ok(event) => self.pending_attachments[event.key] = event.attachment
         Err(_) => ()
       }
     "notify_create_group_talk"
@@ -202,6 +231,7 @@ pub fn EventDispatcher::remove_all_handlers(self : EventDispatcher) -> Unit {
   self.user_handlers = []
   self.domain_handlers = []
   self.conference_handlers = []
+  self.pending_attachments = Map::new()
 }
 
 ///|
@@ -442,6 +472,15 @@ fn parse_received_message(
         Some(v) => v
         None => @types.JsonNull
       }
+      let attachment_url = content_first_string(content, [
+        "url", "get_url", "download_url", "attachment_url",
+      ]).unwrap_or("")
+      let attachment_name = content_first_string(content, [
+        "name", "file_name", "filename", "attachment_name",
+      ]).unwrap_or("")
+      let attachment_content_type = content_first_string(content, [
+        "content_type", "contentType", "mime_type", "mimetype", "attachment_content_type",
+      ]).unwrap_or("")
       let created = match obj.get("created") {
         Some(@types.JsonInt(i)) => i
         Some(@types.JsonNumber(n)) => n.to_int().to_int64()
@@ -456,11 +495,197 @@ fn parse_received_message(
         text,
         msg_type,
         content,
+        attachment_url,
+        attachment_name,
+        attachment_content_type,
         created,
         raw: None,
       })
     }
     _ => Err(@errors.invalid_response("Expected object"))
+  }
+}
+
+///|
+fn attachment_key(talk_id : String, message_id : String) -> String {
+  talk_id + ":" + message_id
+}
+
+///|
+fn json_value_to_id_string(value : @types.JsonValue) -> String? {
+  match value {
+    @types.JsonString(s) if s != "" => Some(s)
+    @types.JsonInt(i) => Some(i.to_string())
+    @types.JsonNumber(n) => Some(n.to_int().to_int64().to_string())
+    _ => None
+  }
+}
+
+///|
+fn json_value_to_non_empty_string(value : @types.JsonValue) -> String? {
+  match value {
+    @types.JsonString(s) if s != "" => Some(s)
+    _ => None
+  }
+}
+
+///|
+fn object_first_id_string(
+  obj : Map[String, @types.JsonValue],
+  keys : Array[String],
+) -> String? {
+  for key in keys {
+    match obj.get(key) {
+      Some(value) =>
+        match json_value_to_id_string(value) {
+          Some(s) => return Some(s)
+          None => ()
+        }
+      None => ()
+    }
+  }
+  None
+}
+
+///|
+fn object_first_non_empty_string(
+  obj : Map[String, @types.JsonValue],
+  keys : Array[String],
+) -> String? {
+  for key in keys {
+    match obj.get(key) {
+      Some(value) =>
+        match json_value_to_non_empty_string(value) {
+          Some(s) => return Some(s)
+          None => ()
+        }
+      None => ()
+    }
+  }
+  None
+}
+
+///|
+fn content_first_string(
+  content : @types.JsonValue,
+  keys : Array[String],
+) -> String? {
+  match content {
+    @types.JsonObject(obj) => {
+      match object_first_non_empty_string(obj, keys) {
+        Some(s) => return Some(s)
+        None => ()
+      }
+      for nested_key in ["file", "attachment", "files", "attachments"] {
+        match obj.get(nested_key) {
+          Some(next) =>
+            match content_first_string(next, keys) {
+              Some(s) => return Some(s)
+              None => ()
+            }
+          None => ()
+        }
+      }
+      None
+    }
+    @types.JsonArray(items) => {
+      for item in items {
+        match content_first_string(item, keys) {
+          Some(s) => return Some(s)
+          None => ()
+        }
+      }
+      None
+    }
+    _ => None
+  }
+}
+
+///|
+fn parse_pending_attachment(
+  data : @types.JsonValue,
+) -> Result[PendingAttachmentEvent, @errors.DirectError] {
+  match data {
+    @types.JsonObject(obj) => {
+      let talk_id = match
+        object_first_id_string(obj, [
+          "talk_id", "talkId", "talk_id_str", "talkIdStr",
+        ]) {
+        Some(s) => s
+        None => return Err(@errors.invalid_response("missing talk_id"))
+      }
+      let message_id = match
+        object_first_id_string(obj, [
+          "message_id", "messageId", "msg_id", "message_id_str",
+        ]) {
+        Some(s) => s
+        None => return Err(@errors.invalid_response("missing message_id"))
+      }
+      let url = match object_first_non_empty_string(obj, ["url", "get_url"]) {
+        Some(s) => s
+        None => return Err(@errors.invalid_response("missing attachment url"))
+      }
+      let name = object_first_non_empty_string(obj, [
+        "name", "file_name", "filename",
+      ]).unwrap_or("")
+      let content_type = object_first_non_empty_string(obj, [
+        "content_type", "contentType", "mime_type", "mimetype", "type",
+      ]).unwrap_or("")
+      Ok({
+        key: attachment_key(talk_id, message_id),
+        attachment: { url, name, content_type },
+      })
+    }
+    _ => Err(@errors.invalid_response("attachment payload is not object"))
+  }
+}
+
+///|
+fn merge_message_attachment(
+  msg : @types.ReceivedMessage,
+  attachment : PendingAttachment,
+) -> @types.ReceivedMessage {
+  let content = match msg.content {
+    @types.JsonObject(obj) => {
+      let merged = Map::new()
+      for item in obj.to_array() {
+        merged[item.0] = item.1
+      }
+      merged["attachment_url"] = @types.JsonString(attachment.url)
+      if attachment.name != "" {
+        merged["attachment_name"] = @types.JsonString(attachment.name)
+      }
+      if attachment.content_type != "" {
+        merged["attachment_content_type"] = @types.JsonString(
+          attachment.content_type,
+        )
+      }
+      @types.JsonObject(merged)
+    }
+    _ => msg.content
+  }
+  {
+    id: msg.id,
+    talk_id: msg.talk_id,
+    room_id: msg.room_id,
+    user_id: msg.user_id,
+    domain_id: msg.domain_id,
+    text: msg.text,
+    msg_type: msg.msg_type,
+    content,
+    attachment_url: attachment.url,
+    attachment_name: if attachment.name != "" {
+      attachment.name
+    } else {
+      msg.attachment_name
+    },
+    attachment_content_type: if attachment.content_type != "" {
+      attachment.content_type
+    } else {
+      msg.attachment_content_type
+    },
+    created: msg.created,
+    raw: msg.raw,
   }
 }
 

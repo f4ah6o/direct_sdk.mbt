@@ -2,6 +2,9 @@
 let e2e_gate_env : String = "DIRECT_SDK_E2E"
 
 ///|
+let e2e_receive_gate_env : String = "DIRECT_SDK_E2E_RECEIVE_ONLY"
+
+///|
 let e2e_talk_id_env : String = "DIRECT_SDK_E2E_TALK_ID"
 
 ///|
@@ -23,6 +26,9 @@ let e2e_total_timeout_ms : Int = 180_000
 let download_timeout_ms : Int = 30_000
 
 ///|
+let download_max_redirects : Int = 5
+
+///|
 let direct_api_timeout_ms : Int = 90_000
 
 ///|
@@ -38,16 +44,31 @@ let create_pair_retry_count : Int = 5
 let create_pair_retry_interval_ms : Int = 2_000
 
 ///|
-let create_download_auth_retry_count : Int = 10
-
-///|
-let create_download_auth_retry_interval_ms : Int = 1_000
-
-///|
 let session_wait_attempts : Int = 100
 
 ///|
 let session_wait_interval_ms : Int = 200
+
+///|
+let message_event_wait_timeout_ms : Int = 30_000
+
+///|
+let message_text_tag_prefix : String = "direct-sdk-e2e-create-download-auth-"
+
+///|
+let message_event_poll_interval_ms : Int = 100
+
+///|
+let message_event_wait_attempts : Int = 300
+
+///|
+let receive_end_message : String = "end."
+
+///|
+let receive_poll_interval_ms : Int = 200
+
+///|
+let receive_wait_attempts : Int = 3000
 
 ///|
 let temp_file_name : String = ".tmp_direct_sdk_e2e_download_auth.txt"
@@ -64,6 +85,12 @@ struct SentFileMeta {
   talk_id : String
   message_id : String
   file_id : String
+}
+
+///|
+struct DownloadRequest {
+  url : String
+  headers : Map[String, String]
 }
 
 ///|
@@ -153,7 +180,7 @@ async fn refresh_token_via_daab_login() -> Result[String?, String] {
   remove_file_quiet(daab_login_env_path)
   log_step("refresh-token-daab-login")
   let result = @async.with_timeout_opt(daab_login_timeout_ms, () => {
-    @daab.run_login(["--env", daab_login_env_path])
+    @daab.run_login(["--force", "--env", daab_login_env_path])
   })
   match result {
     None =>
@@ -167,7 +194,11 @@ async fn refresh_token_via_daab_login() -> Result[String?, String] {
   remove_file_quiet(daab_login_env_path)
   match token {
     Some(value) if value != "" => Ok(Some(value))
-    _ => Err("daab login completed but no token was written")
+    _ =>
+      match env_non_empty(@daab.ENV_TOKEN_KEY) {
+        Some(value) => Ok(Some(value))
+        None => Err("daab login completed but no token was written")
+      }
   }
 }
 
@@ -186,19 +217,11 @@ fn resolve_e2e_tokens() -> Array[String] {
     Some(token) => push_unique_token(tokens, token)
     None => ()
   }
-  match env_non_empty("DIRECT_API_ACCESS_TOKEN") {
-    Some(token) => push_unique_token(tokens, token)
-    None => ()
-  }
   match read_direct_api_env_value("HUBOT_DIRECT_TOKEN") {
     Some(token) => push_unique_token(tokens, token)
     None => ()
   }
   match read_direct_api_env_value("DIRECT4B_API_TOKEN") {
-    Some(token) => push_unique_token(tokens, token)
-    None => ()
-  }
-  match read_direct_api_env_value("DIRECT_API_ACCESS_TOKEN") {
     Some(token) => push_unique_token(tokens, token)
     None => ()
   }
@@ -515,10 +538,11 @@ async fn resolve_talk_id_via_direct_api(
 async fn send_file_meta_via_direct_api(
   talk_id : String,
   direct_api_token : String?,
+  text_tag : String,
 ) -> Result[SentFileMeta, String] {
   let stdout_text = match
     run_direct_api_command(
-      ["send-file-meta", talk_id, "./" + temp_file_name, "--text", "sdk-e2e"],
+      ["send-file-meta", talk_id, "./" + temp_file_name, "--text", text_tag],
       direct_api_token,
     ) {
     Ok(text) => text
@@ -532,80 +556,6 @@ fn resolve_direct_api_token() -> String? {
   match env_non_empty("DIRECT_SDK_E2E_DIRECT_API_TOKEN") {
     Some(token) => Some(token)
     None => read_direct_api_env_value("DIRECT_API_ACCESS_TOKEN")
-  }
-}
-
-///|
-fn parse_email_from_me_output(stdout_text : String) -> String? {
-  let lines = stdout_text.split("\n").to_array()
-  for line_view in lines {
-    let line = line_view.trim().to_string()
-    if line.has_prefix("Email:") {
-      let value = line.split(":").to_array()[1:]
-        .to_array()
-        .join(":")
-        .trim()
-        .to_string()
-        .to_lower()
-      if value != "" {
-        return Some(value)
-      }
-    }
-  }
-  None
-}
-
-///|
-fn parse_sdk_email(value : @types.JsonValue) -> String? {
-  match value {
-    @types.JsonObject(obj) =>
-      match obj.get("email") {
-        Some(@types.JsonString(email)) if email != "" => Some(email.to_lower())
-        _ => None
-      }
-    _ => None
-  }
-}
-
-///|
-async fn resolve_sdk_email(
-  client : @rpc_client.Client,
-) -> Result[String, String] {
-  match @rpc_client.call(client, @constants.METHOD_GET_ME, []) {
-    Ok(value) =>
-      match parse_sdk_email(value) {
-        Some(email) => Ok(email)
-        None => Err("get_me response does not include email")
-      }
-    Err(err) => Err("get_me failed: " + @errors.direct_error_to_string(err))
-  }
-}
-
-///|
-async fn resolve_talk_id_with_fallback(
-  _client : @rpc_client.Client,
-  direct_api_token : String?,
-) -> Result[String, String] {
-  match resolve_talk_id(direct_api_token) {
-    Ok(value) => Ok(value)
-    Err(msg) => {
-      if resolve_talk_id_override() is Some(_) {
-        return Err(msg)
-      }
-      let me_output = match run_direct_api_command(["me"], direct_api_token) {
-        Ok(text) => text
-        Err(me_err) => return Err(msg + "\n\nsender resolve failed: " + me_err)
-      }
-      let sdk_email = match parse_email_from_me_output(me_output) {
-        Some(value) => value
-        None =>
-          return Err(
-            msg +
-            "\n\nsender resolve failed: email not found in direct-api me output",
-          )
-      }
-      resolve_talk_id_via_direct_api(sdk_email, direct_api_token)
-    }
   }
 }
 
@@ -629,14 +579,9 @@ async fn resolve_talk_id(direct_api_token : String?) -> Result[String, String] {
 }
 
 ///|
-async fn download_with_auth(auth : DownloadAuth) -> Result[Bytes, String] {
+async fn download_with_request(req : DownloadRequest) -> Result[Bytes, String] {
   let result = @async.with_timeout_opt(download_timeout_ms, () => {
-    let (resp, body) = @http.get(auth.url, headers=auth.headers)
-    if resp.code < 200 || resp.code >= 300 {
-      Err("download HTTP failed: " + resp.code.to_string() + " " + resp.reason)
-    } else {
-      Ok(body.binary())
-    }
+    follow_download_redirect(req, 0)
   })
   match result {
     Some(v) => v
@@ -646,28 +591,39 @@ async fn download_with_auth(auth : DownloadAuth) -> Result[Bytes, String] {
 }
 
 ///|
-async fn create_download_auth_with_retry(
-  client : @rpc_client.Client,
-  talk_id : @types.ID,
-  message_id : @types.ID,
-  file_id : @types.ID,
-) -> Result[DownloadAuth, String] {
-  let mut last_error = "create_download_auth failed"
-  for _ in 0..<create_download_auth_retry_count {
-    match create_download_auth(client, talk_id, message_id, file_id) {
-      Ok(value) => return Ok(value)
-      Err(err) => {
-        let msg = @errors.direct_error_to_string(err)
-        last_error = msg
-        if msg.contains("RPC error 400") {
-          @async.sleep(create_download_auth_retry_interval_ms)
-          continue
-        }
-        return Err(msg)
-      }
-    }
+async fn follow_download_redirect(
+  req : DownloadRequest,
+  redirects : Int,
+) -> Result[Bytes, String] {
+  let (resp, body) = @http.get(req.url, headers=req.headers)
+  if resp.code >= 200 && resp.code < 300 {
+    return Ok(body.binary())
   }
-  Err(last_error)
+  if resp.code == 301 ||
+    resp.code == 302 ||
+    resp.code == 303 ||
+    resp.code == 307 ||
+    resp.code == 308 {
+    if redirects >= download_max_redirects {
+      return Err(
+        "download redirect exceeded " + download_max_redirects.to_string(),
+      )
+    }
+    let location = match resp.headers.get("location") {
+      Some(value) if value != "" => value
+      _ =>
+        return Err(
+          "download redirect missing location header (" +
+          resp.code.to_string() +
+          ")",
+        )
+    }
+    return follow_download_redirect(
+      { url: location, headers: req.headers },
+      redirects + 1,
+    )
+  }
+  Err("download HTTP failed: " + resp.code.to_string() + " " + resp.reason)
 }
 
 ///|
@@ -701,35 +657,49 @@ async fn wait_for_rpc_session(
 }
 
 ///|
-async fn resolve_file_id_from_attachments(
-  client : @rpc_client.Client,
-  talk_id : @types.ID,
-  message_id_str : String,
-  fallback_file_id : @types.ID,
-) -> @types.ID {
-  let attachments = match get_attachments(client, talk_id, 100) {
-    Ok(value) => value
-    Err(err) => {
-      println(
-        "[e2e] get_attachments failed: " + @errors.direct_error_to_string(err),
-      )
-      return fallback_file_id
-    }
+fn build_message_text_tag() -> String {
+  message_text_tag_prefix + @env.now().to_int().to_string()
+}
+
+///|
+fn is_matching_message_event(
+  msg : @types.ReceivedMessage,
+  talk_id : String,
+  message_id : String,
+  text_tag : String,
+) -> Bool {
+  if msg.talk_id != talk_id {
+    return false
   }
-  for att in attachments {
-    if @types.id_to_string(att.message_id) == message_id_str {
-      println(
-        "[e2e] file_id resolved from attachments: " +
-        @types.id_to_string(att.file_id),
-      )
-      return att.file_id
-    }
+  if msg.id == message_id {
+    return true
   }
-  println(
-    "[e2e] file_id fallback from direct-api output: " +
-    @types.id_to_string(fallback_file_id),
+  msg.text != "" && msg.text.contains(text_tag)
+}
+
+///|
+async fn wait_for_message_event(
+  events : Array[@types.ReceivedMessage],
+  talk_id : String,
+  message_id : String,
+  text_tag : String,
+) -> Result[@types.ReceivedMessage, String] {
+  let mut index = 0
+  for _ in 0..<message_event_wait_attempts {
+    while index < events.length() {
+      let msg = events[index]
+      index = index + 1
+      if is_matching_message_event(msg, talk_id, message_id, text_tag) {
+        return Ok(msg)
+      }
+    }
+    @async.sleep(message_event_poll_interval_ms)
+  }
+  Err(
+    "message event timeout after " +
+    message_event_wait_timeout_ms.to_string() +
+    "ms",
   )
-  fallback_file_id
 }
 
 ///|
@@ -741,89 +711,20 @@ async fn run_e2e_flow(client : @rpc_client.Client) -> Result[Unit, String] {
   direct_api_token = resolve_direct_api_token()
 
   log_step("resolve-talk")
-  let mut talk_id_str = match
-    resolve_talk_id_with_fallback(client, direct_api_token) {
+  let talk_id_str = match resolve_talk_id(direct_api_token) {
     Ok(value) => value
     Err(msg) => return Err(msg)
   }
-  let mut sdk_email : String? = None
-  match @rpc_client.call(client, @constants.METHOD_GET_ME, []) {
-    Ok(value) => {
-      println("[e2e] sdk raw get_me=" + value.to_string())
-      sdk_email = parse_sdk_email(value)
+
+  let message_events : Array[@types.ReceivedMessage] = []
+  log_step("listen-message")
+  @rpc_client.on_message(client, fn(msg) {
+    if msg.talk_id == talk_id_str {
+      message_events.push(msg)
     }
-    Err(err) =>
-      println(
-        "[e2e] sdk raw get_me failed: " + @errors.direct_error_to_string(err),
-      )
-  }
-  let mut contains_target = false
-  match @api_talks.get_talks(client) {
-    Ok(talks) => {
-      for talk in talks {
-        if @types.id_to_string(talk.id) == talk_id_str {
-          contains_target = true
-          break
-        }
-      }
-      println(
-        "[e2e] sdk visible talks=" +
-        talks.length().to_string() +
-        " contains_target=" +
-        contains_target.to_string(),
-      )
-    }
-    Err(err) =>
-      println("[e2e] get_talks failed: " + @errors.direct_error_to_string(err))
-  }
-  if !contains_target {
-    log_step("resolve-talk-fallback")
-    let mut resolved_fallback = false
-    let mut fallback_error = "talk fallback is not available"
-    match sdk_email {
-      Some(email) =>
-        match resolve_talk_id_via_direct_api(email, direct_api_token) {
-          Ok(fallback_talk_id) => {
-            talk_id_str = fallback_talk_id
-            resolved_fallback = true
-            println(
-              "[e2e] fallback talk resolved via direct-api: " + talk_id_str,
-            )
-          }
-          Err(msg) => {
-            fallback_error = msg
-            println("[e2e] direct-api fallback talk resolve failed: " + msg)
-          }
-        }
-      None =>
-        match resolve_sdk_email(client) {
-          Ok(email) =>
-            match resolve_talk_id_via_direct_api(email, direct_api_token) {
-              Ok(fallback_talk_id) => {
-                talk_id_str = fallback_talk_id
-                resolved_fallback = true
-                println(
-                  "[e2e] fallback talk resolved via direct-api: " + talk_id_str,
-                )
-              }
-              Err(msg) => {
-                fallback_error = msg
-                println("[e2e] direct-api fallback talk resolve failed: " + msg)
-              }
-            }
-          Err(msg) => {
-            fallback_error = msg
-            println("[e2e] sdk email resolve failed: " + msg)
-          }
-        }
-    }
-    if !resolved_fallback {
-      return Err(
-        "target talk is not visible to sdk user and fallback talk resolve failed: " +
-        fallback_error,
-      )
-    }
-  }
+  })
+
+  let text_tag = build_message_text_tag()
 
   log_step("prepare-temp-file")
   let expected_text = "direct-sdk-e2e-create-download-auth\n"
@@ -832,36 +733,73 @@ async fn run_e2e_flow(client : @rpc_client.Client) -> Result[Unit, String] {
 
   log_step("send-file-via-direct-api")
   let sent = match
-    send_file_meta_via_direct_api(talk_id_str, direct_api_token) {
+    send_file_meta_via_direct_api(talk_id_str, direct_api_token, text_tag) {
     Ok(value) => value
     Err(msg) => return Err(msg)
   }
-
-  log_step("create-download-auth")
-  let talk_id : @types.ID = @types.IDString(sent.talk_id)
-  let message_id : @types.ID = @types.IDString(sent.message_id)
-  let file_id = resolve_file_id_from_attachments(
-    client,
-    talk_id,
-    sent.message_id,
-    @types.IDString(sent.file_id),
-  )
   println(
-    "[e2e] ids talk=" +
-    @types.id_to_string(talk_id) +
-    " message=" +
-    @types.id_to_string(message_id) +
-    " file=" +
-    @types.id_to_string(file_id),
+    "[e2e] sent file message_id=" + sent.message_id + " file_id=" + sent.file_id,
   )
-  let auth = match
-    create_download_auth_with_retry(client, talk_id, message_id, file_id) {
+
+  log_step("wait-message-event")
+  let observed = match
+    wait_for_message_event(
+      message_events,
+      talk_id_str,
+      sent.message_id,
+      text_tag,
+    ) {
     Ok(value) => value
-    Err(msg) => return Err("create_download_auth failed: " + msg)
+    Err(msg) => return Err(msg)
   }
+  println(
+    "[e2e] observed message id=" +
+    observed.id +
+    " talk=" +
+    observed.talk_id +
+    " text=" +
+    observed.text,
+  )
+
+  log_step("resolve-download-request")
+  let talk_id : @types.ID = @types.string_to_id(sent.talk_id)
+  let req_raw = match resolve_receive_only_download_request(observed) {
+    Some(value) => value
+    None => {
+      let attachment = match
+        find_attachment_for_message(client, talk_id, sent.message_id) {
+        Ok(Some(value)) => value
+        Ok(None) =>
+          return Err(
+            "attachment not found for sent message: " +
+            sent.message_id +
+            " (talk=" +
+            sent.talk_id +
+            ")",
+          )
+        Err(msg) => return Err("get_attachments failed: " + msg)
+      }
+      if attachment.url == "" {
+        return Err(
+          "attachment url not found for sent message: " + sent.message_id,
+        )
+      }
+      println(
+        "[e2e] attachment url resolved from get_attachments message=" +
+        sent.message_id +
+        " url=" +
+        attachment.url,
+      )
+      { url: attachment.url, headers: Map::new() }
+    }
+  }
+  let req = with_bearer_auth(req_raw, @rpc_client.get_config(client).token)
+  println(
+    "[e2e] attachment url found message=" + sent.message_id + " url=" + req.url,
+  )
 
   log_step("download-file")
-  let downloaded = match download_with_auth(auth) {
+  let downloaded = match download_with_request(req) {
     Ok(value) => value
     Err(msg) => return Err(msg)
   }
@@ -869,6 +807,227 @@ async fn run_e2e_flow(client : @rpc_client.Client) -> Result[Unit, String] {
     return Err("downloaded bytes do not match uploaded file")
   }
   Ok(())
+}
+
+///|
+async fn find_attachment_for_message(
+  client : @rpc_client.Client,
+  talk_id : @types.ID,
+  message_id_str : String,
+) -> Result[Attachment?, String] {
+  let attachments = match get_attachments(client, talk_id, 100) {
+    Ok(value) => value
+    Err(err) => return Err(@errors.direct_error_to_string(err))
+  }
+  for att in attachments {
+    if @types.id_to_string(att.message_id) == message_id_str {
+      return Ok(Some(att))
+    }
+  }
+  Ok(None)
+}
+
+///|
+fn url_from_object(obj : Map[String, @types.JsonValue]) -> String? {
+  for key in ["url", "get_url", "download_url", "attachment_url"] {
+    match obj.get(key) {
+      Some(@types.JsonString(value)) if value != "" => return Some(value)
+      _ => ()
+    }
+  }
+  None
+}
+
+///|
+fn first_file_url_in_content(content : @types.JsonValue) -> String? {
+  match content {
+    @types.JsonObject(obj) => {
+      match url_from_object(obj) {
+        Some(url) => return Some(url)
+        None => ()
+      }
+      for key in ["file", "attachment", "files", "attachments"] {
+        match obj.get(key) {
+          Some(next) =>
+            match first_file_url_in_content(next) {
+              Some(url) => return Some(url)
+              None => ()
+            }
+          None => ()
+        }
+      }
+      None
+    }
+    @types.JsonArray(items) => {
+      for item in items {
+        match first_file_url_in_content(item) {
+          Some(url) => return Some(url)
+          None => ()
+        }
+      }
+      None
+    }
+    _ => None
+  }
+}
+
+///|
+fn resolve_receive_only_download_request(
+  msg : @types.ReceivedMessage,
+) -> DownloadRequest? {
+  let url = if msg.attachment_url != "" {
+    msg.attachment_url
+  } else {
+    match first_file_url_in_content(msg.content) {
+      Some(value) => value
+      None => ""
+    }
+  }
+  if url == "" {
+    return None
+  }
+  Some({ url, headers: Map::new() })
+}
+
+///|
+fn with_bearer_auth(req : DownloadRequest, token : String) -> DownloadRequest {
+  if token == "" {
+    return req
+  }
+  let mut url = req.url
+  if (
+      url.has_prefix("https://api.direct4b.com/") ||
+      url.has_prefix("http://api.direct4b.com/")
+    ) &&
+    !url.contains("Authorization=") {
+    let separator = if url.contains("?") { "&" } else { "?" }
+    // Match direct-js behavior for file download authentication.
+    url = url + separator + "Authorization=ALB%20" + token
+  }
+  { url, headers: req.headers }
+}
+
+///|
+fn map_has_key(obj : Map[String, @types.JsonValue], key : String) -> Bool {
+  match obj.get(key) {
+    Some(_) => true
+    None => false
+  }
+}
+
+///|
+fn content_has_file_hint(content : @types.JsonValue) -> Bool {
+  match content {
+    @types.JsonObject(obj) =>
+      map_has_key(obj, "file_id") ||
+      map_has_key(obj, "file_id_str") ||
+      map_has_key(obj, "file") ||
+      map_has_key(obj, "attachment") ||
+      map_has_key(obj, "files") ||
+      map_has_key(obj, "attachments")
+    @types.JsonArray(items) => {
+      for item in items {
+        if content_has_file_hint(item) {
+          return true
+        }
+      }
+      false
+    }
+    _ => false
+  }
+}
+
+///|
+fn maybe_file_message(msg : @types.ReceivedMessage) -> Bool {
+  msg.msg_type == @types.MsgTypeFile ||
+  msg.msg_type == @types.MsgTypeTextMultipleFile ||
+  msg.attachment_url != "" ||
+  content_has_file_hint(msg.content)
+}
+
+///|
+async fn run_receive_only_flow(
+  client : @rpc_client.Client,
+) -> Result[Unit, String] {
+  let token = @rpc_client.get_config(client).token
+  let message_events : Array[@types.ReceivedMessage] = []
+  log_step("listen-message(receive-only)")
+  @rpc_client.on_message(client, fn(msg) { message_events.push(msg) })
+
+  let mut consumed_index = 0
+  let processed_ids : Array[String] = []
+  let mut downloaded_count = 0
+
+  println(
+    "[e2e] receive-only started. send file to bot and send `" +
+    receive_end_message +
+    "` to finish.",
+  )
+
+  for _ in 0..<receive_wait_attempts {
+    while consumed_index < message_events.length() {
+      let msg = message_events[consumed_index]
+      consumed_index = consumed_index + 1
+
+      if processed_ids.contains(msg.id) {
+        continue
+      }
+      processed_ids.push(msg.id)
+      println(
+        "[e2e] observed message id=" +
+        msg.id +
+        " type=" +
+        @types.msg_type_to_wire(msg.msg_type).to_string() +
+        " talk=" +
+        msg.talk_id +
+        " text=" +
+        msg.text,
+      )
+
+      if msg.text.trim() == receive_end_message {
+        if downloaded_count > 0 {
+          println(
+            "[e2e] receive-only finished. downloaded files=" +
+            downloaded_count.to_string(),
+          )
+          return Ok(())
+        }
+        return Err(
+          "end received but no file was downloaded (send file before end.)",
+        )
+      }
+
+      if !maybe_file_message(msg) {
+        continue
+      }
+      let req_raw = match resolve_receive_only_download_request(msg) {
+        Some(value) => value
+        None => {
+          println("[e2e] file-like message had no downloadable url: " + msg.id)
+          continue
+        }
+      }
+      let req = with_bearer_auth(req_raw, token)
+      println(
+        "[e2e] attachment url found message=" + msg.id + " url=" + req.url,
+      )
+      match download_with_request(req) {
+        Ok(bytes) => {
+          downloaded_count = downloaded_count + 1
+          println(
+            "[e2e] downloaded attachment bytes=" +
+            bytes.length().to_string() +
+            " message=" +
+            msg.id,
+          )
+        }
+        Err(err) =>
+          return Err("download failed for message=" + msg.id + ": " + err)
+      }
+    }
+    @async.sleep(receive_poll_interval_ms)
+  }
+  Err("receive-only timeout waiting for `" + receive_end_message + "`")
 }
 
 ///|
@@ -933,7 +1092,7 @@ async fn run_create_download_auth_e2e() -> Result[Unit, String] {
       Ok(None) =>
         return Err(
           "token not found: set DIRECT_SDK_E2E_TOKEN, HUBOT_DIRECT_TOKEN, " +
-          "DIRECT4B_API_TOKEN, or DIRECT_API_ACCESS_TOKEN, " +
+          "or DIRECT4B_API_TOKEN (DIRECT_API_ACCESS_TOKEN is REST-only), " +
           "or set DIRECT4B_BOT_USER_ID and DIRECT4B_USER_PASSWORD for auto login",
         )
       Err(msg) => return Err(msg)
@@ -971,7 +1130,84 @@ async fn run_create_download_auth_e2e() -> Result[Unit, String] {
 }
 
 ///|
-async test "e2e create_download_auth downloads attached file" {
+async fn run_receive_only_e2e_with_token(
+  token : String,
+) -> Result[Unit, String] {
+  let client = build_e2e_client(token)
+  let result : Result[Unit, String] = @async.with_task_group(tasks => {
+    log_step("connect")
+    match @rpc_client.connect(client, tasks) {
+      Ok(_) => ()
+      Err(err) => {
+        close_client_quiet(client)
+        tasks.return_immediately(
+          Err("connect failed: " + @errors.direct_error_to_string(err)),
+        )
+        abort("unreachable")
+      }
+    }
+    log_step("wait-session")
+    match wait_for_rpc_session(client) {
+      Ok(_) => ()
+      Err(msg) => {
+        close_client_quiet(client)
+        tasks.return_immediately(Err(msg))
+        abort("unreachable")
+      }
+    }
+
+    let result = run_receive_only_flow(client)
+    close_client_quiet(client)
+    tasks.return_immediately(result)
+    abort("unreachable")
+  })
+  result
+}
+
+///|
+async fn run_receive_only_e2e() -> Result[Unit, String] {
+  let tokens = resolve_e2e_tokens()
+  if tokens.length() == 0 {
+    match refresh_token_via_daab_login() {
+      Ok(Some(token)) => push_unique_token(tokens, token)
+      Ok(None) =>
+        return Err(
+          "token not found: set DIRECT_SDK_E2E_TOKEN, HUBOT_DIRECT_TOKEN, " +
+          "or DIRECT4B_API_TOKEN (DIRECT_API_ACCESS_TOKEN is REST-only), " +
+          "or set DIRECT4B_BOT_USER_ID and DIRECT4B_USER_PASSWORD for auto login",
+        )
+      Err(msg) => return Err(msg)
+    }
+  }
+  let mut last_error = "receive-only e2e failed"
+  let mut index = 0
+  let mut tried_daab_login = false
+  while index < tokens.length() {
+    let token = tokens[index]
+    index = index + 1
+    match run_receive_only_e2e_with_token(token) {
+      Ok(_) => return Ok(())
+      Err(msg) => {
+        last_error = msg
+        if !is_auth_session_error(msg) {
+          return Err(last_error)
+        }
+        if !tried_daab_login && index >= tokens.length() {
+          tried_daab_login = true
+          match refresh_token_via_daab_login() {
+            Ok(Some(new_token)) => push_unique_token(tokens, new_token)
+            Ok(None) => ()
+            Err(login_err) => return Err(login_err + "\nlast rpc error: " + msg)
+          }
+        }
+      }
+    }
+  }
+  Err(last_error)
+}
+
+///|
+async test "e2e send-file and download attached file" {
   if @sys.get_env_var(e2e_gate_env) != Some("1") {
     println("skip e2e: set DIRECT_SDK_E2E=1 to enable")
     return
@@ -983,5 +1219,26 @@ async test "e2e create_download_auth downloads attached file" {
     Some(Ok(_)) => ()
     Some(Err(msg)) => fail(msg)
     None => fail("e2e timeout after " + e2e_total_timeout_ms.to_string() + "ms")
+  }
+}
+
+///|
+async test "e2e receive-only downloads attached file until end message" {
+  if @sys.get_env_var(e2e_receive_gate_env) != Some("1") {
+    println(
+      "skip receive-only e2e: set DIRECT_SDK_E2E_RECEIVE_ONLY=1 to enable",
+    )
+    return
+  }
+  match
+    @async.with_timeout_opt(e2e_total_timeout_ms, () => run_receive_only_e2e()) {
+    Some(Ok(_)) => ()
+    Some(Err(msg)) => fail(msg)
+    None =>
+      fail(
+        "receive-only e2e timeout after " +
+        e2e_total_timeout_ms.to_string() +
+        "ms",
+      )
   }
 }

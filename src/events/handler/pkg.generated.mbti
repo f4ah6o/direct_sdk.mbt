@@ -48,6 +48,7 @@ pub struct EventDispatcher {
   mut user_handlers : Array[(@types.UserInfo) -> Unit]
   mut domain_handlers : Array[(@types.DomainInfo) -> Unit]
   mut conference_handlers : Array[(@types.ConferenceInfo) -> Unit]
+  mut pending_attachments : Map[String, PendingAttachment]
 }
 pub fn EventDispatcher::emit(Self, String, @types.JsonValue) -> Unit
 pub fn EventDispatcher::emit_message(Self, @types.ReceivedMessage) -> Unit
@@ -64,6 +65,8 @@ pub fn EventDispatcher::remove_all_handlers(Self) -> Unit
 pub fn EventDispatcher::remove_handler(Self, String) -> Unit
 pub fn EventDispatcher::remove_message_handlers(Self) -> Unit
 pub fn EventDispatcher::total_handler_count(Self) -> Int
+
+type PendingAttachment
 
 // Type aliases
 pub type ConferenceEventHandler = (@types.ConferenceInfo) -> Unit

@@ -15,6 +15,7 @@ pub async fn run_login(args : ArrayView[String]) -> Result[Unit, String] {
     None => DEFAULT_ENV_PATH
   }
   let token_flag = flag_value(args, "--token")
+  let force_login = has_flag(args, "--force")
   if has_flag(args, "--token") && token_flag is None {
     return Err("token is required")
   }
@@ -33,18 +34,20 @@ pub async fn run_login(args : ArrayView[String]) -> Result[Unit, String] {
     }
     None => ()
   }
-  match has_token(env_path) {
-    Ok(true) => {
-      println("Already logged in.")
-      println(
-        "Remove HUBOT_DIRECT_TOKEN or delete " +
-        env_path +
-        " to login with a different account.",
-      )
-      return Ok(())
+  if !force_login {
+    match has_token(env_path) {
+      Ok(true) => {
+        println("Already logged in.")
+        println(
+          "Remove HUBOT_DIRECT_TOKEN or delete " +
+          env_path +
+          " to login with a different account.",
+        )
+        return Ok(())
+      }
+      Ok(false) => ()
+      Err(msg) => return Err(msg)
     }
-    Ok(false) => ()
-    Err(msg) => return Err(msg)
   }
   match load_env_file(env_path) {
     Ok(_) => ()

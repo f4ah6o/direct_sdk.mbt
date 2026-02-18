@@ -553,6 +553,9 @@ fn parse_message(
     text,
     msg_type,
     content,
+    attachment_url: "",
+    attachment_name: "",
+    attachment_content_type: "",
     created,
     raw: None,
   })
@@ -626,6 +629,9 @@ fn parse_message_search_content(
             text: "",
             msg_type: @types.MsgTypeText,
             content: @types.JsonNull,
+            attachment_url: "",
+            attachment_name: "",
+            attachment_content_type: "",
             created: 0L,
             raw: None,
           }
