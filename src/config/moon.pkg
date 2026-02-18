@@ -10,10 +10,10 @@ import {
 
 options(
   targets: {
-    "config.mbt": [ "native", "js" ],
+    "config.mbt": [ "native", "js", "wasm", "wasm-gc" ],
     "config.pbt.mbt.md": [ "native" ],
     "config_test.mbt": [ "native" ],
     "pbt_generated_test.mbt": [ "native" ],
-    "pkg.generated.mbti": [ "native", "js" ],
+    "pkg.generated.mbti": [ "native", "js", "wasm", "wasm-gc" ],
   },
 )

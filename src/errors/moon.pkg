@@ -6,8 +6,8 @@ import {
 
 options(
   targets: {
-    "errors.mbt": [ "native", "js", "wasm-gc" ],
+    "errors.mbt": [ "native", "js", "wasm", "wasm-gc" ],
     "errors_test.mbt": [ "native" ],
-    "pkg.generated.mbti": [ "native", "js", "wasm-gc" ],
+    "pkg.generated.mbti": [ "native", "js", "wasm", "wasm-gc" ],
   },
 )

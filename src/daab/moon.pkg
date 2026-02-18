@@ -21,6 +21,7 @@ import {
 
 options(
   "is-main": true,
+  "supported-targets": [ "native", "js" ],
   targets: {
     "args.mbt": [ "native" ],
     "create.mbt": [ "native" ],
@@ -30,7 +31,7 @@ options(
     "login.mbt": [ "native" ],
     "login_test.mbt": [ "native" ],
     "main.mbt": [ "native" ],
-    "main_js.mbt": [ "js" ],
+    "main_js.mbt": [ "js", "wasm", "wasm-gc" ],
     "pkg.generated.mbti": [ "native" ],
     "run.mbt": [ "native" ],
     "usage.mbt": [ "native" ],
