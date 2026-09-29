@@ -15,35 +15,33 @@ fn join_path(base : String, leaf : String) -> String {
 fn moon_mod_template(module_name : String) -> String {
   let direct_sdk_version = resolve_direct_sdk_version()
   (
-    $|{
-    $|  "name": "\{module_name}",
-    $|  "version": "0.1.0",
-    $|  "deps": {
-    $|    "f4ah6o/direct_sdk": "\{direct_sdk_version}",
-    $|    "moonbitlang/async": "\{default_async_version}"
-    $|  },
-    $|  "readme": "README.md",
-    $|  "preferred-target": "native",
-    $|  "description": "daab bot project"
+    $|name = "\{module_name}"
+    $|version = "0.1.0"
+    $|
+    $|import {
+    $|  "f4ah6o/direct_sdk@\{direct_sdk_version}",
+    $|  "moonbitlang/async@\{default_async_version}",
     $|}
+    $|
+    $|readme = "README.md"
+    $|source = "."
+    $|preferred_target = "native"
+    $|supported_targets = "+native"
+    $|description = "daab bot project"
   )
 }
 
 ///|
 fn root_pkg_template() -> String {
   (
-    #|{
-    #|  "readme": "README.md"
-    #|}
+    #|// The root package is intentionally empty; the app entry point lives in cmd/main.
   )
 }
 
 ///|
 fn cmd_pkg_template() -> String {
   (
-    #|{
-    #|  "is-main": true
-    #|}
+    #|pkgtype(kind: "executable")
   )
 }
 
@@ -118,19 +116,17 @@ fn scaffold_project(project_name : String) -> Result[Unit, String] {
   }
   match
     write_file(
-      join_path(project_name, "moon.mod.json"),
+      join_path(project_name, "moon.mod"),
       moon_mod_template(module_name),
     ) {
     Ok(_) => ()
     Err(msg) => return Err(msg)
   }
-  match
-    write_file(join_path(project_name, "moon.pkg.json"), root_pkg_template()) {
+  match write_file(join_path(project_name, "moon.pkg"), root_pkg_template()) {
     Ok(_) => ()
     Err(msg) => return Err(msg)
   }
-  match
-    write_file(join_path(cmd_main_dir, "moon.pkg.json"), cmd_pkg_template()) {
+  match write_file(join_path(cmd_main_dir, "moon.pkg"), cmd_pkg_template()) {
     Ok(_) => ()
     Err(msg) => return Err(msg)
   }

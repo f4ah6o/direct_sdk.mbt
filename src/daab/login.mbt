@@ -53,7 +53,7 @@ pub async fn run_login(args : ArrayView[String]) -> Result[Unit, String] {
     Ok(_) => ()
     Err(msg) => println("Warning: could not load " + env_path + ": " + msg)
   }
-  let endpoint = match @sys.get_env_var(ENV_ENDPOINT_KEY) {
+  let endpoint = match @env.get_env_var(ENV_ENDPOINT_KEY) {
     Some(value) => value
     None => @constants.DEFAULT_ENDPOINT
   }
@@ -94,7 +94,7 @@ pub async fn run_login(args : ArrayView[String]) -> Result[Unit, String] {
       }
     }
     Err(err) if err.has_prefix("connect:") => {
-      let err_msg = err[8:].to_string()
+      let err_msg = err[8:].to_owned()
       let msg = "failed to connect\n\n" +
         "Troubleshooting:\n" +
         "  - Check your network connection\n" +
@@ -116,7 +116,7 @@ pub async fn run_login(args : ArrayView[String]) -> Result[Unit, String] {
     }
     Err(err) => {
       let err_msg = if err.has_prefix("auth:") {
-        err[5:].to_string()
+        err[5:].to_owned()
       } else {
         err
       }
@@ -297,11 +297,11 @@ async fn prompt_credentials() -> Result[(String, String), String] {
 
 ///|
 async fn resolve_credentials() -> Result[(String, String), String] {
-  let user_id = match @sys.get_env_var(ENV_BOT_USER_ID_KEY) {
+  let user_id = match @env.get_env_var(ENV_BOT_USER_ID_KEY) {
     Some(value) if value != "" => Some(value)
     _ => None
   }
-  let user_password = match @sys.get_env_var(ENV_USER_PASSWORD_KEY) {
+  let user_password = match @env.get_env_var(ENV_USER_PASSWORD_KEY) {
     Some(value) if value != "" => Some(value)
     _ => None
   }
@@ -321,7 +321,7 @@ async fn resolve_credentials() -> Result[(String, String), String] {
 ///|
 async fn read_line(reader : @stdio.Input) -> Result[String, String] {
   match reader.read_until("\n") {
-    Some(line) => Ok(line.trim().to_string())
+    Some(line) => Ok(line.trim().to_owned())
     None => Err("stdin closed")
   }
 }
@@ -357,13 +357,13 @@ async fn set_tty_echo(enabled : Bool) -> Bool {
 
 ///|
 fn resolve_proxy_url() -> String {
-  match @sys.get_env_var(ENV_PROXY_KEY) {
+  match @env.get_env_var(ENV_PROXY_KEY) {
     Some(value) => value
     None =>
-      match @sys.get_env_var(ENV_HTTPS_PROXY_KEY) {
+      match @env.get_env_var(ENV_HTTPS_PROXY_KEY) {
         Some(value) => value
         None =>
-          match @sys.get_env_var(ENV_HTTP_PROXY_KEY) {
+          match @env.get_env_var(ENV_HTTP_PROXY_KEY) {
             Some(value) => value
             None => ""
           }

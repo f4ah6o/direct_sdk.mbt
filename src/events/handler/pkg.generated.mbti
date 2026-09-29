@@ -74,4 +74,3 @@ pub type ConferenceEventHandler = (@types.ConferenceInfo) -> Unit
 pub type DomainEventHandler = (@types.DomainInfo) -> Unit
 
 // Traits
-

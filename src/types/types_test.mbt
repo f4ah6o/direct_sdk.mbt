@@ -11,11 +11,11 @@ test "msg_type_to_wire converts message types correctly" {
 
 ///|
 test "wire_to_msg_type converts wire values to message types" {
-  inspect(@types.wire_to_msg_type(1), content="Some(MsgTypeText)")
-  inspect(@types.wire_to_msg_type(2), content="Some(MsgTypeStamp)")
-  inspect(@types.wire_to_msg_type(500), content="Some(MsgTypeYesNo)")
-  inspect(@types.wire_to_msg_type(502), content="Some(MsgTypeSelect)")
-  inspect(@types.wire_to_msg_type(999), content="None")
+  debug_inspect(@types.wire_to_msg_type(1), content="Some(MsgTypeText)")
+  debug_inspect(@types.wire_to_msg_type(2), content="Some(MsgTypeStamp)")
+  debug_inspect(@types.wire_to_msg_type(500), content="Some(MsgTypeYesNo)")
+  debug_inspect(@types.wire_to_msg_type(502), content="Some(MsgTypeSelect)")
+  debug_inspect(@types.wire_to_msg_type(999), content="None")
 }
 
 ///|
@@ -47,13 +47,13 @@ test "id_to_json converts ID to JsonValue" {
 ///|
 test "json_to_id parses JsonValue to ID" {
   let json1 = @types.JsonString("test-id")
-  inspect(@types.json_to_id(json1), content="Some(IDString(\"test-id\"))")
+  debug_inspect(@types.json_to_id(json1), content="Some(IDString(\"test-id\"))")
   let json2 = @types.JsonInt(123L)
-  inspect(@types.json_to_id(json2), content="Some(IDInt(123))")
+  debug_inspect(@types.json_to_id(json2), content="Some(IDInt(123))")
   let json3 = @types.JsonNumber(123.0)
-  inspect(@types.json_to_id(json3), content="Some(IDInt(123))")
+  debug_inspect(@types.json_to_id(json3), content="Some(IDInt(123))")
   let json4 = @types.JsonBool(true)
-  inspect(@types.json_to_id(json4), content="None")
+  debug_inspect(@types.json_to_id(json4), content="None")
 }
 
 ///|
@@ -64,7 +64,7 @@ test "room_type_to_int converts room types" {
 
 ///|
 test "int_to_room_type parses int to room type" {
-  inspect(@types.int_to_room_type(1), content="Some(RoomTypePair)")
-  inspect(@types.int_to_room_type(2), content="Some(RoomTypeGroup)")
-  inspect(@types.int_to_room_type(3), content="None")
+  debug_inspect(@types.int_to_room_type(1), content="Some(RoomTypePair)")
+  debug_inspect(@types.int_to_room_type(2), content="Some(RoomTypeGroup)")
+  debug_inspect(@types.int_to_room_type(3), content="None")
 }

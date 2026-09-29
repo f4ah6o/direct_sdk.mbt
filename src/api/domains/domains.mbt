@@ -261,7 +261,7 @@ fn parse_domain_info(
     Some(@types.JsonBool(b)) => b
     _ => false
   }
-  Ok({ id, name, updated_at, contract, setting, role, closed })
+  Ok({ id, name, updated_at, contract, setting, role, closed, })
 }
 
 // Parse DomainInviteInfo from @types.JsonValue
@@ -307,7 +307,7 @@ fn parse_domain_invite_info(
     Some(@types.JsonNumber(n)) => n.to_int().to_int64()
     _ => 0L
   }
-  Ok({ id, name, account_control_request_id, updated_at })
+  Ok({ id, name, account_control_request_id, updated_at, })
 }
 
 // Parse UserInfo from @types.JsonValue (shared with users module)
@@ -352,7 +352,7 @@ fn parse_user_info_from_json(
   }
   let profiles = match obj.get("profiles") {
     Some(@types.JsonObject(p)) => p
-    _ => Map::new()
+    _ => Map([])
   }
   let can_talk = match obj.get("can_talk") {
     Some(@types.JsonBool(b)) => b

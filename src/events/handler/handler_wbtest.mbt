@@ -36,7 +36,7 @@ test "notify_create_attachment enriches notify_create_message" {
   inspect(messages[0].attachment_content_type, content="text/plain")
   match messages[0].content {
     @types.JsonObject(obj) =>
-      inspect(
+      debug_inspect(
         obj.get("attachment_url"),
         content="Some(JsonString(\"https://example.test/files/abc\"))",
       )

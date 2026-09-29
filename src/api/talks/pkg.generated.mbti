@@ -33,4 +33,3 @@ pub async fn update_group_talk(@client.Client, @types.ID, Map[String, @types.Jso
 // Type aliases
 
 // Traits
-

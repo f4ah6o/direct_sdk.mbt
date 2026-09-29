@@ -22,7 +22,7 @@ async fn dispatch(args : Array[String]) -> Result[Unit, String] {
 ///|
 fn main {
   @async.run_async_main(() => {
-    let args = @sys.get_cli_args()
+    let args = @env.args()
     match dispatch(args) {
       Ok(_) => ()
       Err(msg) => {

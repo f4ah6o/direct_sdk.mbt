@@ -1,27 +1,28 @@
 import {
-  "moonbitlang/async" @async,
-  "moonbitlang/async/io",
-  "moonbitlang/async/process" @process,
-  "moonbitlang/async/stdio" @stdio,
-  "f4ah6o/direct_sdk/constants" @constants,
-  "f4ah6o/direct_sdk/errors" @errors,
+  "moonbitlang/async",
+  "moonbitlang/core/env",
+  "moonbitlang/async/process",
+  "moonbitlang/async/stdio",
+  "f4ah6o/direct_sdk/constants",
+  "f4ah6o/direct_sdk/errors",
   "f4ah6o/direct_sdk/rpc/msgpack" @rpc_msgpack,
   "f4ah6o/direct_sdk/rpc/websocket" @rpc_websocket,
-  "f4ah6o/direct_sdk/types" @types,
-  "moonbitlang/core/json" @json,
-  "moonbitlang/x/fs" @fs,
-  "moonbitlang/x/path" @path,
-  "moonbitlang/x/sys" @sys,
+  "f4ah6o/direct_sdk/types",
+  "moonbitlang/core/json",
+  "moonbitlang/x/fs",
+  "moonbitlang/x/path",
 }
 
 import {
-  "moonbitlang/x/fs" @fs,
-  "f4ah6o/direct_sdk/types" @types,
+  "moonbitlang/x/fs",
+  "f4ah6o/direct_sdk/types",
 } for "test"
 
+pkgtype(kind: "executable")
+
+supported_targets = "+native+js"
+
 options(
-  "is-main": true,
-  "supported-targets": [ "native", "js" ],
   targets: {
     "args.mbt": [ "native" ],
     "create.mbt": [ "native" ],
@@ -36,5 +37,6 @@ options(
     "run.mbt": [ "native" ],
     "usage.mbt": [ "native" ],
     "version.mbt": [ "native" ],
+    "version_wbtest.mbt": [ "native" ],
   },
 )

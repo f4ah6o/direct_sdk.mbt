@@ -257,7 +257,7 @@ fn parse_download_auth(
   }
   let headers = match obj.get("get_headers") {
     Some(@types.JsonObject(raw)) => {
-      let result = Map::new()
+      let result = Map([])
       for kv in raw.to_array() {
         match kv.1 {
           @types.JsonString(s) => result[kv.0] = s
@@ -266,9 +266,9 @@ fn parse_download_auth(
       }
       result
     }
-    _ => Map::new()
+    _ => Map([])
   }
-  Ok({ file_id, url, headers })
+  Ok({ file_id, url, headers, })
 }
 
 ///|
@@ -316,7 +316,7 @@ fn parse_upload_auth(
   }
   let post_form = match obj.get("post_form") {
     Some(@types.JsonObject(form)) => {
-      let result = Map::new()
+      let result = Map([])
       for kv in form.to_array() {
         match kv.1 {
           @types.JsonString(s) => result[kv.0] = s
@@ -325,9 +325,9 @@ fn parse_upload_auth(
       }
       result
     }
-    _ => Map::new()
+    _ => Map([])
   }
-  Ok({ file_id, post_url, post_form, put_url })
+  Ok({ file_id, post_url, post_form, put_url, })
 }
 
 // Parse Attachment from @types.JsonValue
@@ -428,7 +428,7 @@ fn parse_file_preview(
   let status = json_get_string(obj, "status").unwrap_or("")
   let url = json_get_string(obj, "url").unwrap_or("")
   let key = json_get_string(obj, "key").unwrap_or("")
-  Ok({ file_id, status, file_preview_file_id, url, key })
+  Ok({ file_id, status, file_preview_file_id, url, key, })
 }
 
 // Helper: Get string value from @types.JsonObject

@@ -266,7 +266,7 @@ fn parse_talk(
     Some(@types.JsonBool(b)) => b
     _ => true
   }
-  Ok({ id, domain_id, talk_type, name, user_ids, allow_display_past_messages })
+  Ok({ id, domain_id, talk_type, name, user_ids, allow_display_past_messages, })
 }
 
 // Parse TalkStatus from @types.JsonValue
@@ -296,7 +296,7 @@ fn parse_talk_status(
       }
     None => None
   }
-  Ok({ talk_id, unread_count, latest_msg_id })
+  Ok({ talk_id, unread_count, latest_msg_id, })
 }
 
 // Helper: Get string value from @types.JsonObject

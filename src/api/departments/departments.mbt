@@ -150,7 +150,7 @@ fn parse_department_tree(
     }
     _ => []
   }
-  Ok({ domain_id, departments })
+  Ok({ domain_id, departments, })
 }
 
 // Parse Department from @types.JsonValue
@@ -194,7 +194,7 @@ fn parse_department(
     Some(@types.JsonNumber(n)) => n.to_int()
     _ => 0
   }
-  Ok({ id, name, parent_id, children_ids, user_count })
+  Ok({ id, name, parent_id, children_ids, user_count, })
 }
 
 // Parse DepartmentUserCounts from @types.JsonValue
@@ -228,7 +228,7 @@ fn parse_department_user_counts(
     }
     _ => []
   }
-  Ok({ domain_id, departments })
+  Ok({ domain_id, departments, })
 }
 
 // Parse DepartmentUserCount from @types.JsonValue
@@ -255,7 +255,7 @@ fn parse_department_user_count(
     Some(@types.JsonNumber(n)) => n.to_int()
     _ => 0
   }
-  Ok({ department_id, all, partial })
+  Ok({ department_id, all, partial, })
 }
 
 // Parse UserInfo from @types.JsonValue (shared with users module)
@@ -300,7 +300,7 @@ fn parse_user_info(
   }
   let profiles = match obj.get("profiles") {
     Some(@types.JsonObject(p)) => p
-    _ => Map::new()
+    _ => Map([])
   }
   let can_talk = match obj.get("can_talk") {
     Some(@types.JsonBool(b)) => b

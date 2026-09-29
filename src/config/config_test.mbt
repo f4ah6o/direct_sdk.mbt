@@ -26,7 +26,7 @@ test "with_endpoint sets endpoint" {
 test "with_proxy sets proxy_url" {
   let cfg = @config.default_config()
     |> @config.with_proxy("http://proxy.example.com")
-  inspect(cfg.proxy_url, content="Some(\"http://proxy.example.com\")")
+  debug_inspect(cfg.proxy_url, content="Some(\"http://proxy.example.com\")")
 }
 
 ///|

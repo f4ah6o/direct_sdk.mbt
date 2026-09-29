@@ -1,6 +1,10 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "f4ah6o/direct_sdk/types"
 
+import {
+  "moonbitlang/core/debug",
+}
+
 // Values
 pub fn id_to_json(ID) -> JsonValue
 
@@ -74,8 +78,13 @@ pub(all) struct HealthStatus {
 pub(all) enum ID {
   IDString(String)
   IDInt(Int64)
-}
-pub impl Eq for ID
+} derive(Eq, @debug.Debug)
+pub fn ID::equal(Self, Self) -> Bool
+pub fn ID::not_equal(Self, Self) -> Bool
+pub fn ID::output(Self, &Logger) -> Unit
+#deprecated
+pub fn ID::to_repr(Self) -> @debug.Repr
+pub fn ID::to_string(Self) -> String
 pub impl Show for ID
 
 pub(all) enum JsonValue {
@@ -86,7 +95,11 @@ pub(all) enum JsonValue {
   JsonString(String)
   JsonArray(Array[JsonValue])
   JsonObject(Map[String, JsonValue])
-}
+} derive(@debug.Debug)
+pub fn JsonValue::output(Self, &Logger) -> Unit
+#deprecated
+pub fn JsonValue::to_repr(Self) -> @debug.Repr
+pub fn JsonValue::to_string(Self) -> String
 pub impl Show for JsonValue
 
 pub(all) struct LocationMessage {
@@ -118,8 +131,13 @@ pub(all) enum MessageType {
   MsgTypeYesNoClosed
   MsgTypeSelectClosed
   MsgTypeTaskClosed
-}
-pub impl Eq for MessageType
+} derive(Eq, @debug.Debug)
+pub fn MessageType::equal(Self, Self) -> Bool
+pub fn MessageType::not_equal(Self, Self) -> Bool
+pub fn MessageType::output(Self, &Logger) -> Unit
+#deprecated
+pub fn MessageType::to_repr(Self) -> @debug.Repr
+pub fn MessageType::to_string(Self) -> String
 pub impl Show for MessageType
 
 pub(all) struct NoteMessage {
@@ -167,8 +185,13 @@ pub(all) struct Room {
 pub(all) enum RoomType {
   RoomTypePair
   RoomTypeGroup
-}
-pub impl Eq for RoomType
+} derive(Eq, @debug.Debug)
+pub fn RoomType::equal(Self, Self) -> Bool
+pub fn RoomType::not_equal(Self, Self) -> Bool
+pub fn RoomType::output(Self, &Logger) -> Unit
+#deprecated
+pub fn RoomType::to_repr(Self) -> @debug.Repr
+pub fn RoomType::to_string(Self) -> String
 pub impl Show for RoomType
 
 pub(all) struct SelectMessage {
@@ -248,4 +271,3 @@ pub(all) struct YesNoMessage {
 // Type aliases
 
 // Traits
-

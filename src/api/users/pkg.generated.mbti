@@ -37,4 +37,3 @@ pub async fn update_user(@client.Client, @types.ID, Map[String, @types.JsonValue
 // Type aliases
 
 // Traits
-

@@ -24,15 +24,15 @@ pub const ENV_USER_PASSWORD_KEY : String = "DIRECT4B_USER_PASSWORD"
 
 ///|
 fn parse_env_value(content : String, key : String) -> String? {
-  let lines = content.split("\n").to_array()
+  let lines = content.split("\n").collect()
   for line_view in lines {
-    let line = line_view.trim().to_string()
+    let line = line_view.trim().to_owned()
     if line != "" && !line.has_prefix("#") {
-      let parts = line.split("=").to_array()
+      let parts = line.split("=").collect()
       if parts.length() >= 2 {
-        let name = parts[0].trim().to_string()
+        let name = parts[0].trim().to_owned()
         if name == key {
-          let value = parts[1:].to_array().join("=").trim().to_string()
+          let value = parts[1:].exact_view().join("=").trim().to_owned()
           return Some(value)
         }
       }
@@ -59,10 +59,10 @@ pub fn set_env_value(
     Ok(content) => {
       let out : Array[String] = []
       let mut found = false
-      let lines = content.split("\n").to_array()
+      let lines = content.split("\n").collect()
       for line_view in lines {
-        let line = line_view.to_string()
-        let trimmed = line.trim().to_string()
+        let line = line_view.to_owned()
+        let trimmed = line.trim().to_owned()
         if trimmed.has_prefix(key + "=") {
           found = true
           if value != "" {
@@ -88,7 +88,7 @@ pub fn set_env_value(
 
 ///|
 pub fn resolve_token(env_path : String) -> Result[String?, String] {
-  match @sys.get_env_var(ENV_TOKEN_KEY) {
+  match @env.get_env_var(ENV_TOKEN_KEY) {
     Some(token) => Ok(Some(token))
     None => read_env_value(env_path, ENV_TOKEN_KEY)
   }
@@ -107,18 +107,18 @@ pub fn has_token(env_path : String) -> Result[Bool, String] {
 pub fn load_env_file(path : String) -> Result[Unit, String] {
   match read_file_or_empty(path) {
     Ok(content) => {
-      let lines = content.split("\n").to_array()
+      let lines = content.split("\n").collect()
       for line_view in lines {
-        let line = line_view.trim().to_string()
+        let line = line_view.trim().to_owned()
         if line == "" || line.has_prefix("#") {
           continue
         }
-        let parts = line.split("=").to_array()
+        let parts = line.split("=").collect()
         if parts.length() >= 2 {
-          let key = parts[0].trim().to_string()
-          if @sys.get_env_var(key) is None {
-            let value = parts[1:].to_array().join("=").trim().to_string()
-            @sys.set_env_var(key, value)
+          let key = parts[0].trim().to_owned()
+          if @env.get_env_var(key) is None {
+            let value = parts[1:].exact_view().join("=").trim().to_owned()
+            @env.set_env_var(key, value)
           }
         }
       }

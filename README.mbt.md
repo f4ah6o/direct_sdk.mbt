@@ -11,17 +11,28 @@ MoonBit用のDirect4B WebSocket API SDKです。`direct-go-sdk`を移植した�
 - **完全なAPIカバレッジ**: 69個のRPCメソッド、40種類のイベント
 - **型安全**: MoonBitの型システムによる静的型チェック
 - **イベント駆動**: サーバー通知のハンドラー登録
-- **非同期I/O**: `async`/`await`による効率的な並行処理
+- **非同期I/O**: `async`関数による効率的な並行処理
 
 ## Installation
 
-```json
-{
-  "dependencies": {
-    "moonbitlang/async": "*",
-    "f4ah6o/direct_sdk": "*"
-  }
+```sh
+moon add f4ah6o/direct_sdk
+moon add moonbitlang/async
+```
+
+Then import the packages used by your application in its `moon.pkg` file:
+
+```moonbit
+import {
+  "moonbitlang/async" @async,
+  "f4ah6o/direct_sdk/config" @config,
+  "f4ah6o/direct_sdk/rpc/client" @rpc_client,
+  "f4ah6o/direct_sdk/types" @types,
+  "f4ah6o/direct_sdk/errors" @errors,
+  "f4ah6o/direct_sdk/api/users" @api_users,
+  "f4ah6o/direct_sdk/api/talks" @api_talks,
 }
+pkgtype(kind: "executable")
 ```
 
 ## Quick Start
@@ -33,8 +44,8 @@ let client = @rpc_client.new_client_with_token("your-access-token")
 @async.with_task_group(fn(tasks) {
   // 接続
   match @rpc_client.connect(client, tasks) {
-    | Ok(_) => println("Connected!")
-    | Err(e) => {
+    Ok(_) => println("Connected!")
+    Err(e) => {
         println("Failed: \${@errors.direct_error_to_string(e)}")
         return
       }
@@ -42,18 +53,18 @@ let client = @rpc_client.new_client_with_token("your-access-token")
 
   // ユーザー情報取得
   match @api_users.get_me(client) {
-    | Ok(user) => println("Hello, \${user.display_name}!")
-    | Err(e) => ()
+    Ok(user) => println("Hello, \${user.display_name}!")
+    Err(e) => ()
   }
 
   // トーク一覧取得
   match @api_talks.get_talks(client) {
-    | Ok(talks) => {
+    Ok(talks) => {
       for talk in talks {
         println("Talk: \${talk.name}")
       }
     }
-    | Err(e) => ()
+    Err(e) => ()
   }
 
   // メッセージ送信
@@ -66,8 +77,8 @@ let client = @rpc_client.new_client_with_token("your-access-token")
     content,
   ]
   match @rpc_client.call(client, "create_message", params) {
-    | Ok(_) => println("Message sent!")
-    | Err(e) => ()
+    Ok(_) => println("Message sent!")
+    Err(e) => ()
   }
 })
 ```
@@ -110,21 +121,25 @@ let client = @rpc_client.new_client_with_token("your-access-token")
 
 ```moonbit
 ///|
-let client = rpc /
-  client /
-  new_client(
-    (config / default_config())
-    |> config / with_token("your-token")
-    |> config / with_endpoint("wss://custom.example.com/api")
-    |> config / with_proxy("http://proxy:8080")
-    |> config / with_timeout(60000),
-  )
+let client = @rpc_client.new_client(
+  @config.default_config()
+    .with_token("your-token")
+    .with_endpoint("wss://custom.example.com/api")
+    .with_proxy("http://proxy:8080")
+    .with_timeout(60000),
+)
 ```
 
 ## Examples
 
-- `examples/basic_usage.mbt` - 基本的な使用方法
-- `examples/bot_example.mbt` - ボット実装パターン
+実行可能な bot のひな形は `daab` CLI から生成できます。テンプレートは現在の `moon.mod` / `moon.pkg` 形式を使います。
+
+```bash
+moon run src/daab -- create my-ping-bot --template ping-bot
+moon run src/daab -- create my-selectstamp-bot --template selectstamp-bot
+```
+
+リポジトリ内の `examples/` は旧実装の参照用で、現在の compiler では型チェックされず、公開 package にも含めません。新しいプロジェクトでは上記の生成テンプレートを使ってください。
 
 ## CLI (daab)
 
@@ -178,4 +193,3 @@ Apache-2.0
 
 - [direct-go-sdk](https://github.com/f4ah6o/direct-go-sdk) - Go版SDK
 - [Direct4B](https://www.direct4b.com/) - サービスサイト
-

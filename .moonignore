@@ -1,0 +1,13 @@
+# Repository-only instructions and hooks are not part of the published package.
+AGENTS.md
+CLAUDE.md
+.githooks/
+
+# The historical examples use pre-current package layouts and APIs. The tested
+# `daab create` templates are the supported runnable examples.
+examples/
+
+# Keep the repository's ordinary ignore policy while filtering package files.
+.DS_Store
+target/
+_build/

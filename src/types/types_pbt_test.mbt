@@ -10,7 +10,7 @@ fn is_valid_msg_wire(wire : Int) -> Bool {
 }
 
 ///|
-let msg_type_gen : @qc.Gen[@types.MessageType] = @qc.one_of_array([
+let msg_type_gen : @gen.Gen[@types.MessageType] = @gen.one_of_array([
   @types.MsgTypeSystem,
   @types.MsgTypeText,
   @types.MsgTypeStamp,
@@ -36,19 +36,19 @@ let msg_type_gen : @qc.Gen[@types.MessageType] = @qc.one_of_array([
 ])
 
 ///|
-let room_type_gen : @qc.Gen[@types.RoomType] = @qc.one_of_array([
+let room_type_gen : @gen.Gen[@types.RoomType] = @gen.one_of_array([
   @types.RoomTypePair,
   @types.RoomTypeGroup,
 ])
 
 ///|
-let small_int_gen : @qc.Gen[Int] = @qc.int_range(-1_000_000, 1_000_000)
+let small_int_gen : @gen.Gen[Int] = @gen.int_range(-1_000_000, 1_000_000)
 
 ///|
-let non_numeric_string_gen : @qc.Gen[String] = @qc.Gen::spawn().such_that(fn(
+let non_numeric_string_gen : @gen.Gen[String] = @gen.Gen::spawn().such_that(fn(
   s : String,
 ) {
-  try @strconv.parse_int64(s) catch {
+  try @string.parse_int64(s) catch {
     _ => true
   } noraise {
     _ => false
@@ -56,7 +56,7 @@ let non_numeric_string_gen : @qc.Gen[String] = @qc.Gen::spawn().such_that(fn(
 })
 
 ///|
-let invalid_wire_gen : @qc.Gen[Int] = @qc.int_range(-1000, 2000).such_that(fn(
+let invalid_wire_gen : @gen.Gen[Int] = @gen.int_range(-1000, 2000).such_that(fn(
   wire : Int,
 ) {
   !is_valid_msg_wire(wire)

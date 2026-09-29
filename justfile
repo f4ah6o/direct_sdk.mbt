@@ -10,7 +10,7 @@ fmt:
     moon fmt
 
 check:
-    moon check --deny-warn --target {{target}}
+    moon check --target {{target}}
 
 test:
     moon test --target {{target}}

@@ -13,11 +13,11 @@ test "parse_download_auth handles object payload" {
     Ok(auth) => {
       inspect(auth.file_id, content="IDString(\"file-1\")")
       inspect(auth.url, content="https://example.test/download")
-      inspect(
+      debug_inspect(
         auth.headers.get("Authorization"),
         content="Some(\"Bearer token\")",
       )
-      inspect(auth.headers.get("X-Ignore"), content="None")
+      debug_inspect(auth.headers.get("X-Ignore"), content="None")
     }
     Err(e) =>
       inspect(@errors.direct_error_to_string(e), content="unexpected error")
@@ -26,7 +26,7 @@ test "parse_download_auth handles object payload" {
 
 ///|
 test "parse_download_auth handles missing fields" {
-  let obj = Map::new()
+  let obj = Map([])
   match parse_download_auth(obj) {
     Ok(auth) => {
       inspect(auth.file_id, content="IDString(\"\")")

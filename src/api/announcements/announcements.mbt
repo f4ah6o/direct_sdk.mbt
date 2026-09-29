@@ -290,7 +290,7 @@ fn parse_announcement_status(
       }
     None => @types.IDString("")
   }
-  Ok({ domain_id, unread_count, max_announcement_id, max_read_announcement_id })
+  Ok({ domain_id, unread_count, max_announcement_id, max_read_announcement_id, })
 }
 
 // Helper: Get string value from @types.JsonObject

@@ -2,44 +2,44 @@
 // Property-Based Test Targets for types
 
 ///|
-let msg_type_gen_property : @qc.Gen[MessageType] = @qc.one_of_array([
-  MsgTypeSystem,
-  MsgTypeText,
-  MsgTypeStamp,
-  MsgTypeLocation,
-  MsgTypeFile,
-  MsgTypeTextMultipleFile,
-  MsgTypeDeleted,
-  MsgTypeNoteShared,
-  MsgTypeNoteDeleted,
-  MsgTypeNoteCreated,
-  MsgTypeNoteUpdated,
-  MsgTypeOriginalStamp,
-  MsgTypeYesNo,
-  MsgTypeYesNoReply,
-  MsgTypeSelect,
-  MsgTypeSelectReply,
-  MsgTypeTask,
-  MsgTypeTaskDone,
-  MsgTypeYesNoClosed,
-  MsgTypeSelectClosed,
-  MsgTypeTaskClosed,
+let msg_type_gen_property : @gen.Gen[@types.MessageType] = @gen.one_of_array([
+  @types.MsgTypeSystem,
+  @types.MsgTypeText,
+  @types.MsgTypeStamp,
+  @types.MsgTypeLocation,
+  @types.MsgTypeFile,
+  @types.MsgTypeTextMultipleFile,
+  @types.MsgTypeDeleted,
+  @types.MsgTypeNoteShared,
+  @types.MsgTypeNoteDeleted,
+  @types.MsgTypeNoteCreated,
+  @types.MsgTypeNoteUpdated,
+  @types.MsgTypeOriginalStamp,
+  @types.MsgTypeYesNo,
+  @types.MsgTypeYesNoReply,
+  @types.MsgTypeSelect,
+  @types.MsgTypeSelectReply,
+  @types.MsgTypeTask,
+  @types.MsgTypeTaskDone,
+  @types.MsgTypeYesNoClosed,
+  @types.MsgTypeSelectClosed,
+  @types.MsgTypeTaskClosed,
 ])
 
 ///|
-let room_type_gen_property : @qc.Gen[RoomType] = @qc.one_of_array([
-  RoomTypePair,
-  RoomTypeGroup,
+let room_type_gen_property : @gen.Gen[@types.RoomType] = @gen.one_of_array([
+  @types.RoomTypePair,
+  @types.RoomTypeGroup,
 ])
 
 ///|
-let pbt_small_int_gen : @qc.Gen[Int] = @qc.int_range(-1_000_000, 1_000_000)
+let pbt_small_int_gen : @gen.Gen[Int] = @gen.int_range(-1_000_000, 1_000_000)
 
 ///|
 test "prop_msg_type_wire_roundtrip" {
   @qc.quick_check(
-    @qc.forall(msg_type_gen_property, fn(t : MessageType) {
-      match wire_to_msg_type(msg_type_to_wire(t)) {
+    @qc.forall(msg_type_gen_property, fn(t : @types.MessageType) {
+      match @types.wire_to_msg_type(@types.msg_type_to_wire(t)) {
         Some(decoded) => decoded == t
         None => false
       }
@@ -50,8 +50,8 @@ test "prop_msg_type_wire_roundtrip" {
 ///|
 test "prop_room_type_int_roundtrip" {
   @qc.quick_check(
-    @qc.forall(room_type_gen_property, fn(r : RoomType) {
-      match int_to_room_type(room_type_to_int(r)) {
+    @qc.forall(room_type_gen_property, fn(r : @types.RoomType) {
+      match @types.int_to_room_type(@types.room_type_to_int(r)) {
         Some(decoded) => decoded == r
         None => false
       }
@@ -64,7 +64,7 @@ test "prop_id_string_roundtrip_int" {
   @qc.quick_check(
     @qc.forall(pbt_small_int_gen, fn(i : Int) {
       let id = @types.IDInt(i.to_int64())
-      string_to_id(id_to_string(id)) == id
+      @types.string_to_id(@types.id_to_string(id)) == id
     }),
   )
 }
@@ -74,7 +74,7 @@ test "prop_id_json_roundtrip_int" {
   @qc.quick_check(
     @qc.forall(pbt_small_int_gen, fn(i : Int) {
       let id = @types.IDInt(i.to_int64())
-      match json_to_id(id_to_json(id)) {
+      match @types.json_to_id(@types.id_to_json(id)) {
         Some(decoded) => decoded == id
         None => false
       }

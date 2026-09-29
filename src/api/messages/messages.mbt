@@ -39,7 +39,7 @@ pub struct GetMessagesOptions {
 
 ///|
 pub fn default_get_messages_options() -> GetMessagesOptions {
-  { since_id: None, max_id: None, order: Desc }
+  { since_id: None, max_id: None, order: Desc, }
 }
 
 // Result from SearchMessages
@@ -605,7 +605,7 @@ fn parse_search_result(
     }
     _ => []
   }
-  Ok({ total, marker, next_marker, contents })
+  Ok({ total, marker, next_marker, contents, })
 }
 
 // Parse MessageSearchContent
@@ -659,7 +659,7 @@ fn parse_message_search_content(
     Some(@types.JsonNumber(n)) => n
     _ => 0.0
   }
-  Ok({ message, talk_id, domain_id, match_score })
+  Ok({ message, talk_id, domain_id, match_score, })
 }
 
 // Parse ScheduledMessage
@@ -719,7 +719,7 @@ fn parse_scheduled_message(
     Some(@types.JsonNumber(n)) => n.to_int().to_int64()
     _ => 0L
   }
-  Ok({ id, talk_id, domain_id, msg_type, content, scheduled_at, created_at })
+  Ok({ id, talk_id, domain_id, msg_type, content, scheduled_at, created_at, })
 }
 
 // Parse MessageReaction
@@ -738,7 +738,7 @@ fn parse_message_reaction(
   }
   let name = json_get_string(obj, "name").unwrap_or("")
   let image_url = json_get_string(obj, "image_url").unwrap_or("")
-  Ok({ id, name, image_url })
+  Ok({ id, name, image_url, })
 }
 
 // Parse MessageReactionUser
@@ -768,7 +768,7 @@ fn parse_reaction_user(
     Some(@types.JsonNumber(n)) => n.to_int().to_int64()
     _ => 0L
   }
-  Ok({ user_id, reaction_id, created_at })
+  Ok({ user_id, reaction_id, created_at, })
 }
 
 // Helper: Get string value from @types.JsonObject

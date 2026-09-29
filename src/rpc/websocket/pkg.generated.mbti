@@ -100,4 +100,3 @@ pub(all) enum WebSocketError {
 pub using @moonbitlang/async/websocket {type Conn as InternalConn}
 
 // Traits
-

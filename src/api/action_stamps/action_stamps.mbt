@@ -38,7 +38,7 @@ pub fn new_select_content(
   question : String,
   options : Array[String],
 ) -> SelectStampContent {
-  { question, options, listing: true, closing_type: 1 }
+  { question, options, listing: true, closing_type: 1, }
 }
 
 // Create select stamp content with custom listing
@@ -49,7 +49,7 @@ pub fn select_content_with_listing(
   options : Array[String],
   listing : Bool,
 ) -> SelectStampContent {
-  { question, options, listing, closing_type: 1 }
+  { question, options, listing, closing_type: 1, }
 }
 
 // Send a select action stamp to a room
@@ -63,7 +63,7 @@ pub async fn send_select(
   content : SelectStampContent,
 ) -> Result[String, @errors.DirectError] {
   // Build content object
-  let content_map = Map::new()
+  let content_map = Map([])
   content_map["question"] = @types.JsonString(content.question)
   content_map["options"] = @types.JsonArray(
     content.options.map(fn(o) { @types.JsonString(o) }),

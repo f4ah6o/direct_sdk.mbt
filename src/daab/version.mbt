@@ -2,13 +2,13 @@
 // Template dependency versions and runtime version resolution.
 
 ///|
-let default_direct_sdk_version : String = "0.5.0"
+let default_direct_sdk_version : String = "0.11.2"
 
 ///|
-let default_async_version : String = "0.16.0"
+let default_async_version : String = "0.22.4"
 
 ///|
-let default_moon_x_version : String = "0.4.38"
+let default_moon_x_version : String = "0.5.5"
 
 ///|
 fn resolve_direct_sdk_version() -> String {
@@ -28,7 +28,7 @@ fn find_direct_sdk_version() -> String? {
 
 ///|
 fn resolve_daab_executable_path() -> String? {
-  let args = @sys.get_cli_args()
+  let args = @env.args()
   let argv0 = match args.get(0) {
     Some(value) => value
     None => ""
@@ -55,13 +55,13 @@ fn resolve_path(value : String) -> String {
 
 ///|
 fn find_executable_in_path(exe_name : String) -> String? {
-  let path_env = match @sys.get_env_var("PATH") {
+  let path_env = match @env.get_env_var("PATH") {
     Some(value) => value
     None => return None
   }
   let delimiter = @path.delimiter.to_string()
   for dir_view in path_env.split(delimiter) {
-    let dir = dir_view.to_string()
+    let dir = dir_view.to_owned()
     if dir == "" {
       continue
     }
@@ -98,15 +98,22 @@ fn find_version_from_executable(exe_path : String) -> String? {
 
 ///|
 fn find_version_from_dir(dir : @path.Path) -> String? {
-  let mod_path = @path.Path::join(dir, @path.Path("moon.mod.json")).to_string()
-  if @fs.path_exists(mod_path) {
-    match read_direct_sdk_version(mod_path) {
+  let modern_manifest = @path.Path::join(dir, @path.Path("moon.mod")).to_string()
+  if @fs.path_exists(modern_manifest) {
+    match read_direct_sdk_version(modern_manifest) {
+      Some(version) => return Some(version)
+      None => ()
+    }
+  }
+  let legacy_manifest = @path.Path::join(dir, @path.Path("moon.mod.json")).to_string()
+  if @fs.path_exists(legacy_manifest) {
+    match read_direct_sdk_version(legacy_manifest) {
       Some(version) => return Some(version)
       None => ()
     }
   }
   let parent = @path.Path::dirname(dir)
-  if @path.Path::equal(parent, dir) {
+  if Eq::equal(parent, dir) {
     return None
   }
   find_version_from_dir(parent)
@@ -123,6 +130,10 @@ fn read_direct_sdk_version(path : String) -> String? {
 
 ///|
 fn parse_direct_sdk_version(content : String) -> String? {
+  match parse_direct_sdk_manifest_version(content) {
+    Some(version) => return Some(version)
+    None => ()
+  }
   try @json.parse(content) catch {
     _ => None
   } noraise {
@@ -144,4 +155,29 @@ fn parse_direct_sdk_version(content : String) -> String? {
         _ => None
       }
   }
+}
+
+///|
+fn parse_direct_sdk_manifest_version(content : String) -> String? {
+  if manifest_string_value(content, "name") != Some("f4ah6o/direct_sdk") {
+    return None
+  }
+  manifest_string_value(content, "version")
+}
+
+///|
+fn manifest_string_value(content : String, key : String) -> String? {
+  for line in content.split("\n") {
+    let parts = line.split("=").collect()
+    if parts.length() != 2 || parts[0].trim().to_owned() != key {
+      continue
+    }
+    let value_parts = parts[1].split("\"").collect()
+    if value_parts.length() == 3 {
+      if value_parts[0].trim().is_empty() && value_parts[2].trim().is_empty() {
+        return Some(value_parts[1].to_owned())
+      }
+    }
+  }
+  None
 }

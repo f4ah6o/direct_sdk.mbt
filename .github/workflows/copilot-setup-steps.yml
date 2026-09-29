@@ -27,11 +27,11 @@ jobs:
     # If you do not check out your code, Copilot will do this for you.
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Set up MoonBit
         run: |
-          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | MOONBIT_INSTALL_VERSION="0.1.20260409" bash
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | MOONBIT_INSTALL_VERSION="0.1.20260920" bash
           echo "$HOME/.moon/bin" >> $GITHUB_PATH
 
       - name: Update MoonBit dependencies

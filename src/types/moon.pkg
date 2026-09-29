@@ -1,7 +1,9 @@
 import {
-  "moonbitlang/core/strconv" @strconv,
+  "moonbitlang/core/debug",
+  "moonbitlang/core/string",
 }
 
 import {
   "moonbitlang/quickcheck" @qc,
+  "moonbitlang/quickcheck/gen",
 } for "test"

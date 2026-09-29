@@ -42,13 +42,13 @@ pub type ConferenceEventHandler = (@types.ConferenceInfo) -> Unit
 ///|
 pub fn new_dispatcher() -> EventDispatcher {
   {
-    handlers: Map::new(),
+    handlers: Map([]),
     message_handlers: [],
     talk_handlers: [],
     user_handlers: [],
     domain_handlers: [],
     conference_handlers: [],
-    pending_attachments: Map::new(),
+    pending_attachments: Map([]),
   }
 }
 
@@ -225,13 +225,13 @@ pub fn EventDispatcher::remove_message_handlers(self : EventDispatcher) -> Unit 
 
 ///|
 pub fn EventDispatcher::remove_all_handlers(self : EventDispatcher) -> Unit {
-  self.handlers = Map::new()
+  self.handlers = Map([])
   self.message_handlers = []
   self.talk_handlers = []
   self.user_handlers = []
   self.domain_handlers = []
   self.conference_handlers = []
-  self.pending_attachments = Map::new()
+  self.pending_attachments = Map([])
 }
 
 ///|
@@ -633,7 +633,7 @@ fn parse_pending_attachment(
       ]).unwrap_or("")
       Ok({
         key: attachment_key(talk_id, message_id),
-        attachment: { url, name, content_type },
+        attachment: { url, name, content_type, },
       })
     }
     _ => Err(@errors.invalid_response("attachment payload is not object"))
@@ -647,7 +647,7 @@ fn merge_message_attachment(
 ) -> @types.ReceivedMessage {
   let content = match msg.content {
     @types.JsonObject(obj) => {
-      let merged = Map::new()
+      let merged = Map([])
       for item in obj.to_array() {
         merged[item.0] = item.1
       }
@@ -812,7 +812,7 @@ fn parse_user_info(
       }
       let profiles = match obj.get("profiles") {
         Some(@types.JsonObject(p)) => p
-        _ => Map::new()
+        _ => Map([])
       }
       let can_talk = match obj.get("can_talk") {
         Some(@types.JsonBool(b)) => b
@@ -893,7 +893,7 @@ fn parse_domain_info(
         Some(@types.JsonBool(b)) => b
         _ => false
       }
-      Ok({ id, name, updated_at, contract, setting, role, closed })
+      Ok({ id, name, updated_at, contract, setting, role, closed, })
     }
     _ => Err(@errors.invalid_response("Expected object"))
   }
@@ -940,7 +940,7 @@ fn parse_conference_info(
         Some(@types.JsonNumber(n)) => n.to_int().to_int64()
         _ => 0L
       }
-      Ok({ id, talk_id, domain_id, status, created })
+      Ok({ id, talk_id, domain_id, status, created, })
     }
     _ => Err(@errors.invalid_response("Expected object"))
   }

@@ -42,4 +42,3 @@ pub struct RpcResponse {
 // Type aliases
 
 // Traits
-

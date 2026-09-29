@@ -127,7 +127,7 @@ pub fn Config::default() -> Config {
 /// # Example
 /// ```mbt check
 /// test {
-///   let cfg = Config::new("token")
+///   let cfg = @config.Config::new("token")
 ///     .with_endpoint("wss://example.invalid")
 ///     .with_name("bot")
 ///   let opts = cfg.to_options()
@@ -215,7 +215,7 @@ pub fn Config::apply_defaults(self : Config) -> Config {
 /// # Example
 /// ```mbt check
 /// test {
-///   let result = Config::create("token")
+///   let result = @config.Config::create("token")
 ///   let ok = match result {
 ///     Ok(_) => true
 ///     Err(_) => false
@@ -256,7 +256,7 @@ pub struct HealthStatus {
 
 ///|
 pub fn healthy_health_status(endpoint : String) -> HealthStatus {
-  { connected: true, authenticated: true, endpoint, error: None }
+  { connected: true, authenticated: true, endpoint, error: None, }
 }
 
 // Create an unhealthy health status
@@ -266,7 +266,7 @@ pub fn unhealthy_health_status(
   endpoint : String,
   error_msg : String,
 ) -> HealthStatus {
-  { connected: false, authenticated: false, endpoint, error: Some(error_msg) }
+  { connected: false, authenticated: false, endpoint, error: Some(error_msg), }
 }
 
 // Metrics interface for observability

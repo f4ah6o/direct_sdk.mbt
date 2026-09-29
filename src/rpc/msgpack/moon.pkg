@@ -1,11 +1,12 @@
 import {
-  "f4ah6o/direct_sdk/constants" @constants,
-  "f4ah6o/direct_sdk/types" @types,
-  "f4ah6o/direct_sdk/errors" @errors,
+  "f4ah6o/direct_sdk/constants",
+  "f4ah6o/direct_sdk/types",
+  "f4ah6o/direct_sdk/errors",
   "moonbitlang/core/encoding/utf8" @encoding/utf8,
-  "moonbitlang/core/math" @math,
+  "moonbitlang/core/math",
 }
 
 import {
   "moonbitlang/quickcheck" @qc,
+  "moonbitlang/quickcheck/gen",
 } for "test"

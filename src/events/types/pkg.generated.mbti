@@ -187,4 +187,3 @@ pub type TalkEventHandler = (@f4ah6o/direct_sdk/types.Talk) -> Unit
 pub type UserEventHandler = (@f4ah6o/direct_sdk/types.UserInfo) -> Unit
 
 // Traits
-

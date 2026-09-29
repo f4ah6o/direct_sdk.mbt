@@ -269,7 +269,7 @@ fn parse_conference_join_info(
     Some(@types.JsonNumber(n)) => n.to_int()
     _ => 0
   }
-  Ok({ conference_id, room_name, credential, mode, timestamp, skyway_version })
+  Ok({ conference_id, room_name, credential, mode, timestamp, skyway_version, })
 }
 
 // Helper: Get string value from @types.JsonObject

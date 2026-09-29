@@ -61,30 +61,30 @@ fn ensure_dir(path : String) -> Result[Unit, String] {
 fn moon_mod_template_with_x(module_name : String) -> String {
   let direct_sdk_version = resolve_direct_sdk_version()
   (
-    $|{
-    $|  "name": "\{module_name}",
-    $|  "version": "0.1.0",
-    $|  "deps": {
-    $|    "f4ah6o/direct_sdk": "\{direct_sdk_version}",
-    $|    "moonbitlang/async": "0.15.0",
-    $|    "moonbitlang/x": "\{default_moon_x_version}"
-    $|  },
-    $|  "readme": "README.md",
-    $|  "preferred-target": "native",
-    $|  "description": "daab bot project"
+    $|name = "\{module_name}"
+    $|version = "0.1.0"
+    $|
+    $|import {
+    $|  "f4ah6o/direct_sdk@\{direct_sdk_version}",
+    $|  "moonbitlang/async@\{default_async_version}",
+    $|  "moonbitlang/x@\{default_moon_x_version}",
     $|}
+    $|
+    $|readme = "README.md"
+    $|source = "."
+    $|preferred_target = "native"
+    $|supported_targets = "+native"
+    $|description = "daab bot project"
   )
 }
 
 ///|
 fn shared_pkg_template() -> String {
   (
-    #|{
-    #|  "import": [
-    #|    { "path": "f4ah6o/direct_sdk/rpc/client", "alias": "rpc_client" },
-    #|    { "path": "f4ah6o/direct_sdk/types", "alias": "types" },
-    #|    { "path": "f4ah6o/direct_sdk/errors", "alias": "errors" }
-    #|  ]
+    #|import {
+    #|  "f4ah6o/direct_sdk/rpc/client" @rpc_client,
+    #|  "f4ah6o/direct_sdk/types" @types,
+    #|  "f4ah6o/direct_sdk/errors" @errors,
     #|}
   )
 }
@@ -223,7 +223,7 @@ fn shared_bot_utils_template() -> String {
     #|
     #|///|
     #|pub fn split_words(text : String) -> Array[String] {
-    #|  text.split(" ").to_array().map((part) => part.to_string())
+    #|  text.split(" ").map((part) => part.to_owned()).collect()
     #|}
     #|
     #|// Convert ID to String (handles both String and Int64 IDs)
@@ -406,14 +406,14 @@ fn shared_command_parser_template() -> String {
     #|    ("", "")
     #|  } else {
     #|    let parts =
-    #|      trimmed.split(" ").to_array().map((part) => part.to_string())
+    #|      trimmed.split(" ").map((part) => part.to_owned()).collect()
     #|        .filter((part) => part != "")
     #|    if parts.length() == 0 {
     #|      ("", "")
     #|    } else if parts.length() == 1 {
     #|      (parts[0], "")
     #|    } else {
-    #|      let args = parts[1:parts.length()].to_array().join(" ")
+    #|      let args = parts[1:].exact_view().join(" ")
     #|      (parts[0], trim(args))
     #|    }
     #|  }
@@ -464,7 +464,7 @@ fn shared_command_parser_template() -> String {
     #|
     #|///|
     #|pub fn trim(text : String) -> String {
-    #|  text.trim().to_string()
+    #|  text.trim().to_owned()
     #|}
     #|
     #|// Check if text starts with prefix
@@ -503,7 +503,7 @@ fn shared_command_parser_template() -> String {
     #|  if trimmed == "" {
     #|    return []
     #|  }
-    #|  trimmed.split(" ").to_array().map((part) => part.to_string())
+    #|  trimmed.split(" ").map((part) => part.to_owned()).collect()
     #|    .filter((part) => part != "")
     #|}
     #|
@@ -525,16 +525,15 @@ fn shared_command_parser_template() -> String {
 ///|
 fn ping_cmd_pkg_template(module_name : String) -> String {
   (
-    $|{
-    $|  "is-main": true,
-    $|  "import": [
-    $|    { "path": "moonbitlang/async", "alias": "async" },
-    $|    { "path": "f4ah6o/direct_sdk/rpc/client", "alias": "rpc_client" },
-    $|    { "path": "f4ah6o/direct_sdk/types", "alias": "types" },
-    $|    { "path": "f4ah6o/direct_sdk/errors", "alias": "errors" },
-    $|    { "path": "\{module_name}/shared", "alias": "shared" },
-    $|    { "path": "moonbitlang/x/sys", "alias": "sys" }
-    $|  ]
+    $|pkgtype(kind: "executable")
+    $|
+    $|import {
+    $|  "moonbitlang/async" @async,
+    $|  "f4ah6o/direct_sdk/rpc/client" @rpc_client,
+    $|  "f4ah6o/direct_sdk/types" @types,
+    $|  "f4ah6o/direct_sdk/errors" @errors,
+    $|  "\{module_name}/shared" @shared,
+    $|  "moonbitlang/core/env" @env,
     $|}
   )
 }
@@ -597,9 +596,7 @@ fn ping_main_template() -> String {
     #|///|
     #|fn setup_handlers(bot : Bot) -> Unit {
     #|  @rpc_client.on_message(bot.client, fn(msg) {
-    #|    bot.tasks.spawn_bg(fn() {
-    #|      handle_message(bot, msg)
-    #|    })
+    #|    bot.tasks.spawn_bg(() => handle_message(bot, msg))
     #|  })
     #|
     #|  println("Bot is running. Send commands to interact!")
@@ -717,7 +714,7 @@ fn ping_main_template() -> String {
     #|
     #|///|
     #|async fn main {
-    #|  let token = match @sys.get_env_var("HUBOT_DIRECT_TOKEN") {
+    #|  let token = match @env.get_env_var("HUBOT_DIRECT_TOKEN") {
     #|    Some(value) => value
     #|    None => {
     #|      println("HUBOT_DIRECT_TOKEN is not set. Run 'daab login' first.")
@@ -735,7 +732,7 @@ fn ping_main_template() -> String {
     #|    log_all: true,
     #|  }
     #|
-    #|  @async.with_task_group(fn(tasks) {
+    #|  @async.with_task_group(tasks => {
     #|    let bot = new_bot(config, tasks)
     #|    match start(bot) {
     #|      Ok(_) => ()
@@ -783,17 +780,16 @@ fn ping_readme_template(project_name : String) -> String {
 ///|
 fn select_cmd_pkg_template(module_name : String) -> String {
   (
-    $|{
-    $|  "is-main": true,
-    $|  "import": [
-    $|    { "path": "moonbitlang/async", "alias": "async" },
-    $|    { "path": "f4ah6o/direct_sdk/rpc/client", "alias": "rpc_client" },
-    $|    { "path": "f4ah6o/direct_sdk/types", "alias": "types" },
-    $|    { "path": "f4ah6o/direct_sdk/errors", "alias": "errors" },
-    $|    { "path": "f4ah6o/direct_sdk/api/action_stamps", "alias": "action_stamps" },
-    $|    { "path": "\{module_name}/shared", "alias": "shared" },
-    $|    { "path": "moonbitlang/x/sys", "alias": "sys" }
-    $|  ]
+    $|pkgtype(kind: "executable")
+    $|
+    $|import {
+    $|  "moonbitlang/async" @async,
+    $|  "f4ah6o/direct_sdk/rpc/client" @rpc_client,
+    $|  "f4ah6o/direct_sdk/types" @types,
+    $|  "f4ah6o/direct_sdk/errors" @errors,
+    $|  "f4ah6o/direct_sdk/api/action_stamps" @action_stamps,
+    $|  "\{module_name}/shared" @shared,
+    $|  "moonbitlang/core/env" @env,
     $|}
   )
 }
@@ -861,9 +857,7 @@ fn select_main_template() -> String {
     #|///|
     #|fn setup_handlers(bot : Bot) -> Unit {
     #|  @rpc_client.on_message(bot.client, fn(msg) {
-    #|    bot.tasks.spawn_bg(fn() {
-    #|      handle_message(bot, msg)
-    #|    })
+    #|    bot.tasks.spawn_bg(() => handle_message(bot, msg))
     #|  })
     #|
     #|  println("Bot is running!")
@@ -966,7 +960,7 @@ fn select_main_template() -> String {
     #|
     #|///|
     #|async fn main {
-    #|  let token = match @sys.get_env_var("HUBOT_DIRECT_TOKEN") {
+    #|  let token = match @env.get_env_var("HUBOT_DIRECT_TOKEN") {
     #|    Some(value) => value
     #|    None => {
     #|      println("HUBOT_DIRECT_TOKEN is not set. Run 'daab login' first.")
@@ -983,7 +977,7 @@ fn select_main_template() -> String {
     #|    bot_name: "SelectStampBot",
     #|  }
     #|
-    #|  @async.with_task_group(fn(tasks) {
+    #|  @async.with_task_group(tasks => {
     #|    let bot = new_bot(config, tasks)
     #|    match start(bot) {
     #|      Ok(_) => ()
@@ -1358,8 +1352,7 @@ fn apply_shared_template(project_name : String) -> Result[Unit, String] {
     Ok(_) => ()
     Err(msg) => return Err(msg)
   }
-  match
-    write_file(join_path(shared_dir, "moon.pkg.json"), shared_pkg_template()) {
+  match write_file(join_path(shared_dir, "moon.pkg"), shared_pkg_template()) {
     Ok(_) => ()
     Err(msg) => return Err(msg)
   }
@@ -1393,7 +1386,7 @@ fn apply_ping_template(project_name : String) -> Result[Unit, String] {
   }
   match
     write_file(
-      join_path(project_name, "moon.mod.json"),
+      join_path(project_name, "moon.mod"),
       moon_mod_template_with_x(module_name),
     ) {
     Ok(_) => ()
@@ -1401,7 +1394,7 @@ fn apply_ping_template(project_name : String) -> Result[Unit, String] {
   }
   match
     write_file(
-      join_path(cmd_main_dir, "moon.pkg.json"),
+      join_path(cmd_main_dir, "moon.pkg"),
       ping_cmd_pkg_template(module_name),
     ) {
     Ok(_) => ()
@@ -1433,7 +1426,7 @@ fn apply_select_template(project_name : String) -> Result[Unit, String] {
   }
   match
     write_file(
-      join_path(project_name, "moon.mod.json"),
+      join_path(project_name, "moon.mod"),
       moon_mod_template_with_x(module_name),
     ) {
     Ok(_) => ()
@@ -1441,7 +1434,7 @@ fn apply_select_template(project_name : String) -> Result[Unit, String] {
   }
   match
     write_file(
-      join_path(cmd_main_dir, "moon.pkg.json"),
+      join_path(cmd_main_dir, "moon.pkg"),
       select_cmd_pkg_template(module_name),
     ) {
     Ok(_) => ()

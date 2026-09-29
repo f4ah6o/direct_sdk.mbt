@@ -311,7 +311,7 @@ fn parse_user_info(
   }
   let profiles = match obj.get("profiles") {
     Some(@types.JsonObject(p)) => p
-    _ => Map::new()
+    _ => Map([])
   }
   let can_talk = match obj.get("can_talk") {
     Some(@types.JsonBool(b)) => b
@@ -362,9 +362,9 @@ fn parse_profile_info(
   let phonetic_name = json_get_string(obj, "phonetic_name").unwrap_or("")
   let profiles = match obj.get("profiles") {
     Some(@types.JsonObject(p)) => p
-    _ => Map::new()
+    _ => Map([])
   }
-  Ok({ user_id, domain_id, display_name, phonetic_name, profiles })
+  Ok({ user_id, domain_id, display_name, phonetic_name, profiles, })
 }
 
 // Parse PresenceInfo from @types.JsonValue
@@ -382,7 +382,7 @@ fn parse_presence_info(
     None => return Err(@errors.invalid_response("Missing user_id"))
   }
   let status = json_get_string(obj, "status").unwrap_or("offline")
-  Ok({ user_id, status })
+  Ok({ user_id, status, })
 }
 
 // Parse UserIdentifier from @types.JsonValue
@@ -403,7 +403,7 @@ fn parse_user_identifier(
   let sub_email = json_get_string(obj, "sub_email").unwrap_or("")
   let group_alias = json_get_string(obj, "group_alias").unwrap_or("")
   let signin_id = json_get_string(obj, "signin_id").unwrap_or("")
-  Ok({ user_id, email, sub_email, group_alias, signin_id })
+  Ok({ user_id, email, sub_email, group_alias, signin_id, })
 }
 
 // Helper: Get string value from @types.JsonObject

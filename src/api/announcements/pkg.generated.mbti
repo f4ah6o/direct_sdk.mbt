@@ -44,4 +44,3 @@ pub struct AnnouncementStatus {
 // Type aliases
 
 // Traits
-

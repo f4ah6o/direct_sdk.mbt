@@ -249,4 +249,3 @@ pub const RPC_RESPONSE : Int = 1
 // Type aliases
 
 // Traits
-

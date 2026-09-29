@@ -90,7 +90,7 @@ struct SentFileMeta {
 ///|
 struct DownloadRequest {
   url : String
-  headers : Map[String, String]
+  headers : @http.Headers
 }
 
 ///|
@@ -100,7 +100,7 @@ fn log_step(name : String) -> Unit {
 
 ///|
 fn env_non_empty(key : String) -> String? {
-  match @sys.get_env_var(key) {
+  match @env.get_env_var(key) {
     Some(value) if value != "" => Some(value)
     _ => None
   }
@@ -115,15 +115,15 @@ fn push_unique_token(tokens : Array[String], token : String) -> Unit {
 
 ///|
 fn parse_env_value(content : String, key : String) -> String? {
-  let lines = content.split("\n").to_array()
+  let lines = content.split("\n").collect()
   for line_view in lines {
-    let line = line_view.trim().to_string()
+    let line = line_view.trim().to_owned()
     if line != "" && !line.has_prefix("#") {
-      let parts = line.split("=").to_array()
+      let parts = line.split("=").collect()
       if parts.length() >= 2 {
-        let name = parts[0].trim().to_string()
+        let name = parts[0].trim().to_owned()
         if name == key {
-          let value = parts[1:].to_array().join("=").trim().to_string()
+          let value = parts[1:].exact_view().join("=").trim().to_owned()
           if value != "" {
             return Some(value)
           }
@@ -246,7 +246,7 @@ fn resolve_talk_id_override() -> String? {
 
 ///|
 fn decode_data(data : &@io.Data) -> String {
-  @utf8.decode_lossy(data.binary().view())
+  @utf8.decode_lossy(data.binary().exact_view())
 }
 
 ///|
@@ -266,11 +266,11 @@ fn close_client_quiet(client : @rpc_client.Client) -> Unit {
 
 ///|
 fn last_non_empty_line(text : String) -> String? {
-  let lines = text.split("\n").to_array()
+  let lines = text.split("\n").collect()
   let mut index = lines.length()
   while index > 0 {
     index = index - 1
-    let line = lines[index].trim().to_string()
+    let line = lines[index].trim().to_owned()
     if line != "" {
       return Some(line)
     }
@@ -340,7 +340,7 @@ fn parse_sent_file_meta_from_output(
     Some(value) => value
     None => return Err("file_id not found in output: " + line)
   }
-  Ok({ talk_id, message_id, file_id })
+  Ok({ talk_id, message_id, file_id, })
 }
 
 ///|
@@ -384,7 +384,7 @@ async fn run_direct_api_command(
     return Err("direct-api repo not found at " + direct_api_dir)
   }
   let args = ["run", "src/main", "--target", "native", "--"] + command_args
-  let extra_env : Map[String, String] = {}
+  let extra_env : Map[String, String] = Map([])
   match direct_api_token {
     Some(token) => extra_env["DIRECT_API_ACCESS_TOKEN"] = token
     None => ()
@@ -474,7 +474,7 @@ async fn run_direct_api_command(
 async fn refresh_direct_api_token_if_possible(
   direct_api_token : String?,
 ) -> Unit {
-  let extra_env : Map[String, String] = {}
+  let extra_env : Map[String, String] = Map([])
   match direct_api_token {
     Some(token) => extra_env["DIRECT_API_ACCESS_TOKEN"] = token
     None => ()
@@ -619,7 +619,7 @@ async fn follow_download_redirect(
         )
     }
     return follow_download_redirect(
-      { url: location, headers: req.headers },
+      { url: location, headers: req.headers, },
       redirects + 1,
     )
   }
@@ -790,7 +790,7 @@ async fn run_e2e_flow(client : @rpc_client.Client) -> Result[Unit, String] {
         " url=" +
         attachment.url,
       )
-      { url: attachment.url, headers: Map::new() }
+      { url: attachment.url, headers: Map([]), }
     }
   }
   let req = with_bearer_auth(req_raw, @rpc_client.get_config(client).token)
@@ -814,8 +814,8 @@ async fn find_attachment_for_message(
   client : @rpc_client.Client,
   talk_id : @types.ID,
   message_id_str : String,
-) -> Result[Attachment?, String] {
-  let attachments = match get_attachments(client, talk_id, 100) {
+) -> Result[@files.Attachment?, String] {
+  let attachments = match @files.get_attachments(client, talk_id, 100) {
     Ok(value) => value
     Err(err) => return Err(@errors.direct_error_to_string(err))
   }
@@ -886,7 +886,7 @@ fn resolve_receive_only_download_request(
   if url == "" {
     return None
   }
-  Some({ url, headers: Map::new() })
+  Some({ url, headers: Map([]), })
 }
 
 ///|
@@ -904,7 +904,7 @@ fn with_bearer_auth(req : DownloadRequest, token : String) -> DownloadRequest {
     // Match direct-js behavior for file download authentication.
     url = url + separator + "Authorization=ALB%20" + token
   }
-  { url, headers: req.headers }
+  { url, headers: req.headers, }
 }
 
 ///|
@@ -1208,7 +1208,7 @@ async fn run_receive_only_e2e() -> Result[Unit, String] {
 
 ///|
 async test "e2e send-file and download attached file" {
-  if @sys.get_env_var(e2e_gate_env) != Some("1") {
+  if @env.get_env_var(e2e_gate_env) != Some("1") {
     println("skip e2e: set DIRECT_SDK_E2E=1 to enable")
     return
   }
@@ -1224,7 +1224,7 @@ async test "e2e send-file and download attached file" {
 
 ///|
 async test "e2e receive-only downloads attached file until end message" {
-  if @sys.get_env_var(e2e_receive_gate_env) != Some("1") {
+  if @env.get_env_var(e2e_receive_gate_env) != Some("1") {
     println(
       "skip receive-only e2e: set DIRECT_SDK_E2E_RECEIVE_ONLY=1 to enable",
     )

@@ -98,4 +98,3 @@ pub type MessageChannel = Unit
 pub type ResultChannel = @aqueue.Queue[Result[@types.JsonValue, @errors.DirectError]]
 
 // Traits
-

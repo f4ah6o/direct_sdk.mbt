@@ -27,7 +27,22 @@ pub(all) enum MessageType {
   MsgTypeYesNoClosed // 19 - internal (wire: 506)
   MsgTypeSelectClosed // 20 - internal (wire: 507)
   MsgTypeTaskClosed // 21 - internal (wire: 508)
-} derive(Show, Eq)
+} derive(Eq, Debug)
+
+///|
+pub impl Show for MessageType with fn output(self, logger) {
+  logger.write_string(@debug.to_string(self))
+}
+
+///|
+pub extend MessageType with Eq::{equal, not_equal}
+
+///|
+pub extend MessageType with Show::{output, to_string}
+
+///|
+#deprecated("Use `Repr(x)` instead")
+pub extend MessageType with Debug::{to_repr}
 
 // Convert internal MessageType to wire format value
 // For action stamps (types 13-21), use: wireType = 500 + internalType - 13
@@ -97,7 +112,22 @@ pub fn wire_to_msg_type(wire : Int) -> MessageType? {
 pub(all) enum RoomType {
   RoomTypePair // 1 - 1:1 chat
   RoomTypeGroup // 2 - Group chat
-} derive(Show, Eq)
+} derive(Eq, Debug)
+
+///|
+pub impl Show for RoomType with fn output(self, logger) {
+  logger.write_string(@debug.to_string(self))
+}
+
+///|
+pub extend RoomType with Eq::{equal, not_equal}
+
+///|
+pub extend RoomType with Show::{output, to_string}
+
+///|
+#deprecated("Use `Repr(x)` instead")
+pub extend RoomType with Debug::{to_repr}
 
 ///|
 pub fn room_type_to_int(t : RoomType) -> Int {
@@ -123,7 +153,22 @@ pub fn int_to_room_type(i : Int) -> RoomType? {
 pub(all) enum ID {
   IDString(String)
   IDInt(Int64)
-} derive(Show, Eq)
+} derive(Eq, Debug)
+
+///|
+pub impl Show for ID with fn output(self, logger) {
+  logger.write_string(@debug.to_string(self))
+}
+
+///|
+pub extend ID with Eq::{equal, not_equal}
+
+///|
+pub extend ID with Show::{output, to_string}
+
+///|
+#deprecated("Use `Repr(x)` instead")
+pub extend ID with Debug::{to_repr}
 
 ///|
 pub fn id_to_string(id : ID) -> String {
@@ -136,7 +181,7 @@ pub fn id_to_string(id : ID) -> String {
 ///|
 pub fn string_to_id(s : String) -> ID {
   // Try to parse as Int64 first, fallback to String
-  try @strconv.parse_int64(s) catch {
+  try @string.parse_int64(s) catch {
     _ => IDString(s)
   } noraise {
     i => IDInt(i)
@@ -397,7 +442,19 @@ pub(all) enum JsonValue {
   JsonString(String)
   JsonArray(Array[JsonValue])
   JsonObject(Map[String, JsonValue])
-} derive(Show)
+} derive(Debug)
+
+///|
+pub impl Show for JsonValue with fn output(self, logger) {
+  logger.write_string(@debug.to_string(self))
+}
+
+///|
+pub extend JsonValue with Show::{output, to_string}
+
+///|
+#deprecated("Use `Repr(x)` instead")
+pub extend JsonValue with Debug::{to_repr}
 
 // Convert ID to JsonValue
 

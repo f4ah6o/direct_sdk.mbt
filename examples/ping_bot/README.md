@@ -1,5 +1,7 @@
 # Ping Bot Example
 
+> This is a legacy source sample and is not a standalone project. Its package layout and API calls are not checked by the current toolchain. For a runnable current example, generate the maintained template with `moon run src/daab -- create my-ping-bot --template ping-bot` from the repository root.
+
 A simple bot for the Direct SDK that responds to various commands.
 
 ## Features

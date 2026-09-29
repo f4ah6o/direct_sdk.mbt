@@ -67,11 +67,11 @@ pub fn new_client(config : @config.Config) -> Client {
     msg_id: 0L,
     connected: false,
     authenticated: false,
-    pending_requests: Map::new(),
-    event_handlers: Map::new(),
+    pending_requests: Map([]),
+    event_handlers: Map([]),
     message_channel: None,
     done_channel: None,
-    talk_domains: Map::new(),
+    talk_domains: Map([]),
     metrics: @config.noop_metrics(),
     dispatcher: @events_handler.new_dispatcher(),
   }
@@ -145,10 +145,10 @@ pub fn close(client : Client) -> Result[Unit, @errors.DirectError] {
   }
 
   // Clear pending requests
-  client.pending_requests = Map::new()
+  client.pending_requests = Map([])
 
   // Clear talk domains cache
-  client.talk_domains = Map::new()
+  client.talk_domains = Map([])
   client.connected = false
   client.authenticated = false
   client.ws = None
@@ -200,7 +200,7 @@ pub async fn call(
     Ok(bytes) => bytes
     Err(e) => return Err(e)
   }
-  let promise = { result_ch: @async.Queue::new(kind=Unbounded) }
+  let promise = { result_ch: @async.Queue(kind=Unbounded), }
   client.pending_requests[msg_id] = promise
 
   // Send request

@@ -1,5 +1,7 @@
 # Select Stamp Bot Example
 
+> This is a legacy source sample and is not a standalone project. Its package layout and API calls are not checked by the current toolchain. For a runnable current example, generate the maintained template with `moon run src/daab -- create my-selectstamp-bot --template selectstamp-bot` from the repository root.
+
 A bot for the Direct SDK that demonstrates interactive menus using select stamps.
 
 ## Features

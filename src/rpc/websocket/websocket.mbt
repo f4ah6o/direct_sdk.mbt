@@ -177,7 +177,9 @@ pub fn with_timeout(cfg : WebSocketConfig, timeout_ms : Int) -> WebSocketConfig 
 /// # Example
 /// ```mbt check
 /// test {
-///   let cfg = WebSocketConfig::new("ws://example.invalid").with_timeout(1234)
+///   let cfg = @websocket.WebSocketConfig::new("ws://example.invalid").with_timeout(
+///     1234,
+///   )
 ///   inspect(cfg.timeout, content="1234")
 /// }
 /// ```
@@ -237,7 +239,7 @@ pub type InternalConn = @async_ws.Conn
 
 ///|
 pub fn new_connection(endpoint : String) -> WebSocketConnection {
-  { conn: None, endpoint, connected: false }
+  { conn: None, endpoint, connected: false, }
 }
 
 // Check if connected
@@ -265,13 +267,13 @@ pub fn get_endpoint(conn : WebSocketConnection) -> String {
 pub async fn connect_native(
   config : WebSocketConfig,
 ) -> Result[WebSocketConnection, WebSocketError] {
-  let headers : Map[String, String] = match config.headers {
-    Some(h) => h
-    None => {}
+  let headers : @http.Headers = Map([])
+  for k, v in config.headers.unwrap_or({}) {
+    headers[k] = v
   }
   let proxy_client = match config.proxy_url {
     Some(url) => {
-      let client = try @http.Client::new(url) catch {
+      let client = try @http.Client(url) catch {
         err => return Err(ConnectionFailed("proxy: " + err.to_string()))
       } noraise {
         c => c
@@ -294,7 +296,7 @@ pub async fn connect_native(
   })
   match result {
     Some(Ok(ws)) =>
-      Ok({ conn: Some(ws), endpoint: config.endpoint, connected: true })
+      Ok({ conn: Some(ws), endpoint: config.endpoint, connected: true, })
     Some(Err(err)) => Err(map_async_error(err))
     None => Err(Timeout("handshake timed out"))
   }

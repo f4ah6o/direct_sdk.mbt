@@ -1,8 +1,8 @@
 import {
   "f4ah6o/direct_sdk/rpc/client" @rpc_client,
-  "f4ah6o/direct_sdk/types" @types,
-  "f4ah6o/direct_sdk/errors" @errors,
-  "f4ah6o/direct_sdk/constants" @constants,
+  "f4ah6o/direct_sdk/types",
+  "f4ah6o/direct_sdk/errors",
+  "f4ah6o/direct_sdk/constants",
 }
 
 options(

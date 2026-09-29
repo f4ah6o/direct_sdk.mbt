@@ -79,11 +79,11 @@ pub fn decode_message(data : Bytes) -> Result[RpcMessage, @errors.DirectError] {
           _ =>
             return Err(@errors.invalid_response("Request params must be array"))
         }
-        Ok(Request({ msg_type, msg_id, rpc_method, params }))
+        Ok(Request({ msg_type, msg_id, rpc_method, params, }))
       } else if msg_type == @constants.RPC_RESPONSE {
         let error = if is_null_or_nil(arr[2]) { None } else { Some(arr[2]) }
         let result = arr[3]
-        Ok(Response({ msg_type, msg_id, error, result }))
+        Ok(Response({ msg_type, msg_id, error, result, }))
       } else {
         Err(@errors.invalid_response("Unknown message type"))
       }
@@ -133,7 +133,7 @@ pub fn create_request(
   rpc_method : String,
   params : Array[@types.JsonValue],
 ) -> RpcRequest {
-  { msg_type: @constants.RPC_REQUEST, msg_id, rpc_method, params }
+  { msg_type: @constants.RPC_REQUEST, msg_id, rpc_method, params, }
 }
 
 // Helper: Check if @types.JsonValue is null or nil
@@ -190,7 +190,7 @@ priv struct Encoder {
 
 ///|
 fn Encoder::new() -> Encoder {
-  { buf: [] }
+  { buf: [], }
 }
 
 ///|
@@ -449,7 +449,7 @@ priv struct Decoder {
 
 ///|
 fn Decoder::new(data : Bytes) -> Decoder {
-  { data, pos: 0 }
+  { data, pos: 0, }
 }
 
 ///|
@@ -470,7 +470,7 @@ fn Decoder::read_bytes(self : Decoder, len : Int) -> Result[Bytes, String] {
   }
   let view = self.data[self.pos:end_pos]
   self.pos = end_pos
-  Ok(view.to_bytes())
+  Ok(view.to_owned())
 }
 
 ///|
@@ -673,7 +673,7 @@ fn decode_array(dec : Decoder, len : Int) -> Result[@types.JsonValue, String] {
 
 ///|
 fn decode_map(dec : Decoder, len : Int) -> Result[@types.JsonValue, String] {
-  let values : Map[String, @types.JsonValue] = Map::new()
+  let values : Map[String, @types.JsonValue] = Map([])
   for _ in 0..<len {
     let key = match decode_value(dec) {
       Ok(@types.JsonString(value)) => value
@@ -699,12 +699,12 @@ fn decode_float32(bits : UInt64) -> Float {
   let exp = (bits >> 23).land(0xff).to_int()
   let frac_bits = bits & 0x7fffff
   if exp == 255 {
-    return Float::default()
+    return Default::default()
   }
   let fraction = Float::from_uint64(frac_bits) / Float::from_int(8_388_608)
   if exp == 0 {
     if frac_bits == 0 {
-      return Float::default()
+      return Default::default()
     }
     let base = Float::from_int(2)
     let exponent = Float::from_int(-126)

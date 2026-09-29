@@ -1,16 +1,16 @@
 // Property-based tests for DirectError formatting and constructors.
 
 ///|
-let msg_gen : @qc.Gen[String] = @qc.Gen::spawn()
+let msg_gen : @gen.Gen[String] = @gen.Gen::spawn()
 
 ///|
-let code_gen : @qc.Gen[Int] = @qc.int_range(-1000, 1000)
+let code_gen : @gen.Gen[Int] = @gen.int_range(-1000, 1000)
 
 ///|
-let error_tag_gen : @qc.Gen[Int] = @qc.int_range(0, 10)
+let error_tag_gen : @gen.Gen[Int] = @gen.int_range(0, 10)
 
 ///|
-let error_spec_gen : @qc.Gen[(Int, String, Int)] = error_tag_gen.bind(fn(
+let error_spec_gen : @gen.Gen[(Int, String, Int)] = error_tag_gen.bind(fn(
   tag : Int,
 ) {
   msg_gen.bind(fn(msg : String) {

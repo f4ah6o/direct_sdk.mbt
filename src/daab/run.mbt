@@ -8,8 +8,10 @@ pub async fn run_run(args : ArrayView[String]) -> Result[Unit, String] {
     Some(path) => path
     None => DEFAULT_ENV_PATH
   }
-  if !@fs.path_exists("moon.mod.json") {
-    return Err("moon.mod.json not found (run 'daab init <project-name>' first)")
+  if !@fs.path_exists("moon.mod") && !@fs.path_exists("moon.mod.json") {
+    return Err(
+      "MoonBit module manifest not found (run 'daab init <project-name>' first)",
+    )
   }
   match load_env_file(env_path) {
     Ok(_) => ()
