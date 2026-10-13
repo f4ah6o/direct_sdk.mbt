@@ -2,7 +2,7 @@
 // Property-Based Test Targets for msgpack
 
 ///|
-let pbt_int_gen : @gen.Gen[Int32] = @gen.int_range(0, 1000000)
+let pbt_int_gen : @gen.Generator[Int32] = @gen.int_range(0, 1000000)
 
 ///|
 test "prop_encode_request_decode_message_roundtrip" {

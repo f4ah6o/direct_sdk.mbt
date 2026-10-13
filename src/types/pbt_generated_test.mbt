@@ -2,7 +2,7 @@
 // Property-Based Test Targets for types
 
 ///|
-let msg_type_gen_property : @gen.Gen[@types.MessageType] = @gen.one_of_array([
+let msg_type_gen_property : @gen.Generator[@types.MessageType] = @gen.elements([
   @types.MsgTypeSystem,
   @types.MsgTypeText,
   @types.MsgTypeStamp,
@@ -27,13 +27,13 @@ let msg_type_gen_property : @gen.Gen[@types.MessageType] = @gen.one_of_array([
 ])
 
 ///|
-let room_type_gen_property : @gen.Gen[@types.RoomType] = @gen.one_of_array([
+let room_type_gen_property : @gen.Generator[@types.RoomType] = @gen.elements([
   @types.RoomTypePair,
   @types.RoomTypeGroup,
 ])
 
 ///|
-let pbt_small_int_gen : @gen.Gen[Int32] = @gen.int_range(-1_000_000, 1_000_000)
+let pbt_small_int_gen : @gen.Generator[Int32] = @gen.int_range(-1_000_000, 1_000_000)
 
 ///|
 test "prop_msg_type_wire_roundtrip" {

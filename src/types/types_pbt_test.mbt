@@ -1,3 +1,20 @@
+
+///|
+/// Rejection sampling: regenerate until the predicate holds.
+fn[T] such_that(
+  gen : @gen.Generator[T],
+  pred : (T) -> Bool
+) -> @gen.Generator[T] {
+  @gen.Generator::Generator(fn(size, rng) {
+    for ;; {
+      let v = gen.run(size, rng)
+      if pred(v) {
+        break v
+      }
+    }
+  })
+}
+
 // Property-based tests for core type conversions.
 
 ///|
@@ -10,7 +27,7 @@ fn is_valid_msg_wire(wire : Int32) -> Bool {
 }
 
 ///|
-let msg_type_gen : @gen.Gen[@types.MessageType] = @gen.one_of_array([
+let msg_type_gen : @gen.Generator[@types.MessageType] = @gen.elements([
   @types.MsgTypeSystem,
   @types.MsgTypeText,
   @types.MsgTypeStamp,
@@ -36,16 +53,16 @@ let msg_type_gen : @gen.Gen[@types.MessageType] = @gen.one_of_array([
 ])
 
 ///|
-let room_type_gen : @gen.Gen[@types.RoomType] = @gen.one_of_array([
+let room_type_gen : @gen.Generator[@types.RoomType] = @gen.elements([
   @types.RoomTypePair,
   @types.RoomTypeGroup,
 ])
 
 ///|
-let small_int_gen : @gen.Gen[Int32] = @gen.int_range(-1_000_000, 1_000_000)
+let small_int_gen : @gen.Generator[Int32] = @gen.int_range(-1_000_000, 1_000_000)
 
 ///|
-let non_numeric_string_gen : @gen.Gen[String] = @gen.Gen::spawn().such_that(fn(
+let non_numeric_string_gen : @gen.Generator[String] = such_that(@gen.spawn(), fn(
   s : String,
 ) {
   try @string.parse_int64(s) catch {
@@ -56,7 +73,7 @@ let non_numeric_string_gen : @gen.Gen[String] = @gen.Gen::spawn().such_that(fn(
 })
 
 ///|
-let invalid_wire_gen : @gen.Gen[Int32] = @gen.int_range(-1000, 2000).such_that(fn(
+let invalid_wire_gen : @gen.Generator[Int32] = such_that(@gen.int_range(-1000, 2000), fn(
   wire : Int32,
 ) {
   !is_valid_msg_wire(wire)

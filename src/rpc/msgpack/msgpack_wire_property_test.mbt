@@ -67,7 +67,7 @@ fn response_matches_wire(value : Int64, has_error : Bool) -> Bool {
 
 ///|
 test "core quickcheck integer request bytes match MessagePack specification" {
-  @quickcheck.check(
+  @gen.check(
     request_matches_integer_wire,
     count=2000,
     max_size=100,
@@ -78,7 +78,7 @@ test "core quickcheck integer request bytes match MessagePack specification" {
 
 ///|
 test "core quickcheck response distinguishes nil and false errors" {
-  @quickcheck.check(
+  @gen.check(
     fn(input : (Int64, Bool)) { response_matches_wire(input.0, input.1) },
     count=2000,
     max_size=100,

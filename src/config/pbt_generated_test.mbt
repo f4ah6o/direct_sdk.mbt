@@ -2,7 +2,7 @@
 // Property-Based Test Targets for config
 
 ///|
-let timeout_gen : @gen.Gen[Int32] = @gen.int_range(0, 400000)
+let timeout_gen : @gen.Generator[Int32] = @gen.int_range(0, 400000)
 
 ///|
 test "prop_validate_timeout_bounds" {
