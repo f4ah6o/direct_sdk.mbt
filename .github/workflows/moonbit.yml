@@ -16,7 +16,7 @@ jobs:
 
       - name: Set up MoonBit
         run: |
-          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | MOONBIT_INSTALL_VERSION="0.1.20260920" bash
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | MOONBIT_INSTALL_VERSION="0.10.14+7d59c7ec9" bash
           echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
 
       - name: Cache MoonBit dependencies
@@ -25,9 +25,9 @@ jobs:
           path: |
             .mooncakes
             ~/.moon/registry/index
-          key: moonbit-${{ runner.os }}-0.1.20260920-${{ hashFiles('moon.mod') }}
+          key: moonbit-${{ runner.os }}-0.10.14+7d59c7ec9-${{ hashFiles('moon.mod') }}
           restore-keys: |
-            moonbit-${{ runner.os }}-0.1.20260920-
+            moonbit-${{ runner.os }}-0.10.14+7d59c7ec9-
 
       - name: Update dependencies
         run: moon update
