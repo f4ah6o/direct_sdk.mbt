@@ -267,7 +267,7 @@ pub fn call_sync(
   client : Client,
   _rpc_method : String,
   _params : Array[@types.JsonValue],
-  _timeout_ms : Int,
+  _timeout_ms : Int32,
 ) -> Result[@types.JsonValue, @errors.DirectError] {
   if !client.connected {
     return Err(@errors.not_connected("Not connected"))

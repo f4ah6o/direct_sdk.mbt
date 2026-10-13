@@ -20,11 +20,11 @@ pub(all) enum CloseCode {
   MessageTooBig // 1009
   MissingExtension // 1010
   InternalError // 1011
-  Other(Int) // Other codes
+  Other(Int32) // Other codes
 }
 
 ///|
-pub fn close_code_to_int(code : CloseCode) -> Int {
+pub fn close_code_to_int(code : CloseCode) -> Int32 {
   match code {
     Normal => 1000
     GoingAway => 1001
@@ -141,7 +141,7 @@ pub struct WebSocketConfig {
   endpoint : String
   mut proxy_url : String?
   mut headers : Map[String, String]?
-  mut timeout : Int // Handshake timeout in milliseconds
+  mut timeout : Int32 // Handshake timeout in milliseconds
 }
 
 // Default WebSocket configuration
@@ -167,7 +167,10 @@ pub fn with_headers(
 }
 
 ///|
-pub fn with_timeout(cfg : WebSocketConfig, timeout_ms : Int) -> WebSocketConfig {
+pub fn with_timeout(
+  cfg : WebSocketConfig,
+  timeout_ms : Int32,
+) -> WebSocketConfig {
   cfg.with_timeout(timeout_ms)
 }
 
@@ -213,7 +216,7 @@ pub fn WebSocketConfig::with_headers(
 ///|
 pub fn WebSocketConfig::with_timeout(
   self : WebSocketConfig,
-  timeout_ms : Int,
+  timeout_ms : Int32,
 ) -> WebSocketConfig {
   self.timeout = timeout_ms
   self

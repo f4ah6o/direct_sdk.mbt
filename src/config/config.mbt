@@ -8,7 +8,7 @@ pub struct Config {
   mut token : String // Authentication token (required)
   mut endpoint : String // WebSocket API endpoint
   mut proxy_url : String? // HTTP proxy URL for WebSocket
-  mut timeout : Int // Request timeout in milliseconds
+  mut timeout : Int32 // Request timeout in milliseconds
   mut name : String // Bot name for log messages
   mut debug : Bool // Enable debug logging
 }
@@ -51,7 +51,7 @@ pub fn with_proxy(cfg : Config, proxy_url : String) -> Config {
 // Builder pattern: Set timeout (milliseconds)
 
 ///|
-pub fn with_timeout(cfg : Config, timeout_ms : Int) -> Config {
+pub fn with_timeout(cfg : Config, timeout_ms : Int32) -> Config {
   cfg.with_timeout(timeout_ms)
 }
 
@@ -160,7 +160,7 @@ pub fn Config::with_proxy(self : Config, proxy_url : String) -> Config {
 }
 
 ///|
-pub fn Config::with_timeout(self : Config, timeout_ms : Int) -> Config {
+pub fn Config::with_timeout(self : Config, timeout_ms : Int32) -> Config {
   self.timeout = timeout_ms
   self
 }

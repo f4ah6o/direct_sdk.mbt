@@ -2,12 +2,12 @@
 // Property-Based Test Targets for config
 
 ///|
-let timeout_gen : @gen.Gen[Int] = @gen.int_range(0, 400000)
+let timeout_gen : @gen.Gen[Int32] = @gen.int_range(0, 400000)
 
 ///|
 test "prop_validate_timeout_bounds" {
   @qc.quick_check(
-    @qc.forall(timeout_gen, fn(timeout : Int) {
+    @qc.forall(timeout_gen, fn(timeout : Int32) {
       let cfg = @config.default_config()
         |> @config.with_timeout(timeout)
         |> @config.with_token("test")
@@ -22,7 +22,7 @@ test "prop_validate_timeout_bounds" {
 ///|
 test "prop_apply_defaults_idempotent" {
   @qc.quick_check(
-    @qc.forall(timeout_gen, fn(timeout : Int) {
+    @qc.forall(timeout_gen, fn(timeout : Int32) {
       let cfg = @config.default_config()
         |> @config.with_timeout(timeout)
         |> @config.with_token("dummy")

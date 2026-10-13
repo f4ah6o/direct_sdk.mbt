@@ -17,7 +17,7 @@ pub struct Department {
   name : String
   parent_id : @types.ID
   children_ids : Array[@types.ID]
-  user_count : Int
+  user_count : Int32
 }
 
 // User count statistics for a department
@@ -25,8 +25,8 @@ pub struct Department {
 ///|
 pub struct DepartmentUserCount {
   department_id : @types.ID
-  all : Int
-  partial : Int
+  all : Int32
+  partial : Int32
 }
 
 // All user counts for departments in a domain

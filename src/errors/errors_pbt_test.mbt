@@ -4,17 +4,17 @@
 let msg_gen : @gen.Gen[String] = @gen.Gen::spawn()
 
 ///|
-let code_gen : @gen.Gen[Int] = @gen.int_range(-1000, 1000)
+let code_gen : @gen.Gen[Int32] = @gen.int_range(-1000, 1000)
 
 ///|
-let error_tag_gen : @gen.Gen[Int] = @gen.int_range(0, 10)
+let error_tag_gen : @gen.Gen[Int32] = @gen.int_range(0, 10)
 
 ///|
-let error_spec_gen : @gen.Gen[(Int, String, Int)] = error_tag_gen.bind(fn(
-  tag : Int,
+let error_spec_gen : @gen.Gen[(Int32, String, Int32)] = error_tag_gen.bind(fn(
+  tag : Int32,
 ) {
   msg_gen.bind(fn(msg : String) {
-    code_gen.fmap(fn(code : Int) { (tag, msg, code) })
+    code_gen.fmap(fn(code : Int32) { (tag, msg, code) })
   })
 })
 
@@ -22,7 +22,7 @@ let error_spec_gen : @gen.Gen[(Int, String, Int)] = error_tag_gen.bind(fn(
 test "quickcheck: direct_error_to_string matches variant format" {
   let tag_offset = @env.now().to_int() % 11
   @qc.quick_check(
-    @qc.forall(error_spec_gen, fn(spec : (Int, String, Int)) {
+    @qc.forall(error_spec_gen, fn(spec : (Int32, String, Int32)) {
       let (tag, msg, code) = spec
       let tag = (tag + tag_offset) % 11
       let prop = match tag {

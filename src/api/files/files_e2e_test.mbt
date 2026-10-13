@@ -20,16 +20,16 @@ let e2e_peer_email_env : String = "DIRECT_SDK_E2E_PEER_EMAIL"
 let e2e_self_email_env : String = "DIRECT_SDK_E2E_SELF_EMAIL"
 
 ///|
-let e2e_total_timeout_ms : Int = 180_000
+let e2e_total_timeout_ms : Int32 = 180_000
 
 ///|
-let download_timeout_ms : Int = 30_000
+let download_timeout_ms : Int32 = 30_000
 
 ///|
-let download_max_redirects : Int = 5
+let download_max_redirects : Int32 = 5
 
 ///|
-let direct_api_timeout_ms : Int = 90_000
+let direct_api_timeout_ms : Int32 = 90_000
 
 ///|
 let direct_api_dir : String = "../direct-api.mbt"
@@ -38,37 +38,37 @@ let direct_api_dir : String = "../direct-api.mbt"
 let direct_api_opz_profile : String = "direct-api-dev"
 
 ///|
-let create_pair_retry_count : Int = 5
+let create_pair_retry_count : Int32 = 5
 
 ///|
-let create_pair_retry_interval_ms : Int = 2_000
+let create_pair_retry_interval_ms : Int32 = 2_000
 
 ///|
-let session_wait_attempts : Int = 100
+let session_wait_attempts : Int32 = 100
 
 ///|
-let session_wait_interval_ms : Int = 200
+let session_wait_interval_ms : Int32 = 200
 
 ///|
-let message_event_wait_timeout_ms : Int = 30_000
+let message_event_wait_timeout_ms : Int32 = 30_000
 
 ///|
 let message_text_tag_prefix : String = "direct-sdk-e2e-create-download-auth-"
 
 ///|
-let message_event_poll_interval_ms : Int = 100
+let message_event_poll_interval_ms : Int32 = 100
 
 ///|
-let message_event_wait_attempts : Int = 300
+let message_event_wait_attempts : Int32 = 300
 
 ///|
 let receive_end_message : String = "end."
 
 ///|
-let receive_poll_interval_ms : Int = 200
+let receive_poll_interval_ms : Int32 = 200
 
 ///|
-let receive_wait_attempts : Int = 3000
+let receive_wait_attempts : Int32 = 3000
 
 ///|
 let temp_file_name : String = ".tmp_direct_sdk_e2e_download_auth.txt"
@@ -78,7 +78,7 @@ let daab_login_env_path : String = direct_api_dir +
   "/.tmp_direct_sdk_e2e_daab_login.env"
 
 ///|
-let daab_login_timeout_ms : Int = 90_000
+let daab_login_timeout_ms : Int32 = 90_000
 
 ///|
 struct SentFileMeta {
@@ -593,7 +593,7 @@ async fn download_with_request(req : DownloadRequest) -> Result[Bytes, String] {
 ///|
 async fn follow_download_redirect(
   req : DownloadRequest,
-  redirects : Int,
+  redirects : Int32,
 ) -> Result[Bytes, String] {
   let (resp, body) = @http.get(req.url, headers=req.headers)
   if resp.code >= 200 && resp.code < 300 {

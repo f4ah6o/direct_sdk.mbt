@@ -10,7 +10,7 @@ pub enum MessageOrder {
 }
 
 ///|
-pub fn message_order_to_int(order : MessageOrder) -> Int {
+pub fn message_order_to_int(order : MessageOrder) -> Int32 {
   match order {
     Asc => 1
     Desc => 2
@@ -18,7 +18,7 @@ pub fn message_order_to_int(order : MessageOrder) -> Int {
 }
 
 ///|
-pub fn int_to_message_order(i : Int) -> MessageOrder {
+pub fn int_to_message_order(i : Int32) -> MessageOrder {
   match i {
     1 => Asc
     2 => Desc
@@ -46,7 +46,7 @@ pub fn default_get_messages_options() -> GetMessagesOptions {
 
 ///|
 pub struct SearchMessagesResult {
-  total : Int
+  total : Int32
   marker : @types.ID?
   next_marker : @types.ID?
   contents : Array[MessageSearchContent]
@@ -172,7 +172,7 @@ pub async fn search_messages(
   talk_id : @types.ID?,
   keyword : String,
   marker : @types.ID?,
-  limit : Int,
+  limit : Int32,
 ) -> Result[SearchMessagesResult, @errors.DirectError] {
   let params = [
     @types.id_to_json(domain_id),

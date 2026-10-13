@@ -13,7 +13,7 @@ pub struct Conference {
   created_at : Int64
   expired_at : Int64
   participants : Array[@types.ID]
-  skyway_version : Int
+  skyway_version : Int32
 }
 
 // Information for joining a conference
@@ -25,7 +25,7 @@ pub struct ConferenceJoinInfo {
   credential : String
   mode : String
   timestamp : Int64
-  skyway_version : Int
+  skyway_version : Int32
 }
 
 // === Conference Operations ===

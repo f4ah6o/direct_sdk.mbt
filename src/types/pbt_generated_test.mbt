@@ -33,7 +33,7 @@ let room_type_gen_property : @gen.Gen[@types.RoomType] = @gen.one_of_array([
 ])
 
 ///|
-let pbt_small_int_gen : @gen.Gen[Int] = @gen.int_range(-1_000_000, 1_000_000)
+let pbt_small_int_gen : @gen.Gen[Int32] = @gen.int_range(-1_000_000, 1_000_000)
 
 ///|
 test "prop_msg_type_wire_roundtrip" {
@@ -62,7 +62,7 @@ test "prop_room_type_int_roundtrip" {
 ///|
 test "prop_id_string_roundtrip_int" {
   @qc.quick_check(
-    @qc.forall(pbt_small_int_gen, fn(i : Int) {
+    @qc.forall(pbt_small_int_gen, fn(i : Int32) {
       let id = @types.IDInt(i.to_int64())
       @types.string_to_id(@types.id_to_string(id)) == id
     }),
@@ -72,7 +72,7 @@ test "prop_id_string_roundtrip_int" {
 ///|
 test "prop_id_json_roundtrip_int" {
   @qc.quick_check(
-    @qc.forall(pbt_small_int_gen, fn(i : Int) {
+    @qc.forall(pbt_small_int_gen, fn(i : Int32) {
       let id = @types.IDInt(i.to_int64())
       match @types.json_to_id(@types.id_to_json(id)) {
         Some(decoded) => decoded == id

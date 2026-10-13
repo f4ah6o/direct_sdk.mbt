@@ -238,7 +238,7 @@ pub fn EventDispatcher::remove_all_handlers(self : EventDispatcher) -> Unit {
 pub fn EventDispatcher::handler_count(
   self : EventDispatcher,
   event_name : String,
-) -> Int {
+) -> Int32 {
   match self.handlers.get(event_name) {
     Some(handlers) => handlers.length()
     None => 0
@@ -246,7 +246,7 @@ pub fn EventDispatcher::handler_count(
 }
 
 ///|
-pub fn EventDispatcher::total_handler_count(self : EventDispatcher) -> Int {
+pub fn EventDispatcher::total_handler_count(self : EventDispatcher) -> Int32 {
   let mut total = 0
   for handlers in self.handlers.to_array() {
     total = total + handlers.1.length()
@@ -382,14 +382,17 @@ pub fn remove_all_handlers(dispatcher : EventDispatcher) -> Unit {
 // Get the count of handlers for a specific event
 
 ///|
-pub fn handler_count(dispatcher : EventDispatcher, event_name : String) -> Int {
+pub fn handler_count(
+  dispatcher : EventDispatcher,
+  event_name : String,
+) -> Int32 {
   dispatcher.handler_count(event_name)
 }
 
 // Get the total count of all handlers
 
 ///|
-pub fn total_handler_count(dispatcher : EventDispatcher) -> Int {
+pub fn total_handler_count(dispatcher : EventDispatcher) -> Int32 {
   dispatcher.total_handler_count()
 }
 

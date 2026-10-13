@@ -9,7 +9,7 @@
 
 ///|
 pub struct RpcRequest {
-  msg_type : Int // Always @constants.RPC_REQUEST (0)
+  msg_type : Int32 // Always @constants.RPC_REQUEST (0)
   msg_id : Int64
   rpc_method : String
   params : Array[@types.JsonValue]
@@ -19,7 +19,7 @@ pub struct RpcRequest {
 
 ///|
 pub struct RpcResponse {
-  msg_type : Int // Always @constants.RPC_RESPONSE (1)
+  msg_type : Int32 // Always @constants.RPC_RESPONSE (1)
   msg_id : Int64
   error : @types.JsonValue?
   result : @types.JsonValue
@@ -147,7 +147,7 @@ fn is_null_or_nil(v : @types.JsonValue) -> Bool {
 }
 
 ///|
-fn json_number_to_int(value : @types.JsonValue) -> Result[Int, String] {
+fn json_number_to_int(value : @types.JsonValue) -> Result[Int32, String] {
   match value {
     @types.JsonInt(i) => {
       let int_val = i.to_int()
@@ -206,7 +206,7 @@ fn Encoder::push_bytes(self : Encoder, bytes : Bytes) -> Unit {
 }
 
 ///|
-fn Encoder::push_u16(self : Encoder, value : Int) -> Unit {
+fn Encoder::push_u16(self : Encoder, value : Int32) -> Unit {
   let tmp = FixedArray::make(2, b'\x00')
   tmp.unsafe_write_uint16_be(0, value.to_uint16())
   for b in tmp {
@@ -215,9 +215,9 @@ fn Encoder::push_u16(self : Encoder, value : Int) -> Unit {
 }
 
 ///|
-fn Encoder::push_u32(self : Encoder, value : Int) -> Unit {
+fn Encoder::push_u32(self : Encoder, value : Int32) -> Unit {
   let tmp = FixedArray::make(4, b'\x00')
-  let u = UInt::trunc_double(value.to_double())
+  let u = UInt32::trunc_double(value.to_double())
   tmp.unsafe_write_uint32_be(0, u)
   for b in tmp {
     self.buf.push(b)
@@ -289,7 +289,7 @@ fn encode_number(enc : Encoder, value : Float) -> Result[Unit, String] {
 }
 
 ///|
-fn encode_int(enc : Encoder, value : Int) -> Unit {
+fn encode_int(enc : Encoder, value : Int32) -> Unit {
   if value >= 0 {
     if value <= 0x7f {
       enc.push_byte(value.to_byte())
@@ -444,7 +444,7 @@ fn encode_map(
 ///|
 priv struct Decoder {
   data : Bytes
-  mut pos : Int
+  mut pos : Int32
 }
 
 ///|
@@ -463,7 +463,7 @@ fn Decoder::read_byte(self : Decoder) -> Result[Byte, String] {
 }
 
 ///|
-fn Decoder::read_bytes(self : Decoder, len : Int) -> Result[Bytes, String] {
+fn Decoder::read_bytes(self : Decoder, len : Int32) -> Result[Bytes, String] {
   let end_pos = self.pos + len
   if end_pos > self.data.length() {
     return Err("Unexpected end of input")
@@ -474,7 +474,7 @@ fn Decoder::read_bytes(self : Decoder, len : Int) -> Result[Bytes, String] {
 }
 
 ///|
-fn Decoder::read_uint(self : Decoder, len : Int) -> Result[UInt64, String] {
+fn Decoder::read_uint(self : Decoder, len : Int32) -> Result[UInt64, String] {
   let mut acc : UInt64 = 0
   for _ in 0..<len {
     match self.read_byte() {
@@ -486,7 +486,7 @@ fn Decoder::read_uint(self : Decoder, len : Int) -> Result[UInt64, String] {
 }
 
 ///|
-fn Decoder::read_int(self : Decoder, bits : Int) -> Result[Int64, String] {
+fn Decoder::read_int(self : Decoder, bits : Int32) -> Result[Int64, String] {
   let value = self.read_uint(bits / 8)
   match value {
     Ok(raw) =>
@@ -647,7 +647,10 @@ fn decode_value(dec : Decoder) -> Result[@types.JsonValue, String] {
 }
 
 ///|
-fn decode_string(dec : Decoder, len : Int) -> Result[@types.JsonValue, String] {
+fn decode_string(
+  dec : Decoder,
+  len : Int32,
+) -> Result[@types.JsonValue, String] {
   match dec.read_bytes(len) {
     Ok(bytes) =>
       try @encoding/utf8.decode(bytes) catch {
@@ -660,7 +663,7 @@ fn decode_string(dec : Decoder, len : Int) -> Result[@types.JsonValue, String] {
 }
 
 ///|
-fn decode_array(dec : Decoder, len : Int) -> Result[@types.JsonValue, String] {
+fn decode_array(dec : Decoder, len : Int32) -> Result[@types.JsonValue, String] {
   let values : Array[@types.JsonValue] = []
   for _ in 0..<len {
     match decode_value(dec) {
@@ -672,7 +675,7 @@ fn decode_array(dec : Decoder, len : Int) -> Result[@types.JsonValue, String] {
 }
 
 ///|
-fn decode_map(dec : Decoder, len : Int) -> Result[@types.JsonValue, String] {
+fn decode_map(dec : Decoder, len : Int32) -> Result[@types.JsonValue, String] {
   let values : Map[String, @types.JsonValue] = Map([])
   for _ in 0..<len {
     let key = match decode_value(dec) {

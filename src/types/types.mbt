@@ -48,7 +48,7 @@ pub extend MessageType with Debug::{to_repr}
 // For action stamps (types 13-21), use: wireType = 500 + internalType - 13
 
 ///|
-pub fn msg_type_to_wire(t : MessageType) -> Int {
+pub fn msg_type_to_wire(t : MessageType) -> Int32 {
   match t {
     MsgTypeYesNo => 500
     MsgTypeYesNoReply => 501
@@ -78,7 +78,7 @@ pub fn msg_type_to_wire(t : MessageType) -> Int {
 // Convert wire format value to MessageType
 
 ///|
-pub fn wire_to_msg_type(wire : Int) -> MessageType? {
+pub fn wire_to_msg_type(wire : Int32) -> MessageType? {
   match wire {
     0 => Some(MsgTypeSystem)
     1 => Some(MsgTypeText)
@@ -130,7 +130,7 @@ pub extend RoomType with Show::{output, to_string}
 pub extend RoomType with Debug::{to_repr}
 
 ///|
-pub fn room_type_to_int(t : RoomType) -> Int {
+pub fn room_type_to_int(t : RoomType) -> Int32 {
   match t {
     RoomTypePair => 1
     RoomTypeGroup => 2
@@ -138,7 +138,7 @@ pub fn room_type_to_int(t : RoomType) -> Int {
 }
 
 ///|
-pub fn int_to_room_type(i : Int) -> RoomType? {
+pub fn int_to_room_type(i : Int32) -> RoomType? {
   match i {
     1 => Some(RoomTypePair)
     2 => Some(RoomTypeGroup)
@@ -249,7 +249,7 @@ pub(all) struct ReceivedMessage {
 pub(all) struct Talk {
   id : ID
   domain_id : ID
-  talk_type : Int
+  talk_type : Int32
   name : String
   user_ids : Array[ID]
   allow_display_past_messages : Bool
@@ -260,7 +260,7 @@ pub(all) struct Talk {
 ///|
 pub(all) struct TalkStatus {
   talk_id : ID
-  unread_count : Int
+  unread_count : Int32
   latest_msg_id : ID?
 }
 
@@ -370,7 +370,7 @@ pub(all) struct SelectMessage {
   question : String
   options : Array[String]
   listing : Bool
-  closing_type : Int
+  closing_type : Int32
 }
 
 // Task action stamp
@@ -378,8 +378,8 @@ pub(all) struct SelectMessage {
 ///|
 pub(all) struct TaskMessage {
   title : String
-  closing_type : Int
-  closing_users : Int
+  closing_type : Int32
+  closing_users : Int32
   target_user_ids : Array[ID]
 }
 

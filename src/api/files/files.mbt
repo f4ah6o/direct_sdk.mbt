@@ -111,7 +111,7 @@ pub async fn create_download_auth(
 pub async fn get_attachments(
   client : @rpc_client.Client,
   talk_id : @types.ID,
-  limit : Int,
+  limit : Int32,
 ) -> Result[Array[Attachment], @errors.DirectError] {
   let params = [
     id_to_rpc_json(talk_id),

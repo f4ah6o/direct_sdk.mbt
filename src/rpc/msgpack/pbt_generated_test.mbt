@@ -2,12 +2,12 @@
 // Property-Based Test Targets for msgpack
 
 ///|
-let pbt_int_gen : @gen.Gen[Int] = @gen.int_range(0, 1000000)
+let pbt_int_gen : @gen.Gen[Int32] = @gen.int_range(0, 1000000)
 
 ///|
 test "prop_encode_request_decode_message_roundtrip" {
   @qc.quick_check(
-    @qc.forall(pbt_int_gen, fn(msg_id_int : Int) {
+    @qc.forall(pbt_int_gen, fn(msg_id_int : Int32) {
       let msg_id = msg_id_int.to_int64()
       let req = @msgpack.create_request(msg_id, "test_method", [@types.JsonNull])
       match @msgpack.encode_request(req) {
@@ -28,7 +28,7 @@ test "prop_encode_request_decode_message_roundtrip" {
 ///|
 test "prop_encode_request_produces_non_empty_bytes" {
   @qc.quick_check(
-    @qc.forall(pbt_int_gen, fn(msg_id_int : Int) {
+    @qc.forall(pbt_int_gen, fn(msg_id_int : Int32) {
       let msg_id = msg_id_int.to_int64()
       let req = @msgpack.create_request(msg_id, "test_method", [@types.JsonNull])
       match @msgpack.encode_request(req) {
@@ -42,7 +42,7 @@ test "prop_encode_request_produces_non_empty_bytes" {
 ///|
 test "prop_encode_notification_decode_message_roundtrip" {
   @qc.quick_check(
-    @qc.forall(pbt_int_gen, fn(_msg_id_int : Int) {
+    @qc.forall(pbt_int_gen, fn(_msg_id_int : Int32) {
       let rpc_method = "test_method"
       let params = [@types.JsonNull]
       match @msgpack.encode_notification(rpc_method, params) {
@@ -63,7 +63,7 @@ test "prop_encode_notification_decode_message_roundtrip" {
 ///|
 test "prop_encode_notification_produces_non_empty_bytes" {
   @qc.quick_check(
-    @qc.forall(pbt_int_gen, fn(_msg_id_int : Int) {
+    @qc.forall(pbt_int_gen, fn(_msg_id_int : Int32) {
       let rpc_method = "test_method"
       let params = [@types.JsonNull]
       match @msgpack.encode_notification(rpc_method, params) {
