@@ -33,7 +33,9 @@ let room_type_gen_property : @gen.Generator[@types.RoomType] = @gen.elements([
 ])
 
 ///|
-let pbt_small_int_gen : @gen.Generator[Int32] = @gen.int_range(-1_000_000, 1_000_000)
+let pbt_small_int_gen : @gen.Generator[Int32] = @gen.int_range(
+  -1_000_000, 1_000_000,
+)
 
 ///|
 test "prop_msg_type_wire_roundtrip" {

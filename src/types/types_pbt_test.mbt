@@ -1,9 +1,8 @@
-
 ///|
 /// Rejection sampling: regenerate until the predicate holds.
 fn[T] such_that(
   gen : @gen.Generator[T],
-  pred : (T) -> Bool
+  pred : (T) -> Bool,
 ) -> @gen.Generator[T] {
   @gen.Generator::Generator(fn(size, rng) {
     for ;; {
@@ -59,7 +58,9 @@ let room_type_gen : @gen.Generator[@types.RoomType] = @gen.elements([
 ])
 
 ///|
-let small_int_gen : @gen.Generator[Int32] = @gen.int_range(-1_000_000, 1_000_000)
+let small_int_gen : @gen.Generator[Int32] = @gen.int_range(
+  -1_000_000, 1_000_000,
+)
 
 ///|
 let non_numeric_string_gen : @gen.Generator[String] = such_that(@gen.spawn(), fn(
@@ -73,11 +74,10 @@ let non_numeric_string_gen : @gen.Generator[String] = such_that(@gen.spawn(), fn
 })
 
 ///|
-let invalid_wire_gen : @gen.Generator[Int32] = such_that(@gen.int_range(-1000, 2000), fn(
-  wire : Int32,
-) {
-  !is_valid_msg_wire(wire)
-})
+let invalid_wire_gen : @gen.Generator[Int32] = such_that(
+  @gen.int_range(-1000, 2000),
+  fn(wire : Int32) { !is_valid_msg_wire(wire) },
+)
 
 ///|
 test "quickcheck: MessageType wire roundtrip" {

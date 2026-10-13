@@ -11,12 +11,13 @@ let error_tag_gen : @gen.Generator[Int32] = @gen.int_range(0, 10)
 
 ///|
 let error_spec_gen : @gen.Generator[(Int32, String, Int32)] = error_tag_gen.flat_map(fn(
-  tag : Int32,
-) {
-  msg_gen.flat_map(fn(msg : String) {
-    code_gen.map(fn(code : Int32) { (tag, msg, code) })
-  })
-})
+    tag : Int32,
+  ) {
+    msg_gen.flat_map(fn(msg : String) {
+      code_gen.map(fn(code : Int32) { (tag, msg, code) })
+    })
+  },
+)
 
 ///|
 test "quickcheck: direct_error_to_string matches variant format" {
