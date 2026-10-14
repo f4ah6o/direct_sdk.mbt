@@ -2,7 +2,7 @@ import {
   "f4ah6o/direct_sdk/rpc/websocket" @rpc_websocket,
   "moonbitlang/core/env",
   "moonbitlang/quickcheck" @qc,
-  "moonbitlang/quickcheck/gen",
+  "moonbitlang/core/quickcheck" @gen,
 } for "test"
 
 options(

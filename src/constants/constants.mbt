@@ -16,39 +16,39 @@ pub const DEFAULT_ENDPOINT : String = "wss://api.direct4b.com/albero-app-server/
 // MessagePack RPC message types
 
 ///|
-pub const RPC_REQUEST : Int = 0
+pub const RPC_REQUEST : Int32 = 0
 
 ///|
-pub const RPC_RESPONSE : Int = 1
+pub const RPC_RESPONSE : Int32 = 1
 
 // === Timeouts (milliseconds) ===
 
 // Default interval between WebSocket ping messages
 
 ///|
-pub const DEFAULT_PING_INTERVAL : Int = 45_000
+pub const DEFAULT_PING_INTERVAL : Int32 = 45_000
 
 // Default timeout for RPC requests
 
 ///|
-pub const DEFAULT_REQUEST_TIMEOUT : Int = 30_000
+pub const DEFAULT_REQUEST_TIMEOUT : Int32 = 30_000
 
 // Timeout for WebSocket handshake
 
 ///|
-pub const DEFAULT_HANDSHAKE_TIMEOUT : Int = 10_000
+pub const DEFAULT_HANDSHAKE_TIMEOUT : Int32 = 10_000
 
 // === Buffer Sizes ===
 
 // Buffer size for the Messages channel
 
 ///|
-pub const DEFAULT_MESSAGE_CHANNEL_SIZE : Int = 100
+pub const DEFAULT_MESSAGE_CHANNEL_SIZE : Int32 = 100
 
 // Buffer size for RPC result channels
 
 ///|
-pub const DEFAULT_RESULT_CHANNEL_SIZE : Int = 1
+pub const DEFAULT_RESULT_CHANNEL_SIZE : Int32 = 1
 
 // === Event Names ===
 // Server-to-client notifications prefixed with "notify_"

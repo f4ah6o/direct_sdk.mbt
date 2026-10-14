@@ -246,7 +246,7 @@ pub struct ReadStatusData {
 #warnings("-struct_never_constructed")
 pub struct TalkStatusData {
   talk_id : @sdk_types.ID
-  unread_count : Int
+  unread_count : Int32
   latest_msg_id : @sdk_types.ID
 }
 

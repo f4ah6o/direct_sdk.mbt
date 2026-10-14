@@ -14,7 +14,7 @@ pub struct Announcement {
   updated_at : Int64
   target_user_ids : Array[@types.ID]
   read_user_ids : Array[@types.ID]
-  unread_user_count : Int
+  unread_user_count : Int32
 }
 
 // Announcement read status for a domain
@@ -22,7 +22,7 @@ pub struct Announcement {
 ///|
 pub struct AnnouncementStatus {
   domain_id : @types.ID
-  unread_count : Int
+  unread_count : Int32
   max_announcement_id : @types.ID
   max_read_announcement_id : @types.ID
 }

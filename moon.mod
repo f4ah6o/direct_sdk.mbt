@@ -3,7 +3,7 @@ name = "f4ah6o/direct_sdk"
 version = "0.11.2"
 
 import {
-  "moonbitlang/quickcheck@0.14.0",
+  "moonbitlang/quickcheck@0.15.0",
   "moonbitlang/x@0.5.5",
   "moonbitlang/async@0.22.4",
   "f4ah6o/uuidm@0.2.1",

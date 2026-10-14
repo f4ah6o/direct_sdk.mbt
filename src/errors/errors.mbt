@@ -11,7 +11,7 @@ pub enum DirectError {
   AlreadyConnected(String) // Client is already connected
   RoomNotFound(String) // Room/Talk not found
   UserNotFound(String) // User not found
-  RPCError(Int, String) // RPC error from server (code, message)
+  RPCError(Int32, String) // RPC error from server (code, message)
   ConnectionError(String) // WebSocket connection failed
   DecodeError(String) // MessagePack/JSON decode error
   AuthError(String) // Authentication error
@@ -70,7 +70,7 @@ pub fn user_not_found(msg : String) -> DirectError {
 }
 
 ///|
-pub fn rpc_error(code : Int, msg : String) -> DirectError {
+pub fn rpc_error(code : Int32, msg : String) -> DirectError {
   RPCError(code, msg)
 }
 

@@ -8,7 +8,7 @@ pub struct SelectStampContent {
   question : String
   options : Array[String]
   listing : Bool
-  closing_type : Int
+  closing_type : Int32
 }
 
 // Select stamp reply content (received from user)
@@ -17,7 +17,7 @@ pub struct SelectStampContent {
 pub struct SelectStampReply {
   question : String
   options : Array[String]
-  response : Int // Selected index (0-based)
+  response : Int32 // Selected index (0-based)
   in_reply_to : String // Original message ID
 }
 
